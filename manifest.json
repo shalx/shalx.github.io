@@ -1,7 +1,7 @@
 {
   "name": "To‑Do",
   "short_name": "To‑Do",
-  "description": "Простое Material‑To‑Do с чекбоксами, геолокацией и возможностью шеринга",
+  "description": "Material To‑Do со списками, чекбоксами, геолокацией и возможностью шеринга.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -22,6 +22,17 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
+    },
+    {
+      "src": "screenshot2.png",
+      "sizes": "1080x1920",
+      "type": "image/png"
+    }
   ]
 }
-
