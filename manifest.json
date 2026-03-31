@@ -1,20 +1,27 @@
 {
   "name": "To‑Do",
   "short_name": "To‑Do",
-  "start_url": "./index.html",
+  "description": "Простое Material‑To‑Do с чекбоксами, геолокацией и возможностью шеринга",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#F5F5F5",
   "theme_color": "#6200EE",
+  "id": "[shalx.github.io](https://shalx.github.io/)",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
+
