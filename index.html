@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>To‑Do</title>
+
+<meta name="theme-color" content="#6200EE">
+<link rel="manifest" href="manifest.json">
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(err => console.log("SW registration failed", err));
+    });
+  }
+</script>
+
+<style>
+  :root {
+    --primary: #6200EE;
+    --accent: #03DAC5;
+    --danger: #CF6679;
+    --bg: #F5F5F5;
+    --on-primary: #FFFFFF;
+    --text: #333;
+  }
+
+  body {
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    background: var(--bg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  input {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    font-size: 16px;
+  }
+
+  button {
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+  }
+
+  button:active { transform: scale(0.97); }
+
+  #alertBtn, #shareBtn {
+    background: var(--accent);
+  }
+
+  ol {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  li {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .checked span {
+    text-decoration: line-through;
+    color: #888;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--danger);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<button id="alertBtn">📍 LOCATE</button>
+<input id="input1" placeholder="Lat & Lon">
+<input id="myInput" placeholder="Enter note...">
+<button id="myButton">💾 SAVE</button>
+
+<ol id="data-list"></ol>
+
+<button id="shareBtn">📤 SHARE ALL</button>
+
+<script>
+  const list = document.getElementById("data-list");
+
+  function saveList() {
+    const data = [];
+    list.querySelectorAll("li").forEach(li => {
+      data.push({
+        text: li.querySelector("span").textContent,
+        checked: li.querySelector("input").checked
+      });
+    });
+    localStorage.setItem("todo", JSON.stringify(data));
+  }
+
+  function loadList() {
+    const data = JSON.parse(localStorage.getItem("todo") || "[]");
+    data.forEach(item => addItem(item.text, item.checked));
+  }
+
+  function addItem(text, checked = false) {
+    const li = document.createElement("li");
+
+    const left = document.createElement("div");
+    left.className = "left";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = checked;
+
+    const txt = document.createElement("span");
+    txt.textContent = text;
+
+    if (checked) li.classList.add("checked");
+
+    cb.onchange = () => {
+      li.classList.toggle("checked");
+      saveList();
+    };
+
+    left.appendChild(cb);
+    left.appendChild(txt);
+
+    const del = document.createElement("button");
+    del.className = "del-btn";
+    del.textContent = "🗑️";
+    del.onclick = () => {
+      if (confirm(`Удалить «${text}»?`)) {
+        li.remove();
+        saveList();
+      }
+    };
+
+    li.appendChild(left);
+    li.appendChild(del);
+
+    list.appendChild(li);
+  }
+
+  document.getElementById("myButton").onclick = () => {
+    const txt = document.getElementById("myInput").value.trim();
+    if (!txt) return;
+    addItem(txt);
+    document.getElementById("myInput").value = "";
+    saveList();
+  };
+
+  document.getElementById("alertBtn").onclick = () => {
+    if (!navigator.geolocation) return alert("Геолокация не поддерживается.");
+    navigator.geolocation.getCurrentPosition(pos => {
+      document.getElementById("input1").value =
+        pos.coords.latitude.toFixed(6) + ", " +
+        pos.coords.longitude.toFixed(6);
+    });
+  };
+
+  document.getElementById("shareBtn").onclick = async () => {
+    const items = [];
+    list.querySelectorAll("li").forEach(li => {
+      const chk = li.querySelector("input").checked ? "✔️" : "⬜";
+      const text = li.querySelector("span").textContent;
+      items.push(`${chk} ${text}`);
+    });
+
+    const msg = items.join("\n") || "Список пуст.";
+
+    if (navigator.share) {
+      navigator.share({ title: "To‑Do", text: msg });
+    } else {
+      await navigator.clipboard.writeText(msg);
+      alert("Скопировано в буфер!");
+    }
+  };
+
+  loadList();
+</script>
+
+</body>
+</html>
