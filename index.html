@@ -4,208 +4,205 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>To‑Do</title>
-
 <meta name="theme-color" content="#6200EE">
 <link rel="manifest" href="manifest.json">
-
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("service-worker.js")
-        .catch(err => console.log("SW registration failed", err));
-    });
-  }
-</script>
-
 <style>
   :root {
-    --primary: #6200EE;
-    --accent: #03DAC5;
-    --danger: #CF6679;
-    --bg: #F5F5F5;
-    --on-primary: #FFFFFF;
-    --text: #333;
+    --primary:#6200EE;
+    --accent:#03DAC5;
+    --danger:#CF6679;
+    --bg:#F5F5F5;
+    --on-primary:#fff;
+    --text:#333;
   }
-
-  body {
-    font-family: "Roboto", sans-serif;
-    margin: 0;
-    background: var(--bg);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  body{
+    font-family:"Roboto",sans-serif;
+    margin:0;
+    background:var(--bg);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
   }
-
-  input {
-    padding: 14px;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    font-size: 16px;
+  input{
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    box-shadow:0 1px 3px rgba(0,0,0,.2);
+    font-size:16px;
   }
-
-  button {
-    background: var(--primary);
-    color: var(--on-primary);
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    padding: 14px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: transform 0.1s;
+  button{
+    background:var(--primary);
+    color:var(--on-primary);
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    padding:14px;
+    cursor:pointer;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+    transition:transform .1s;
   }
-
-  button:active { transform: scale(0.97); }
-
-  #alertBtn, #shareBtn {
-    background: var(--accent);
+  button:active{transform:scale(.97);}
+  #alertBtn,#mapBtn,#shareBtn{background:var(--accent);}
+  ol{
+    list-style:none;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
   }
-
-  ol {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  li{
+    background:#fff;
+    border-radius:12px;
+    padding:12px 16px;
+    box-shadow:0 2px 6px rgba(0,0,0,.1);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
   }
-
-  li {
-    background: #fff;
-    border-radius: 12px;
-    padding: 12px 16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .left{display:flex;gap:10px;align-items:center;}
+  .checked span{text-decoration:line-through;color:#888;}
+  .del-btn,.map-inline{
+    background:none;border:none;cursor:pointer;font-size:20px;
   }
-
-  .left {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .checked span {
-    text-decoration: line-through;
-    color: #888;
-  }
-
-  .del-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: var(--danger);
-    cursor: pointer;
-  }
+  .del-btn{color:var(--danger);}
+  .map-inline{color:var(--accent);}
 </style>
+<script>
+if('serviceWorker'in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));
+}
+</script>
 </head>
 <body>
 
-<button id="alertBtn">📍 LOCATE</button>
-<input id="input1" placeholder="Lat & Lon">
-<input id="myInput" placeholder="Enter note...">
-<button id="myButton">💾 SAVE</button>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+  <button id="alertBtn">📍 LOCATE</button>
+  <button id="mapBtn">🗺️ MAP</button>
+</div>
+<input id="input1" placeholder="Lat & Lon">
+<input id="myInput" placeholder="Enter note...">
+<button id="myButton">💾 SAVE</button>
 
 <ol id="data-list"></ol>
 
-<button id="shareBtn">📤 SHARE ALL</button>
+<button id="shareBtn">📤 SHARE ALL</button>
 
 <script>
-  const list = document.getElementById("data-list");
+const list=document.getElementById("data-list");
 
-  function saveList() {
-    const data = [];
-    list.querySelectorAll("li").forEach(li => {
-      data.push({
-        text: li.querySelector("span").textContent,
-        checked: li.querySelector("input").checked
-      });
-    });
-    localStorage.setItem("todo", JSON.stringify(data));
-  }
+// --- сохранение списка ---
+function saveList(){
+  const data=[];
+  list.querySelectorAll("li").forEach(li=>{
+    const text=li.querySelector("span").textContent;
+    const checked=li.querySelector("input").checked;
+    const mapBtn=li.querySelector(".map-inline");
+    const coords=mapBtn?mapBtn.dataset.coords:"";
+    data.push({text,checked,coords});
+  });
+  localStorage.setItem("todo",JSON.stringify(data));
+}
 
-  function loadList() {
-    const data = JSON.parse(localStorage.getItem("todo") || "[]");
-    data.forEach(item => addItem(item.text, item.checked));
-  }
+// --- загрузка списка ---
+function loadList(){
+  const data=JSON.parse(localStorage.getItem("todo")||"[]");
+  data.forEach(i=>addItem(i.text,i.checked,i.coords));
+}
 
-  function addItem(text, checked = false) {
-    const li = document.createElement("li");
+// --- создание пункта ---
+function addItem(text,checked=false,coords=""){
+  const li=document.createElement("li");
+  const left=document.createElement("div");
+  left.className="left";
 
-    const left = document.createElement("div");
-    left.className = "left";
+  const cb=document.createElement("input");
+  cb.type="checkbox";
+  cb.checked=checked;
+  const span=document.createElement("span");
+  span.textContent=text;
+  if(checked) li.classList.add("checked");
 
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.checked = checked;
+  cb.onchange=()=>{li.classList.toggle("checked");saveList();};
 
-    const txt = document.createElement("span");
-    txt.textContent = text;
+  left.appendChild(cb);
+  left.appendChild(span);
 
-    if (checked) li.classList.add("checked");
-
-    cb.onchange = () => {
-      li.classList.toggle("checked");
-      saveList();
+  // кнопка MAP внутри элемента
+  if(coords){
+    const mapBtn=document.createElement("button");
+    mapBtn.className="map-inline";
+    mapBtn.textContent="🗺️";
+    mapBtn.title="Открыть в картах";
+    mapBtn.dataset.coords=coords;
+    mapBtn.onclick=()=>{
+      const [lat,lon]=coords.split(/[\s,]+/);
+      if(lat&&lon)window.open(`[google.com](https://www.google.com/maps?q=${lat},${lon})`,"_blank");
     };
-
-    left.appendChild(cb);
-    left.appendChild(txt);
-
-    const del = document.createElement("button");
-    del.className = "del-btn";
-    del.textContent = "🗑️";
-    del.onclick = () => {
-      if (confirm(`Удалить «${text}»?`)) {
-        li.remove();
-        saveList();
-      }
-    };
-
-    li.appendChild(left);
-    li.appendChild(del);
-
-    list.appendChild(li);
+    left.appendChild(mapBtn);
   }
 
-  document.getElementById("myButton").onclick = () => {
-    const txt = document.getElementById("myInput").value.trim();
-    if (!txt) return;
-    addItem(txt);
-    document.getElementById("myInput").value = "";
-    saveList();
+  // кнопка удаления
+  const del=document.createElement("button");
+  del.className="del-btn";
+  del.textContent="🗑️";
+  del.onclick=()=>{
+    if(confirm(`Удалить «${text}»?`)){li.remove();saveList();}
   };
 
-  document.getElementById("alertBtn").onclick = () => {
-    if (!navigator.geolocation) return alert("Геолокация не поддерживается.");
-    navigator.geolocation.getCurrentPosition(pos => {
-      document.getElementById("input1").value =
-        pos.coords.latitude.toFixed(6) + ", " +
-        pos.coords.longitude.toFixed(6);
-    });
-  };
+  li.appendChild(left);
+  li.appendChild(del);
+  list.appendChild(li);
+}
 
-  document.getElementById("shareBtn").onclick = async () => {
-    const items = [];
-    list.querySelectorAll("li").forEach(li => {
-      const chk = li.querySelector("input").checked ? "✔️" : "⬜";
-      const text = li.querySelector("span").textContent;
-      items.push(`${chk} ${text}`);
-    });
+// --- кнопка SAVE ---
+document.getElementById("myButton").onclick=()=>{
+  const txt=document.getElementById("myInput").value.trim();
+  const coords=document.getElementById("input1").value.trim();
+  if(!txt) return;
+  addItem(txt,false,coords);
+  document.getElementById("myInput").value="";
+  saveList();
+};
 
-    const msg = items.join("\n") || "Список пуст.";
+// --- LOCATE ---
+document.getElementById("alertBtn").onclick=()=>{
+  if(!navigator.geolocation) return alert("Геолокация не поддерживается.");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=pos.coords.latitude.toFixed(6);
+    const lon=pos.coords.longitude.toFixed(6);
+    document.getElementById("input1").value=`${lat}, ${lon}`;
+  },()=>alert("Ошибка определения местоположения"));
+};
 
-    if (navigator.share) {
-      navigator.share({ title: "To‑Do", text: msg });
-    } else {
-      await navigator.clipboard.writeText(msg);
-      alert("Скопировано в буфер!");
-    }
-  };
+// --- MAP (по существующим координатам из поля) ---
+document.getElementById("mapBtn").onclick=()=>{
+  const v=document.getElementById("input1").value.trim();
+  if(!v) return alert("Нет координат для открытия карты.");
+  const [lat,lon]=v.split(/[\s,]+/);
+  if(lat&&lon) window.open(`[google.com](https://www.google.com/maps?q=${lat},${lon})`,"_blank");
+  else alert("Неверный формат координат (пример: 55.75,37.62)");
+};
 
-  loadList();
+// --- SHARE ALL ---
+document.getElementById("shareBtn").onclick=async()=>{
+  const items=[];
+  list.querySelectorAll("li").forEach(li=>{
+    const chk=li.querySelector("input").checked?"✔️":"⬜";
+    const text=li.querySelector("span").textContent;
+    const coords=li.querySelector(".map-inline")?.dataset.coords||"";
+    items.push(coords?`${chk} ${text} (${coords})`:`${chk} ${text}`);
+  });
+  const msg=items.join("\n")||"Список пуст.";
+  if(navigator.share){
+    await navigator.share({title:"To‑Do",text:msg});
+  }else{
+    await navigator.clipboard.writeText(msg);
+    alert("Скопировано в буфер!");
+  }
+};
+
+loadList();
 </script>
 
 </body>
