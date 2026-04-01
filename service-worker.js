@@ -1,5 +1,5 @@
-const CACHE = "todo-v1";
-const FILES = [
+const CACHE_NAME = "todo-pwa-v1";
+const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.json",
@@ -7,20 +7,29 @@ const FILES = [
   "./icon-512.png"
 ];
 
-self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+// install
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+  );
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
+// activate
+self.addEventListener("activate", event => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE ? caches.delete(k) : null))
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      )
     )
   );
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+// fetch
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
