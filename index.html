@@ -136,8 +136,8 @@ function addItem(text,checked=false,coords=""){
     mapBtn.onclick=()=>{
       const[lat,lon]=coords.split(/[\s,]+/);
       if(lat&&lon){
-        const url=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;
-        window.open(url,"_blank","noopener");  // ✅ абсолютный путь
+        const url = `https://www.google.com/maps?q=${lat},${lon}`;
+window.open(url, "_blank", "noopener");
       }
     };
     left.appendChild(mapBtn);
@@ -179,8 +179,8 @@ document.getElementById("mapBtn").onclick=()=>{
   if(!v)return alert("Нет координат для открытия карты.");
   const[lat,lon]=v.split(/[\s,]+/);
   if(lat&&lon){
-    const mapUrl=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;  // ✅ абсолютный путь
-    window.open(mapUrl,"_blank","noopener");
+    const mapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+window.open(mapUrl, "_blank", "noopener");
   }else{
     alert("Неверный формат координат (пример: 55.75,37.62)");
   }
