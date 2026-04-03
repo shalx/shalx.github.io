@@ -196,7 +196,7 @@ document.getElementById("shareBtn").onclick=async()=>{
   });
   const msg=items.join("\n")||"List is empty.";
   if(navigator.share){
-    await navigator.share({title:"To-Do",text:msg});
+    await navigator.share({title:"Save-Found",text:msg});
   }else{
     await navigator.clipboard.writeText(msg);
     alert("Copied to clipboard!");
