@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>To-Do</title>
+<title>Save-Found</title>
 <meta name="theme-color" content="#6200EE" />
 <link rel="manifest" href="manifest.json" />
 
@@ -102,11 +102,11 @@ function saveList(){
     const coords=mapBtn?mapBtn.dataset.coords:"";
     data.push({text,checked,coords});
   });
-  localStorage.setItem("todo",JSON.stringify(data));
+  localStorage.setItem("savefoun",JSON.stringify(data));
 }
 
 function loadList(){
-  const data=JSON.parse(localStorage.getItem("todo")||"[]");
+  const data=JSON.parse(localStorage.getItem("savefoun")||"[]");
   data.forEach(i=>addItem(i.text,i.checked,i.coords));
 }
 
