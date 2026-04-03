@@ -186,22 +186,51 @@ document.getElementById("mapBtn").onclick=()=>{
   }
 };
 
-document.getElementById("shareBtn").onclick=async()=>{
-  const items=[];
-  list.querySelectorAll("li").forEach(li=>{
-    const chk=li.querySelector("input").checked?"✔️":"⬜";
-    const text=li.querySelector("span").textContent;
-    const coords=li.querySelector(".map-inline")?.dataset.coords||"";
-    items.push(coords?`${chk} ${text} (${coords})`:`${chk} ${text}`);
-  });
-  const msg=items.join("\n")||"List is empty.";
-  if(navigator.share){
-    await navigator.share({title:"Save-Found",text:msg});
-  }else{
-    await navigator.clipboard.writeText(msg);
-    alert("Copied to clipboard!");
+// --- SHARE (короткий и кликабельный текст для Viber / WhatsApp / Telegram) ---
+document.getElementById("shareBtn").onclick = async () => {
+  let message = "Save‑Found 📍";
+
+  // Берём координаты из поля, если введены
+  const coords = document.getElementById("input1").value.trim();
+  if (coords) {
+    const [lat, lon] = coords.split(/[\s,]+/);
+    if (lat && lon) {
+      const mapLink = `[google.com](https://www.google.com/maps?q=${lat},${lon})`;
+      message += `\n${mapLink}`;
+    }
+  }
+
+  // Если нет координат, добавим хотя бы одну задачу из списка
+  else if (list.children.length > 0) {
+    const firstItem = list.querySelector("span");
+    if (firstItem) {
+      message += `\n${firstItem.textContent}`;
+    }
+  }
+
+  // Пытаемся использовать Web Share API
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "Save‑Found", text: message });
+      return;
+    } catch (err) {
+      console.log("Share canceled or failed:", err);
+    }
+  }
+
+  // Если share API недоступно — открываем напрямую в Viber (или копируем текст)
+  const encoded = encodeURIComponent(message);
+  const viberUrl = `viber://forward?text=${encoded}`; // открывает Viber
+  const whatsappUrl = `[wa.me](https://wa.me/?text=${encoded})`; // fallback для WhatsApp
+
+  // Попробуем открыть Viber
+  try {
+    window.open(viberUrl, "_blank");
+  } catch {
+    window.open(whatsappUrl, "_blank");
   }
 };
+
 
 loadList();
 </script>
