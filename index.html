@@ -1,251 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+// --- SHARE (короткий и кликабельный текст для Viber / WhatsApp / Telegram) ---
+document.getElementById("shareBtn").onclick = async () => {
+  let message = "Save‑Found 📍";
 
-<title>Save-Found</title>
-<meta name="theme-color" content="#6200EE" />
-
-<link rel="manifest" href="manifest.json" />
-
-<!-- 🔥 Open Graph (для Viber / WhatsApp / Telegram) -->
-<meta property="og:title" content="Save-Found list" />
-<meta property="og:description" content="Open shared list in Save-Found app" />
-<meta property="og:image" content="https://your-username.github.io/your-repo/icon-512.png" />
-<meta property="og:url" content="https://your-username.github.io/your-repo/" />
-<meta property="og:type" content="website" />
-
-<style>
-:root {
-  --primary:#6200EE;
-  --accent:#03DAC5;
-  --danger:#CF6679;
-  --bg:#F5F5F5;
-  --on-primary:#fff;
-}
-body{
-  font-family:"Roboto",sans-serif;
-  margin:0;
-  background:var(--bg);
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-input{
-  padding:14px;
-  border:none;
-  border-radius:8px;
-  box-shadow:0 1px 3px rgba(0,0,0,.2);
-  font-size:16px;
-}
-button{
-  background:var(--primary);
-  color:var(--on-primary);
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-  padding:14px;
-  cursor:pointer;
-}
-#alertBtn,#mapBtn,#shareBtn{background:var(--accent);}
-ol{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
-li{
-  background:#fff;
-  border-radius:12px;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.left{display:flex;gap:10px;align-items:center;}
-.checked span{text-decoration:line-through;color:#888;}
-.del-btn,.map-inline{background:none;border:none;font-size:20px;cursor:pointer;}
-.del-btn{color:var(--danger);}
-</style>
-
-<script>
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
-}
-</script>
-</head>
-
-<body>
-
-<div style="display:flex;gap:8px;flex-wrap:wrap;">
-  <button id="alertBtn">Fix place</button>
-  <button id="mapBtn">MAP</button>
-</div>
-
-<input id="input1" placeholder="Lat & Lon" />
-<input id="myInput" placeholder="Enter note..." />
-<button id="myButton">SAVE</button>
-
-<ol id="data-list"></ol>
-
-<button id="shareBtn">SHARE</button>
-
-<script>
-const list = document.getElementById("data-list");
-
-// ===== SAVE / LOAD =====
-function saveList(){
-  const data=[];
-  list.querySelectorAll("li").forEach(li=>{
-    const text=li.querySelector("span").textContent;
-    const checked=li.querySelector("input").checked;
-    const coords=li.querySelector(".map-inline")?.dataset.coords || "";
-    data.push({text,checked,coords});
-  });
-  localStorage.setItem("savefoun",JSON.stringify(data));
-}
-
-function loadList(){
-  const data=JSON.parse(localStorage.getItem("savefoun")||"[]");
-  data.forEach(i=>addItem(i.text,i.checked,i.coords));
-}
-
-// ===== ADD ITEM =====
-function addItem(text,checked=false,coords=""){
-  const li=document.createElement("li");
-  const left=document.createElement("div");
-  left.className="left";
-
-  const cb=document.createElement("input");
-  cb.type="checkbox";
-  cb.checked=checked;
-
-  const txt=document.createElement("span");
-  txt.textContent=text;
-
-  if(checked) li.classList.add("checked");
-
-  cb.onchange=()=>{
-    li.classList.toggle("checked");
-    saveList();
-  };
-
-  left.appendChild(cb);
-  left.appendChild(txt);
-
-  if(coords){
-    const mapBtn=document.createElement("button");
-    mapBtn.className="map-inline";
-    mapBtn.textContent="🗺️";
-    mapBtn.dataset.coords=coords;
-
-    mapBtn.onclick=()=>{
-      const [lat,lon]=coords.split(/[\s,]+/);
-      if(lat&&lon){
-        window.open(`https://www.google.com/maps?q=${lat},${lon}`,"_blank");
-      }
-    };
-
-    left.appendChild(mapBtn);
-  }
-
-  const del=document.createElement("button");
-  del.className="del-btn";
-  del.textContent="🗑️";
-
-  del.onclick=()=>{
-    if(confirm(`Delete "${text}"?`)){
-      li.remove();
-      saveList();
+  // Берём координаты из поля, если введены
+  const coords = document.getElementById("input1").value.trim();
+  if (coords) {
+    const [lat, lon] = coords.split(/[\s,]+/);
+    if (lat && lon) {
+      const mapLink = `[google.com](https://www.google.com/maps?q=${lat},${lon})`;
+      message += `\n${mapLink}`;
     }
-  };
-
-  li.appendChild(left);
-  li.appendChild(del);
-  list.appendChild(li);
-}
-
-// ===== ADD BUTTON =====
-document.getElementById("myButton").onclick=()=>{
-  const txt=document.getElementById("myInput").value.trim();
-  const coords=document.getElementById("input1").value.trim();
-  if(!txt) return;
-
-  addItem(txt,false,coords);
-  document.getElementById("myInput").value="";
-  saveList();
-};
-
-// ===== GEO =====
-document.getElementById("alertBtn").onclick=()=>{
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude.toFixed(6);
-    const lon=pos.coords.longitude.toFixed(6);
-    document.getElementById("input1").value=`${lat},${lon}`;
-  });
-};
-
-// ===== MAP =====
-document.getElementById("mapBtn").onclick=()=>{
-  const v=document.getElementById("input1").value.trim();
-  if(!v) return;
-
-  const [lat,lon]=v.split(/[\s,]+/);
-  if(lat&&lon){
-    window.open(`https://www.google.com/maps?q=${lat},${lon}`,"_blank");
-  }
-};
-
-// ===== SHARE (РАБОТАЕТ В VIBER) =====
-document.getElementById("shareBtn").onclick=async()=>{
-  const items=[];
-
-  list.querySelectorAll("li").forEach(li=>{
-    const text=li.querySelector("span").textContent;
-    const checked=li.querySelector("input").checked;
-    const coords=li.querySelector(".map-inline")?.dataset.coords || "";
-    items.push({text,checked,coords});
-  });
-
-  if(!items.length) return alert("List is empty.");
-
-  const encoded=encodeURIComponent(JSON.stringify(items));
-  const shareUrl=`https://your-username.github.io/your-repo/?data=${encoded}`;
-
-  const shareText = `📌 Save-Found list
-
-Open this link:
-${shareUrl}`;
-
-  if(navigator.share){
-    await navigator.share({
-      text:shareText
-    });
-  }else{
-    await navigator.clipboard.writeText(shareText);
-    alert("Copied!");
-  }
-};
-
-// ===== LOAD FROM URL =====
-function loadFromUrl(){
-  const params=new URLSearchParams(location.search);
-  const data=params.get("data");
-
-  if(!data){
-    loadList();
-    return;
   }
 
-  try{
-    const items=JSON.parse(decodeURIComponent(data));
-    list.innerHTML="";
-    items.forEach(i=>addItem(i.text,i.checked,i.coords));
-    saveList();
-  }catch(e){
-    loadList();
+  // Если нет координат, добавим хотя бы одну задачу из списка
+  else if (list.children.length > 0) {
+    const firstItem = list.querySelector("span");
+    if (firstItem) {
+      message += `\n${firstItem.textContent}`;
+    }
   }
-}
 
-loadFromUrl();
-</script>
+  // Пытаемся использовать Web Share API
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "Save‑Found", text: message });
+      return;
+    } catch (err) {
+      console.log("Share canceled or failed:", err);
+    }
+  }
 
-</body>
-</html>
+  // Если share API недоступно — открываем напрямую в Viber (или копируем текст)
+  const encoded = encodeURIComponent(message);
+  const viberUrl = `viber://forward?text=${encoded}`; // открывает Viber
+  const whatsappUrl = `[wa.me](https://wa.me/?text=${encoded})`; // fallback для WhatsApp
+
+  // Попробуем открыть Viber
+  try {
+    window.open(viberUrl, "_blank");
+  } catch {
+    window.open(whatsappUrl, "_blank");
+  }
+};
