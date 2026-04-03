@@ -3,57 +3,66 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
 <title>Save-Found</title>
 <meta name="theme-color" content="#6200EE" />
+
 <link rel="manifest" href="manifest.json" />
 
+<!-- 🔥 Open Graph (для Viber / WhatsApp / Telegram) -->
+<meta property="og:title" content="Save-Found list" />
+<meta property="og:description" content="Open shared list in Save-Found app" />
+<meta property="og:image" content="https://your-username.github.io/your-repo/icon-512.png" />
+<meta property="og:url" content="https://your-username.github.io/your-repo/" />
+<meta property="og:type" content="website" />
+
 <style>
-  :root {
-    --primary:#6200EE;
-    --accent:#03DAC5;
-    --danger:#CF6679;
-    --bg:#F5F5F5;
-    --on-primary:#fff;
-  }
-  body{
-    font-family:"Roboto",sans-serif;
-    margin:0;
-    background:var(--bg);
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  input{
-    padding:14px;
-    border:none;
-    border-radius:8px;
-    box-shadow:0 1px 3px rgba(0,0,0,.2);
-    font-size:16px;
-  }
-  button{
-    background:var(--primary);
-    color:var(--on-primary);
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    padding:14px;
-    cursor:pointer;
-  }
-  #alertBtn,#mapBtn,#shareBtn{background:var(--accent);}
-  ol{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
-  li{
-    background:#fff;
-    border-radius:12px;
-    padding:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  }
-  .left{display:flex;gap:10px;align-items:center;}
-  .checked span{text-decoration:line-through;color:#888;}
-  .del-btn,.map-inline{background:none;border:none;font-size:20px;cursor:pointer;}
-  .del-btn{color:var(--danger);}
+:root {
+  --primary:#6200EE;
+  --accent:#03DAC5;
+  --danger:#CF6679;
+  --bg:#F5F5F5;
+  --on-primary:#fff;
+}
+body{
+  font-family:"Roboto",sans-serif;
+  margin:0;
+  background:var(--bg);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+input{
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+  font-size:16px;
+}
+button{
+  background:var(--primary);
+  color:var(--on-primary);
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  padding:14px;
+  cursor:pointer;
+}
+#alertBtn,#mapBtn,#shareBtn{background:var(--accent);}
+ol{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
+li{
+  background:#fff;
+  border-radius:12px;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.left{display:flex;gap:10px;align-items:center;}
+.checked span{text-decoration:line-through;color:#888;}
+.del-btn,.map-inline{background:none;border:none;font-size:20px;cursor:pointer;}
+.del-btn{color:var(--danger);}
 </style>
 
 <script>
@@ -62,6 +71,7 @@ if("serviceWorker" in navigator){
 }
 </script>
 </head>
+
 <body>
 
 <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -183,7 +193,7 @@ document.getElementById("mapBtn").onclick=()=>{
   }
 };
 
-// ===== SHARE (NAME + LINK В ТЕКСТЕ) =====
+// ===== SHARE (РАБОТАЕТ В VIBER) =====
 document.getElementById("shareBtn").onclick=async()=>{
   const items=[];
 
@@ -197,9 +207,8 @@ document.getElementById("shareBtn").onclick=async()=>{
   if(!items.length) return alert("List is empty.");
 
   const encoded=encodeURIComponent(JSON.stringify(items));
-  const shareUrl=`${location.origin}${location.pathname}?data=${encoded}`;
+  const shareUrl=`https://your-username.github.io/your-repo/?data=${encoded}`;
 
-  // 👇 ГЛАВНОЕ: имя + ссылка внутри текста
   const shareText = `📌 Save-Found list
 
 Open this link:
@@ -207,9 +216,7 @@ ${shareUrl}`;
 
   if(navigator.share){
     await navigator.share({
-      title:"Save-Found",
-      text:shareText,
-      url:shareUrl
+      text:shareText
     });
   }else{
     await navigator.clipboard.writeText(shareText);
@@ -233,7 +240,6 @@ function loadFromUrl(){
     items.forEach(i=>addItem(i.text,i.checked,i.coords));
     saveList();
   }catch(e){
-    console.error(e);
     loadList();
   }
 }
