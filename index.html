@@ -3,75 +3,78 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Save-Found</title>
+<title>Save‑Found</title>
 <meta name="theme-color" content="#6200EE" />
 <link rel="manifest" href="manifest.json" />
 
 <style>
-  :root {
-    --primary:#6200EE;
-    --accent:#03DAC5;
-    --danger:#CF6679;
-    --bg:#F5F5F5;
-    --on-primary:#fff;
-    --text:#333;
-  }
-  body{
-    font-family:"Roboto",sans-serif;
-    margin:0;
-    background:var(--bg);
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  input{
-    padding:14px;
-    border:none;
-    border-radius:8px;
-    box-shadow:0 1px 3px rgba(0,0,0,.2);
-    font-size:16px;
-  }
-  button{
-    background:var(--primary);
-    color:var(--on-primary);
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    padding:14px;
-    cursor:pointer;
-    box-shadow:0 2px 4px rgba(0,0,0,.2);
-    transition:transform .1s;
-  }
-  button:active{transform:scale(.97);}
-  #alertBtn,#mapBtn,#shareBtn{background:var(--accent);}
-  ol{
-    list-style:none;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  li{
-    background:#fff;
-    border-radius:12px;
-    padding:12px 16px;
-    box-shadow:0 2px 6px rgba(0,0,0,.1);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  }
-  .left{display:flex;gap:10px;align-items:center;}
-  .checked span{text-decoration:line-through;color:#888;}
-  .del-btn,.map-inline{
-    background:none;border:none;cursor:pointer;font-size:20px;
-  }
-  .del-btn{color:var(--danger);}
-  .map-inline{color:var(--accent);}
+:root {
+  --primary:#6200EE;
+  --accent:#03DAC5;
+  --danger:#CF6679;
+  --bg:#F5F5F5;
+  --on-primary:#fff;
+  --text:#333;
+}
+body {
+  font-family:"Roboto",sans-serif;
+  margin:0;
+  background:var(--bg);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+input {
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+  font-size:16px;
+}
+button {
+  background:var(--primary);
+  color:var(--on-primary);
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  padding:14px;
+  cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+  transition:transform .1s;
+}
+button:active { transform:scale(.97); }
+#alertBtn,#mapBtn,#shareBtn,#clearBtn { background:var(--accent); }
+ol {
+  list-style:none;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+li {
+  background:#fff;
+  border-radius:12px;
+  padding:12px 16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.left { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.action-btn {
+  border:none; border-radius:50%;
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+  background:rgba(98,0,238,0.08);
+}
+.action-btn.map { color:var(--accent); }
+.action-btn.delete { color:var(--danger); }
 </style>
 
 <script>
-if("serviceWorker" in navigator){
+if ("serviceWorker" in navigator) {
   window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
 }
 </script>
@@ -79,121 +82,69 @@ if("serviceWorker" in navigator){
 <body>
 
 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-  <button id="alertBtn">Fix place</button>
-  <button id="mapBtn">MAP</button>
+  <button id="alertBtn">📍 Fix place</button>
+  <button id="mapBtn">🗺️ Map</button>
 </div>
-<input id="input1" placeholder="Lat & Lon" />
-<input id="myInput" placeholder="Enter note..." />
-<button id="myButton">SAVE</button>
+
+<input id="input1" placeholder="Lat & Lon" />
+<input id="myInput" placeholder="Enter note..." />
+<button id="myButton">💾 Save</button>
 
 <ol id="data-list"></ol>
 
-<button id="shareBtn">SHARE</button>
+<button id="clearBtn">🗑️ Clear All</button>
 
 <script>
 const list=document.getElementById("data-list");
 
+// --- сохранить список ---
 function saveList(){
   const data=[];
   list.querySelectorAll("li").forEach(li=>{
     const text=li.querySelector("span").textContent;
-    const checked=li.querySelector("input").checked;
-    const mapBtn=li.querySelector(".map-inline");
-    const coords=mapBtn?mapBtn.dataset.coords:"";
-    data.push({text,checked,coords});
+    const coords=li.querySelector(".map-inline")?.dataset.coords||"";
+    data.push({text,coords});
   });
-  localStorage.setItem("savefoun",JSON.stringify(data));
+  localStorage.setItem("savefound",JSON.stringify(data));
 }
 
+// --- загрузить список ---
 function loadList(){
-  const data=JSON.parse(localStorage.getItem("savefoun")||"[]");
-  data.forEach(i=>addItem(i.text,i.checked,i.coords));
+  const data=JSON.parse(localStorage.getItem("savefound")||"[]");
+  data.forEach(i=>addItem(i.text,i.coords));
 }
 
-function addItem(text, checked = false, coords = "") {
-  const li = document.createElement("li");
-  const left = document.createElement("div");
-  left.className = "left";
+// --- добавить элемент ---
+function addItem(text,coords=""){
+  const li=document.createElement("li");
+  const left=document.createElement("div");
+  left.className="left";
 
-  const cb = document.createElement("input");
-  cb.type = "checkbox";
-  cb.checked = checked;
-  const txt = document.createElement("span");
-  txt.textContent = text;
-  if (checked) li.classList.add("checked");
-
-  cb.onchange = () => {
-    li.classList.toggle("checked");
-    saveList();
-  };
-
-  left.appendChild(cb);
+  const txt=document.createElement("span");
+  txt.textContent=text;
   left.appendChild(txt);
 
-  // --- кнопка MAP ---
-  if (coords) {
-    const mapBtn = document.createElement("button");
-    mapBtn.className = "map-inline";
-    mapBtn.textContent = "🗺️";
-    mapBtn.title = "Open in maps";
-    mapBtn.dataset.coords = coords;
-    mapBtn.onclick = () => {
-      const [lat, lon] = coords.split(/[\s,]+/);
-      if (lat && lon) {
-        const url = `[google.com](https://www.google.com/maps?q=${lat},${lon})`;
-        window.open(url, "_blank", "noopener");
+  if(coords){
+    const mapBtn=document.createElement("button");
+    mapBtn.className="action-btn map map-inline";
+    mapBtn.textContent="🗺️";
+    mapBtn.title="Open in maps";
+    mapBtn.dataset.coords=coords;
+    mapBtn.onclick=()=>{
+      const[lat,lon]=coords.split(/[\s,]+/);
+      if(lat&&lon){
+        const url=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;
+        window.open(url,"_blank","noopener");
       }
     };
     left.appendChild(mapBtn);
   }
 
-  // --- кнопка SHARE ---
-  const shareBtn = document.createElement("button");
-  shareBtn.className = "map-inline";
-  shareBtn.textContent = "📤";
-  shareBtn.title = "Share this item";
-  shareBtn.onclick = async () => {
-    let message = `Save‑Found 📍\n${text}`;
-    if (coords) {
-      const [lat, lon] = coords.split(/[\s,]+/);
-      if (lat && lon) {
-        const mapLink = `[google.com](https://www.google.com/maps?q=${lat},${lon})`;
-        message += `\n${mapLink}`;
-      }
-    }
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Save‑Found", text: message });
-        return;
-      } catch (e) {
-        console.log("Share canceled:", e);
-      }
-    }
-
-    const encoded = encodeURIComponent(message);
-    const viberUrl = `viber://forward?text=${encoded}`;
-    const whatsappUrl = `[wa.me](https://wa.me/?text=${encoded})`;
-    const telegramUrl = `[t.me](https://t.me/share/url?url=${encoded})`;
-
-    try {
-      window.open(viberUrl, "_blank");
-    } catch {
-      try {
-        window.open(whatsappUrl, "_blank");
-      } catch {
-        window.open(telegramUrl, "_blank");
-      }
-    }
-  };
-  left.appendChild(shareBtn);
-
-  // --- кнопка DELETE ---
-  const del = document.createElement("button");
-  del.className = "del-btn";
-  del.textContent = "🗑️";
-  del.onclick = () => {
-    if (confirm(`Delete "${text}"?`)) {
+  const del=document.createElement("button");
+  del.className="action-btn delete";
+  del.textContent="🗑️";
+  del.onclick=()=>{
+    if(confirm(`Delete "${text}"?`)){
       li.remove();
       saveList();
     }
@@ -204,51 +155,42 @@ function addItem(text, checked = false, coords = "") {
   list.appendChild(li);
 }
 
+// --- Add new item ---
 document.getElementById("myButton").onclick=()=>{
-  const txt=document.getElementById("myInput").value.trim();
+  const text=document.getElementById("myInput").value.trim();
   const coords=document.getElementById("input1").value.trim();
-  if(!txt)return;
-  addItem(txt,false,coords);
+  if(!text)return;
+  addItem(text,coords);
   document.getElementById("myInput").value="";
   saveList();
 };
 
+// --- Geo locate ---
 document.getElementById("alertBtn").onclick=()=>{
-  if(!navigator.geolocation)
-    return alert("Geolocation is not supported");
+  if(!navigator.geolocation) return alert("Geolocation not supported");
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat=pos.coords.latitude.toFixed(6);
     const lon=pos.coords.longitude.toFixed(6);
     document.getElementById("input1").value=`${lat},${lon}`;
-  },()=>alert("Failed to get location"));
+  },()=>alert("Failed to get location"));
 };
 
+// --- Map open from field ---
 document.getElementById("mapBtn").onclick=()=>{
   const v=document.getElementById("input1").value.trim();
-  if(!v)return alert("No coordinates to open.");
+  if(!v)return alert("No coordinates to open.");
   const[lat,lon]=v.split(/[\s,]+/);
   if(lat&&lon){
-    const mapUrl=`https://www.google.com/maps?q=${lat},${lon}`;
+    const mapUrl=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;
     window.open(mapUrl,"_blank","noopener");
-  }else{
-    alert("Invalid coordinates format (example: 55.75,37.62)");
-  }
+  }else alert("Invalid coords (example: 55.75,37.62)");
 };
 
-document.getElementById("shareBtn").onclick=async()=>{
-  const items=[];
-  list.querySelectorAll("li").forEach(li=>{
-    const chk=li.querySelector("input").checked?"✔️":"⬜";
-    const text=li.querySelector("span").textContent;
-    const coords=li.querySelector(".map-inline")?.dataset.coords||"";
-    items.push(coords?`${chk} ${text} (${coords})`:`${chk} ${text}`);
-  });
-  const msg=items.join("\n")||"List is empty.";
-  if(navigator.share){
-    await navigator.share({title:"Save-Found",text:msg});
-  }else{
-    await navigator.clipboard.writeText(msg);
-    alert("Copied to clipboard!");
+// --- Clear all ---
+document.getElementById("clearBtn").onclick=()=>{
+  if(confirm("Delete all items?")){
+    list.innerHTML="";
+    localStorage.removeItem("savefound");
   }
 };
 
