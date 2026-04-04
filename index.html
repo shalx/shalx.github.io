@@ -67,7 +67,7 @@ li{
 .left{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:6px;
   flex-wrap:wrap;
 }
 .mini{
@@ -88,6 +88,26 @@ li{
   font-weight:bold; 
   font-size:16px;
 }
+.share-btn{
+  background:#03DAC5;
+  color:#fff;
+  font-size:12px;
+}
+/* пульс для маркера */
+.pulse-marker {
+  width:16px;
+  height:16px;
+  background:var(--accent);
+  border-radius:50%;
+  box-shadow:0 0 0 0 var(--accent);
+  animation:pulse 1.5s infinite;
+  border:2px solid #fff;
+}
+@keyframes pulse {
+  0% { box-shadow:0 0 0 0 rgba(3,218,197,0.5); }
+  70% { box-shadow:0 0 0 15px rgba(3,218,197,0); }
+  100% { box-shadow:0 0 0 0 rgba(3,218,197,0); }
+}
 </style>
 </head>
 
@@ -105,8 +125,6 @@ li{
 
 <ol id="data-list"></ol>
 
-<button id="shareBtn">SHARE</button>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
@@ -119,7 +137,9 @@ const map=L.map('map').setView([41.7151,44.8271],13);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
   maxZoom:19
 }).addTo(map);
-let marker;
+
+let marker; // обычная точка
+let pulseMarker; // пульсирующая точка
 
 // сохранение
 function saveList(){
@@ -147,6 +167,15 @@ function showOnMap(lat,lon){
   map.setView([lat,lon],15);
 }
 
+// добавить пульс
+function showPulse(lat,lon){
+  if(!lat||!lon) return;
+  if(pulseMarker) map.removeLayer(pulseMarker);
+  const divIcon = L.divIcon({className:'pulse-marker'});
+  pulseMarker = L.marker([lat,lon],{icon:divIcon}).addTo(map);
+  map.setView([lat,lon],15);
+}
+
 // добавить запись
 function addItem(text,coords=""){
   const li=document.createElement("li");
@@ -168,7 +197,7 @@ function addItem(text,coords=""){
     mapBtn.addEventListener("click",(e)=>{
       e.stopPropagation();
       const [lat,lon]=coords.split(/[\s,]+/);
-      showOnMap(lat,lon);
+      showPulse(lat,lon);
     });
 
     left.appendChild(mapBtn);
@@ -178,20 +207,37 @@ function addItem(text,coords=""){
   left.addEventListener("click",()=>{
     if(coords){
       const [lat,lon]=coords.split(/[\s,]+/);
-      showOnMap(lat,lon);
+      showPulse(lat,lon);
     }
   });
 
-  // удалить
+  // кнопка удаления
   const del=document.createElement("button");
   del.className="mini del-btn";
-  del.textContent="✖";  // ← современный крестик
+  del.textContent="✖";
   del.onclick=()=>{
     li.remove();
     saveList();
   };
 
+  // кнопка share
+  const share=document.createElement("button");
+  share.className="mini share-btn";
+  share.textContent="📤";
+  share.title="Share this item";
+  share.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    const msg=coords?`${text} (${coords})`:text;
+    if(navigator.share){
+      navigator.share({title:"Save-Found", text:msg});
+    }else{
+      navigator.clipboard.writeText(msg);
+      alert("Copied!");
+    }
+  });
+
   li.appendChild(left);
+  li.appendChild(share);
   li.appendChild(del);
   list.appendChild(li);
 }
@@ -207,31 +253,14 @@ document.getElementById("myButton").onclick=()=>{
   saveList();
 };
 
-// геолокация
+// геолокация с пульсом
 document.getElementById("alertBtn").onclick=()=>{
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat=pos.coords.latitude.toFixed(6);
     const lon=pos.coords.longitude.toFixed(6);
     input1.value=`${lat},${lon}`;
-    showOnMap(lat,lon);
+    showPulse(lat,lon);
   });
-};
-
-// SHARE
-document.getElementById("shareBtn").onclick=async()=>{
-  const items=[];
-  list.querySelectorAll("li").forEach(li=>{
-    const text=li.querySelector("span").textContent;
-    const coords=li.dataset.coords||"";
-    items.push(coords?`${text} (${coords})`:text);
-  });
-  const msg=items.join("\n")||"Empty";
-  if(navigator.share){
-    navigator.share({title:"Save-Found",text:msg});
-  }else{
-    navigator.clipboard.writeText(msg);
-    alert("Copied!");
-  }
 };
 
 loadList();
