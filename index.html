@@ -2,182 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>fix</title>
-<meta name="theme-color" content="#6200EE" />
-<link rel="manifest" href="manifest.json" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fix Places</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6200EE">
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-:root {
-  --primary:#6200EE;
-  --accent:#03DAC5;
-  --danger:#CF6679;
-  --bg:#F5F5F5;
-  --on-primary:#fff;
-  --text:#333;
-}
-body {
-  font-family:"Roboto",sans-serif;
-  margin:0;
-  background:var(--bg);
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-input {
-  padding:14px;
-  border:none;
-  border-radius:8px;
-  box-shadow:0 1px 3px rgba(0,0,0,.2);
-  font-size:16px;
-}
-button {
-  background:var(--primary);
-  color:var(--on-primary);
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-  padding:14px;
-  cursor:pointer;
-  box-shadow:0 2px 4px rgba(0,0,0,.2);
-  transition:transform .1s;
-}
-button:active { transform:scale(.97); }
-#alertBtn,#clearBtn { background:var(--accent); }
-ol {
-  list-style:none;
-  padding:0;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-li {
-  background:#fff;
-  border-radius:12px;
-  padding:12px 16px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.left { display:flex;gap:10px;align-items:center;flex-wrap:wrap; }
-.action-btn {
-  border:none;
-  border-radius:50%;
-  width:36px;height:36px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-  background:rgba(98,0,238,0.08);
-}
-.action-btn.map   { color:var(--accent); }
-.action-btn.delete{ color:var(--danger); }
+body { font-family:sans-serif; margin:0; padding:10px; }
+#map { height:300px; border-radius:10px; margin-bottom:10px; }
+input,button { padding:10px; margin:5px 0; width:100%; }
+li { margin:5px 0; }
 </style>
 
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", ()=>navigator.serviceWorker.register("service-worker.js"));
-}
-</script>
 </head>
 <body>
 
-<!-- только одна основная кнопка -->
-<button id="alertBtn">📍 fix place</button>
-<input id="input1" placeholder="Lat & Lon">
-<input id="myInput" placeholder="Enter note...">
-<button id="myButton">💾 save</button>
+<h2>📍 Fix Places</h2>
 
-<ol id="data-list"></ol>
+<div id="map"></div>
 
-<button id="clearBtn">🗑️ clear all</button>
+<button id="locBtn">📍 Get Location</button>
+<input id="coords" placeholder="Lat, Lon">
+<input id="note" placeholder="Note">
+<button id="save">💾 Save</button>
+
+<ul id="list"></ul>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-const list=document.getElementById("data-list");
+const map = L.map('map').setView([41.7151, 44.8271], 13);
 
-function saveList(){
-  const data=[];
-  list.querySelectorAll("li").forEach(li=>{
-    const text=li.querySelector("span").textContent;
-    const coords=li.querySelector(".map-inline")?.dataset.coords||"";
-    data.push({text,coords});
+// OpenStreetMap tiles
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19
+}).addTo(map);
+
+let marker;
+
+// 📍 Получить геолокацию
+document.getElementById("locBtn").onclick = () => {
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    document.getElementById("coords").value = lat + "," + lon;
+
+    if(marker) map.removeLayer(marker);
+    marker = L.marker([lat, lon]).addTo(map);
+    map.setView([lat, lon], 15);
   });
-  localStorage.setItem("fixdata",JSON.stringify(data));
+};
+
+// 💾 Сохранение
+const list = document.getElementById("list");
+
+function saveData(){
+  localStorage.setItem("places", list.innerHTML);
 }
 
-function loadList(){
-  const data=JSON.parse(localStorage.getItem("fixdata")||"[]");
-  data.forEach(i=>addItem(i.text,i.coords));
+function loadData(){
+  list.innerHTML = localStorage.getItem("places") || "";
 }
+loadData();
 
-function addItem(text,coords=""){
-  const li=document.createElement("li");
-  const left=document.createElement("div");
-  left.className="left";
+document.getElementById("save").onclick = () => {
+  const text = document.getElementById("note").value;
+  const coords = document.getElementById("coords").value;
 
-  const txt=document.createElement("span");
-  txt.textContent=text;
-  left.appendChild(txt);
-
-  // кнопка для открытия карты если координаты есть
-  if(coords){
-    const mapBtn=document.createElement("button");
-    mapBtn.className="action-btn map map-inline";
-    mapBtn.textContent="🗺️";
-    mapBtn.title="open in maps";
-    mapBtn.dataset.coords=coords;
-    mapBtn.onclick=()=>{
-      const [lat,lon]=coords.split(/[\s,]+/);
-      if(lat&&lon){
-        const url=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;
-        window.open(url,"_blank","noopener");
-      }
-    };
-    left.appendChild(mapBtn);
-  }
-
-  // кнопка удаления
-  const del=document.createElement("button");
-  del.className="action-btn delete";
-  del.textContent="🗑️";
-  del.onclick=()=>{
-    if(confirm(`delete "${text}"?`)){
-      li.remove();
-      saveList();
-    }
-  };
-
-  li.appendChild(left);
-  li.appendChild(del);
-  list.appendChild(li);
-}
-
-document.getElementById("myButton").onclick=()=>{
-  const text=document.getElementById("myInput").value.trim();
-  const coords=document.getElementById("input1").value.trim();
   if(!text) return;
-  addItem(text,coords);
-  document.getElementById("myInput").value="";
-  saveList();
+
+  const li = document.createElement("li");
+
+  li.innerHTML = `
+    ${text}
+    <button onclick="openMap('${coords}')">🗺️</button>
+    <button onclick="this.parentElement.remove(); saveData()">🗑️</button>
+  `;
+
+  list.appendChild(li);
+  saveData();
 };
 
-document.getElementById("alertBtn").onclick=()=>{
-  if(!navigator.geolocation) return alert("geolocation not supported");
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude.toFixed(6);
-    const lon=pos.coords.longitude.toFixed(6);
-    document.getElementById("input1").value=`${lat},${lon}`;
-  },()=>alert("failed to get location"));
-};
+// 🗺️ открыть карту
+function openMap(coords){
+  const [lat, lon] = coords.split(",");
+  window.open(`https://www.google.com/maps?q=${lat},${lon}`, "_blank");
+}
 
-document.getElementById("clearBtn").onclick=()=>{
-  if(confirm("delete all items?")){
-    list.innerHTML="";
-    localStorage.removeItem("fixdata");
-  }
-};
-
-loadList();
+// 📦 Service Worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 
 </body>
