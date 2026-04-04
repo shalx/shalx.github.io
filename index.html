@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Save‑Found</title>
+<title>fix</title>
 <meta name="theme-color" content="#6200EE" />
 <link rel="manifest" href="manifest.json" />
 
@@ -44,7 +44,7 @@ button {
   transition:transform .1s;
 }
 button:active { transform:scale(.97); }
-#alertBtn,#mapBtn,#shareBtn,#clearBtn { background:var(--accent); }
+#alertBtn,#clearBtn { background:var(--accent); }
 ol {
   list-style:none;
   padding:0;
@@ -61,43 +61,40 @@ li {
   justify-content:space-between;
   align-items:center;
 }
-.left { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.left { display:flex;gap:10px;align-items:center;flex-wrap:wrap; }
 .action-btn {
-  border:none; border-radius:50%;
-  width:36px; height:36px;
-  display:flex; align-items:center; justify-content:center;
+  border:none;
+  border-radius:50%;
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
   font-size:18px;
   background:rgba(98,0,238,0.08);
 }
-.action-btn.map { color:var(--accent); }
-.action-btn.delete { color:var(--danger); }
+.action-btn.map   { color:var(--accent); }
+.action-btn.delete{ color:var(--danger); }
 </style>
 
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
+  window.addEventListener("load", ()=>navigator.serviceWorker.register("service-worker.js"));
 }
 </script>
 </head>
 <body>
 
-<div style="display:flex;gap:8px;flex-wrap:wrap;">
-  <button id="alertBtn">📍 Fix place</button>
-  <button id="mapBtn">🗺️ Map</button>
-</div>
-
-<input id="input1" placeholder="Lat & Lon" />
-<input id="myInput" placeholder="Enter note..." />
-<button id="myButton">💾 Save</button>
+<!-- только одна основная кнопка -->
+<button id="alertBtn">📍 fix place</button>
+<input id="input1" placeholder="Lat & Lon">
+<input id="myInput" placeholder="Enter note...">
+<button id="myButton">💾 save</button>
 
 <ol id="data-list"></ol>
 
-<button id="clearBtn">🗑️ Clear All</button>
+<button id="clearBtn">🗑️ clear all</button>
 
 <script>
 const list=document.getElementById("data-list");
 
-// --- сохранить список ---
 function saveList(){
   const data=[];
   list.querySelectorAll("li").forEach(li=>{
@@ -105,16 +102,14 @@ function saveList(){
     const coords=li.querySelector(".map-inline")?.dataset.coords||"";
     data.push({text,coords});
   });
-  localStorage.setItem("savefound",JSON.stringify(data));
+  localStorage.setItem("fixdata",JSON.stringify(data));
 }
 
-// --- загрузить список ---
 function loadList(){
-  const data=JSON.parse(localStorage.getItem("savefound")||"[]");
+  const data=JSON.parse(localStorage.getItem("fixdata")||"[]");
   data.forEach(i=>addItem(i.text,i.coords));
 }
 
-// --- добавить элемент ---
 function addItem(text,coords=""){
   const li=document.createElement("li");
   const left=document.createElement("div");
@@ -124,14 +119,15 @@ function addItem(text,coords=""){
   txt.textContent=text;
   left.appendChild(txt);
 
+  // кнопка для открытия карты если координаты есть
   if(coords){
     const mapBtn=document.createElement("button");
     mapBtn.className="action-btn map map-inline";
     mapBtn.textContent="🗺️";
-    mapBtn.title="Open in maps";
+    mapBtn.title="open in maps";
     mapBtn.dataset.coords=coords;
     mapBtn.onclick=()=>{
-      const[lat,lon]=coords.split(/[\s,]+/);
+      const [lat,lon]=coords.split(/[\s,]+/);
       if(lat&&lon){
         const url=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;
         window.open(url,"_blank","noopener");
@@ -140,11 +136,12 @@ function addItem(text,coords=""){
     left.appendChild(mapBtn);
   }
 
+  // кнопка удаления
   const del=document.createElement("button");
   del.className="action-btn delete";
   del.textContent="🗑️";
   del.onclick=()=>{
-    if(confirm(`Delete "${text}"?`)){
+    if(confirm(`delete "${text}"?`)){
       li.remove();
       saveList();
     }
@@ -155,42 +152,28 @@ function addItem(text,coords=""){
   list.appendChild(li);
 }
 
-// --- Add new item ---
 document.getElementById("myButton").onclick=()=>{
   const text=document.getElementById("myInput").value.trim();
   const coords=document.getElementById("input1").value.trim();
-  if(!text)return;
+  if(!text) return;
   addItem(text,coords);
   document.getElementById("myInput").value="";
   saveList();
 };
 
-// --- Geo locate ---
 document.getElementById("alertBtn").onclick=()=>{
-  if(!navigator.geolocation) return alert("Geolocation not supported");
+  if(!navigator.geolocation) return alert("geolocation not supported");
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat=pos.coords.latitude.toFixed(6);
     const lon=pos.coords.longitude.toFixed(6);
     document.getElementById("input1").value=`${lat},${lon}`;
-  },()=>alert("Failed to get location"));
+  },()=>alert("failed to get location"));
 };
 
-// --- Map open from field ---
-document.getElementById("mapBtn").onclick=()=>{
-  const v=document.getElementById("input1").value.trim();
-  if(!v)return alert("No coordinates to open.");
-  const[lat,lon]=v.split(/[\s,]+/);
-  if(lat&&lon){
-    const mapUrl=`[google.com](https://www.google.com/maps?q=${lat},${lon})`;
-    window.open(mapUrl,"_blank","noopener");
-  }else alert("Invalid coords (example: 55.75,37.62)");
-};
-
-// --- Clear all ---
 document.getElementById("clearBtn").onclick=()=>{
-  if(confirm("Delete all items?")){
+  if(confirm("delete all items?")){
     list.innerHTML="";
-    localStorage.removeItem("savefound");
+    localStorage.removeItem("fixdata");
   }
 };
 
