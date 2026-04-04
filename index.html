@@ -83,7 +83,11 @@ li{
   color:#333;
 }
 .map-inline{ color:var(--accent); }
-.del-btn{ color:var(--danger); }
+.del-btn{ 
+  color:var(--danger); 
+  font-weight:bold; 
+  font-size:16px;
+}
 </style>
 </head>
 
@@ -161,9 +165,8 @@ function addItem(text,coords=""){
     mapBtn.className="mini map-inline";
     mapBtn.textContent="⦿";
 
-    // кликаем только по кнопке
     mapBtn.addEventListener("click",(e)=>{
-      e.stopPropagation(); // предотвращаем клик по родителю
+      e.stopPropagation();
       const [lat,lon]=coords.split(/[\s,]+/);
       showOnMap(lat,lon);
     });
@@ -182,7 +185,7 @@ function addItem(text,coords=""){
   // удалить
   const del=document.createElement("button");
   del.className="mini del-btn";
-  del.textContent="🗑️";
+  del.textContent="✖";  // ← современный крестик
   del.onclick=()=>{
     li.remove();
     saveList();
