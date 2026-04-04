@@ -1,7 +1,7 @@
 {
-  "name": "Save‑Found",
-  "short_name": "Save‑Found",
-  "description": "PWA Save‑Found: store places and notes with coordinates, open them on the map.",
+  "name": "fix",
+  "short_name": "fix",
+  "description": "pwa app fix — simple place saver with coordinates and geolocation.",
   "id": "[shalx.github.io](https://shalx.github.io/)",
   "start_url": "./index.html",
   "scope": "./",
