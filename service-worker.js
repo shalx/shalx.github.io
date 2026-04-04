@@ -1,23 +1,15 @@
-const CACHE = "fix-app-v1";
+const CACHE_NAME="fix-cache-v1";
+const urlsToCache=["/","index.html","manifest.json","https://unpkg.com/leaflet@1.9.4/dist/leaflet.js","https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"];
 
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-];
-
-// установка
-self.addEventListener("install", e => {
+self.addEventListener("install", e=>{
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache))
   );
+  self.skipWaiting();
 });
 
-// fetch (офлайн режим)
-self.addEventListener("fetch", e => {
+self.addEventListener("fetch", e=>{
   e.respondWith(
-    caches.match(e.request).then(res => res || fetch(e.request))
+    caches.match(e.request).then(response=>response||fetch(e.request))
   );
 });
