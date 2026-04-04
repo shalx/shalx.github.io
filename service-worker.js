@@ -1,33 +1,23 @@
-const CACHE_NAME = "fix-pwa-v1";
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
+const CACHE = "fix-app-v1";
+
+const urlsToCache = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 ];
 
-// installation
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+// установка
+self.addEventListener("install", e => {
+  e.waitUntil(
+    caches.open(CACHE).then(cache => cache.addAll(urlsToCache))
   );
-  self.skipWaiting();
 });
 
-// activation
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null))
-    )
-  );
-  self.clients.claim();
-});
-
-// fetch
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+// fetch (офлайн режим)
+self.addEventListener("fetch", e => {
+  e.respondWith(
+    caches.match(e.request).then(res => res || fetch(e.request))
   );
 });
