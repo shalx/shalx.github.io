@@ -110,44 +110,93 @@ function loadList(){
   data.forEach(i=>addItem(i.text,i.checked,i.coords));
 }
 
-function addItem(text,checked=false,coords=""){
-  const li=document.createElement("li");
-  const left=document.createElement("div");
-  left.className="left";
+function addItem(text, checked = false, coords = "") {
+  const li = document.createElement("li");
+  const left = document.createElement("div");
+  left.className = "left";
 
-  const cb=document.createElement("input");
-  cb.type="checkbox";
-  cb.checked=checked;
-  const txt=document.createElement("span");
-  txt.textContent=text;
-  if(checked) li.classList.add("checked");
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.checked = checked;
+  const txt = document.createElement("span");
+  txt.textContent = text;
+  if (checked) li.classList.add("checked");
 
-  cb.onchange=()=>{li.classList.toggle("checked");saveList();};
+  cb.onchange = () => {
+    li.classList.toggle("checked");
+    saveList();
+  };
 
   left.appendChild(cb);
   left.appendChild(txt);
 
-  if(coords){
-    const mapBtn=document.createElement("button");
-    mapBtn.className="map-inline";
-    mapBtn.textContent="🗺️";
-    mapBtn.title="Open in maps";
-    mapBtn.dataset.coords=coords;
-    mapBtn.onclick=()=>{
-      const[lat,lon]=coords.split(/[\s,]+/);
-      if(lat&&lon){
-        const url=`https://www.google.com/maps?q=${lat},${lon}`;
-        window.open(url,"_blank","noopener");
+  // --- кнопка MAP ---
+  if (coords) {
+    const mapBtn = document.createElement("button");
+    mapBtn.className = "map-inline";
+    mapBtn.textContent = "🗺️";
+    mapBtn.title = "Open in maps";
+    mapBtn.dataset.coords = coords;
+    mapBtn.onclick = () => {
+      const [lat, lon] = coords.split(/[\s,]+/);
+      if (lat && lon) {
+        const url = `[google.com](https://www.google.com/maps?q=${lat},${lon})`;
+        window.open(url, "_blank", "noopener");
       }
     };
     left.appendChild(mapBtn);
   }
 
-  const del=document.createElement("button");
-  del.className="del-btn";
-  del.textContent="🗑️";
-  del.onclick=()=>{
-    if(confirm(`Delete "${text}"?`)){li.remove();saveList();}
+  // --- кнопка SHARE ---
+  const shareBtn = document.createElement("button");
+  shareBtn.className = "map-inline";
+  shareBtn.textContent = "📤";
+  shareBtn.title = "Share this item";
+  shareBtn.onclick = async () => {
+    let message = `Save‑Found 📍\n${text}`;
+    if (coords) {
+      const [lat, lon] = coords.split(/[\s,]+/);
+      if (lat && lon) {
+        const mapLink = `[google.com](https://www.google.com/maps?q=${lat},${lon})`;
+        message += `\n${mapLink}`;
+      }
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Save‑Found", text: message });
+        return;
+      } catch (e) {
+        console.log("Share canceled:", e);
+      }
+    }
+
+    const encoded = encodeURIComponent(message);
+    const viberUrl = `viber://forward?text=${encoded}`;
+    const whatsappUrl = `[wa.me](https://wa.me/?text=${encoded})`;
+    const telegramUrl = `[t.me](https://t.me/share/url?url=${encoded})`;
+
+    try {
+      window.open(viberUrl, "_blank");
+    } catch {
+      try {
+        window.open(whatsappUrl, "_blank");
+      } catch {
+        window.open(telegramUrl, "_blank");
+      }
+    }
+  };
+  left.appendChild(shareBtn);
+
+  // --- кнопка DELETE ---
+  const del = document.createElement("button");
+  del.className = "del-btn";
+  del.textContent = "🗑️";
+  del.onclick = () => {
+    if (confirm(`Delete "${text}"?`)) {
+      li.remove();
+      saveList();
+    }
   };
 
   li.appendChild(left);
