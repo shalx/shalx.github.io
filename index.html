@@ -8,6 +8,9 @@
 <meta name="theme-color" content="#6200EE" />
 <link rel="manifest" href="manifest.json" />
 
+<!-- карта -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <style>
 :root{
   --primary:#6200EE;
@@ -26,12 +29,17 @@ body{
   gap:10px;
 }
 
+/* карта */
+#map{
+  height:250px;
+  border-radius:12px;
+}
+
 /* inputs */
 input{
   padding:12px;
   border:none;
   border-radius:8px;
-  font-size:15px;
 }
 
 /* кнопки */
@@ -43,7 +51,7 @@ button{
   padding:12px;
 }
 
-/* верх кнопки */
+/* верх */
 .top{
   display:flex;
   gap:6px;
@@ -80,7 +88,7 @@ li{
   flex-wrap:wrap;
 }
 
-/* маленькие кнопки 🔘 */
+/* маленькие кнопки */
 .mini{
   width:28px;
   height:28px;
@@ -97,24 +105,21 @@ li{
 .map-inline{ color:var(--accent); }
 .del-btn{ color:var(--danger); }
 
-.checked span{
-  text-decoration:line-through;
-  opacity:.6;
-}
 </style>
 
 <script>
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
+  navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 </head>
 
 <body>
 
+<div id="map"></div>
+
 <div class="top">
   <button id="alertBtn">📍</button>
-  <button id="mapBtn">🗺️</button>
 </div>
 
 <input id="input1" placeholder="Lat, Lon" />
@@ -125,60 +130,62 @@ if("serviceWorker" in navigator){
 
 <button id="shareBtn">SHARE</button>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 const list=document.getElementById("data-list");
+const input1=document.getElementById("input1");
+const note=document.getElementById("myInput");
 
+// 🗺️ карта
+const map=L.map('map').setView([41.7151,44.8271],13);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19
+}).addTo(map);
+
+let marker;
+
+// 💾 сохранить
 function saveList(){
   const data=[];
   list.querySelectorAll("li").forEach(li=>{
-    const text=li.querySelector("span").textContent;
-    const checked=li.querySelector("input").checked;
-    const coords=li.dataset.coords||"";
-    data.push({text,checked,coords});
+    data.push({
+      text:li.querySelector("span").textContent,
+      coords:li.dataset.coords||""
+    });
   });
   localStorage.setItem("savefoun",JSON.stringify(data));
 }
 
+// 📂 загрузка
 function loadList(){
   const data=JSON.parse(localStorage.getItem("savefoun")||"[]");
-  data.forEach(i=>addItem(i.text,i.checked,i.coords));
+  data.forEach(i=>addItem(i.text,i.coords));
 }
 
-function addItem(text,checked=false,coords=""){
+// ➕ добавить
+function addItem(text,coords=""){
   const li=document.createElement("li");
   li.dataset.coords=coords;
 
   const left=document.createElement("div");
   left.className="left";
 
-  const cb=document.createElement("input");
-  cb.type="checkbox";
-  cb.checked=checked;
-
   const txt=document.createElement("span");
   txt.textContent=text;
 
-  if(checked) li.classList.add("checked");
-
-  cb.onchange=()=>{
-    li.classList.toggle("checked");
-    saveList();
-  };
-
-  left.appendChild(cb);
   left.appendChild(txt);
 
-  // 🗺️ кнопка карты
+  // 🗺️ кнопка
   if(coords){
     const mapBtn=document.createElement("button");
     mapBtn.className="mini map-inline";
-    mapBtn.textContent="🗺️";
+    mapBtn.textContent="📍";
 
     mapBtn.onclick=()=>{
       const[lat,lon]=coords.split(/[\s,]+/);
-      if(lat&&lon){
-        window.open(`https://www.google.com/maps?q=${lat},${lon}`,"_blank");
-      }
+      showOnMap(lat,lon);
     };
 
     left.appendChild(mapBtn);
@@ -188,10 +195,17 @@ function addItem(text,checked=false,coords=""){
   const del=document.createElement("button");
   del.className="mini del-btn";
   del.textContent="🗑️";
-
   del.onclick=()=>{
     li.remove();
     saveList();
+  };
+
+  // 👉 клик по записи = показать на карте
+  left.onclick=()=>{
+    if(coords){
+      const[lat,lon]=coords.split(/[\s,]+/);
+      showOnMap(lat,lon);
+    }
   };
 
   li.appendChild(left);
@@ -199,17 +213,27 @@ function addItem(text,checked=false,coords=""){
   list.appendChild(li);
 }
 
+// 📍 показать на карте
+function showOnMap(lat,lon){
+  if(!lat||!lon) return;
+
+  if(marker) map.removeLayer(marker);
+
+  marker=L.marker([lat,lon]).addTo(map);
+  map.setView([lat,lon],15);
+}
+
 // SAVE
 document.getElementById("myButton").onclick=()=>{
-  const txt=document.getElementById("myInput").value.trim();
-  const coords=document.getElementById("input1").value.trim();
+  const txt=note.value.trim();
+  const coords=input1.value.trim();
 
   if(!txt) return;
 
-  addItem(txt,false,coords);
+  addItem(txt,coords);
 
-  document.getElementById("myInput").value="";
-  document.getElementById("input1").value=""; // 🔥 очистка
+  note.value="";
+  input1.value="";
 
   saveList();
 };
@@ -220,31 +244,20 @@ document.getElementById("alertBtn").onclick=()=>{
     const lat=pos.coords.latitude.toFixed(6);
     const lon=pos.coords.longitude.toFixed(6);
     input1.value=`${lat},${lon}`;
-  },()=>alert("Location error"));
-};
-
-// 🗺️ открыть координаты
-document.getElementById("mapBtn").onclick=()=>{
-  const v=input1.value.trim();
-  if(!v) return;
-
-  const[lat,lon]=v.split(/[\s,]+/);
-  if(lat&&lon){
-    window.open(`https://www.google.com/maps?q=${lat},${lon}`,"_blank");
-  }
+    showOnMap(lat,lon);
+  });
 };
 
 // 📤 SHARE
 document.getElementById("shareBtn").onclick=async()=>{
   const items=[];
   list.querySelectorAll("li").forEach(li=>{
-    const chk=li.querySelector("input").checked?"✔️":"⬜";
     const text=li.querySelector("span").textContent;
     const coords=li.dataset.coords||"";
-    items.push(coords?`${chk} ${text} (${coords})`:`${chk} ${text}`);
+    items.push(coords?`${text} (${coords})`:text);
   });
 
-  const msg=items.join("\n")||"Empty list";
+  const msg=items.join("\n")||"Empty";
 
   if(navigator.share){
     navigator.share({title:"Save-Found",text:msg});
