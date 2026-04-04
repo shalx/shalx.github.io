@@ -24,14 +24,12 @@ body {
   background:#f5f5f5;
 }
 
-/* карта */
 #map {
   height:260px;
   border-radius:12px;
   margin-bottom:10px;
 }
 
-/* inputs */
 input,button {
   width:100%;
   padding:10px;
@@ -41,20 +39,17 @@ input,button {
   font-size:15px;
 }
 
-/* кнопки */
 button {
   background:var(--primary);
   color:#fff;
 }
 
-/* список */
 ul {
   list-style:none;
   padding:0;
   margin-top:10px;
 }
 
-/* элемент */
 li {
   background:#fff;
   padding:10px 12px;
@@ -66,7 +61,6 @@ li {
   box-shadow:0 2px 5px rgba(0,0,0,.1);
 }
 
-/* левая часть */
 .left {
   display:flex;
   gap:8px;
@@ -74,7 +68,6 @@ li {
   flex-wrap:wrap;
 }
 
-/* 🔘 маленькие кнопки */
 .mini-btn {
   width:28px;
   height:28px;
@@ -88,7 +81,6 @@ li {
   color:#333;
 }
 
-/* цвета */
 .map { color:var(--accent); }
 .del { color:var(--danger); }
 </style>
@@ -110,6 +102,12 @@ li {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+// ✅ фикс: объявляем элементы
+const note = document.getElementById("note");
+const coords = document.getElementById("coords");
+const list = document.getElementById("list");
+
+// карта
 const map = L.map('map').setView([41.7151, 44.8271], 13);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
@@ -129,12 +127,10 @@ document.getElementById("locBtn").onclick = () => {
     if(marker) map.removeLayer(marker);
     marker = L.marker([lat, lon]).addTo(map);
     map.setView([lat, lon], 15);
-  });
+  }, ()=> alert("Location error"));
 };
 
-const list = document.getElementById("list");
-
-// 💾 сохранить
+// 💾 сохранить в localStorage
 function saveData(){
   const items = [];
   list.querySelectorAll("li").forEach(li=>{
@@ -146,22 +142,22 @@ function saveData(){
   localStorage.setItem("places", JSON.stringify(items));
 }
 
-// 📂 загрузить
+// 📂 загрузка
 function loadData(){
   const data = JSON.parse(localStorage.getItem("places") || "[]");
   data.forEach(i => addItem(i.text, i.coords));
 }
 loadData();
 
-// ➕ добавить
-function addItem(text, coords){
+// ➕ добавить элемент
+function addItem(text, coordsValue){
   const li = document.createElement("li");
-  li.dataset.coords = coords;
+  li.dataset.coords = coordsValue;
 
   li.innerHTML = `
     <div class="left">
       <span class="txt">${text}</span>
-      ${coords ? `<button class="mini-btn map">🗺️</button>` : ""}
+      ${coordsValue ? `<button class="mini-btn map">🗺️</button>` : ""}
     </div>
     <button class="mini-btn del">🗑️</button>
   `;
@@ -170,7 +166,7 @@ function addItem(text, coords){
   const mapBtn = li.querySelector(".map");
   if(mapBtn){
     mapBtn.onclick = ()=>{
-      const [lat, lon] = coords.split(",");
+      const [lat, lon] = coordsValue.split(",");
       window.open(`https://www.google.com/maps?q=${lat},${lon}`, "_blank");
     };
   }
@@ -184,7 +180,7 @@ function addItem(text, coords){
   list.appendChild(li);
 }
 
-// 💾 кнопка save
+// 💾 кнопка save (исправленная)
 document.getElementById("save").onclick = ()=>{
   const text = note.value.trim();
   const c = coords.value.trim();
@@ -192,7 +188,10 @@ document.getElementById("save").onclick = ()=>{
   if(!text) return;
 
   addItem(text, c);
+
   note.value = "";
+  coords.value = ""; // бонус очистка
+
   saveData();
 };
 
