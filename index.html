@@ -8,7 +8,6 @@
 <meta name="theme-color" content="#6200EE" />
 <link rel="manifest" href="manifest.json" />
 
-<!-- карта -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
@@ -29,20 +28,17 @@ body{
   gap:10px;
 }
 
-/* карта */
 #map{
   height:250px;
   border-radius:12px;
 }
 
-/* inputs */
 input{
   padding:12px;
   border:none;
   border-radius:8px;
 }
 
-/* кнопки */
 button{
   background:var(--primary);
   color:#fff;
@@ -51,7 +47,6 @@ button{
   padding:12px;
 }
 
-/* верх */
 .top{
   display:flex;
   gap:6px;
@@ -62,7 +57,6 @@ button{
   background:var(--accent);
 }
 
-/* список */
 ol{
   list-style:none;
   padding:0;
@@ -80,7 +74,6 @@ li{
   align-items:center;
 }
 
-/* левая часть */
 .left{
   display:flex;
   align-items:center;
@@ -88,7 +81,6 @@ li{
   flex-wrap:wrap;
 }
 
-/* маленькие кнопки */
 .mini{
   width:28px;
   height:28px;
@@ -119,7 +111,7 @@ if("serviceWorker" in navigator){
 <div id="map"></div>
 
 <div class="top">
-  <button id="alertBtn">📍</button>
+  <button id="alertBtn">⦿</button>
 </div>
 
 <input id="input1" placeholder="Lat, Lon" />
@@ -177,11 +169,11 @@ function addItem(text,coords=""){
 
   left.appendChild(txt);
 
-  // 🗺️ кнопка
+  // ⦿ кнопка карты
   if(coords){
     const mapBtn=document.createElement("button");
     mapBtn.className="mini map-inline";
-    mapBtn.textContent="📍";
+    mapBtn.textContent="⦿";
 
     mapBtn.onclick=()=>{
       const[lat,lon]=coords.split(/[\s,]+/);
@@ -195,12 +187,13 @@ function addItem(text,coords=""){
   const del=document.createElement("button");
   del.className="mini del-btn";
   del.textContent="🗑️";
+
   del.onclick=()=>{
     li.remove();
     saveList();
   };
 
-  // 👉 клик по записи = показать на карте
+  // клик по записи
   left.onclick=()=>{
     if(coords){
       const[lat,lon]=coords.split(/[\s,]+/);
@@ -238,7 +231,7 @@ document.getElementById("myButton").onclick=()=>{
   saveList();
 };
 
-// 📍 геолокация
+// ⦿ геолокация
 document.getElementById("alertBtn").onclick=()=>{
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat=pos.coords.latitude.toFixed(6);
