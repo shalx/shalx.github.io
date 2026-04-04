@@ -7,7 +7,6 @@
 
 <meta name="theme-color" content="#6200EE" />
 <link rel="manifest" href="manifest.json" />
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
@@ -17,7 +16,6 @@
   --danger:#CF6679;
   --bg:#F5F5F5;
 }
-
 body{
   font-family:sans-serif;
   margin:0;
@@ -27,18 +25,15 @@ body{
   flex-direction:column;
   gap:10px;
 }
-
 #map{
   height:250px;
   border-radius:12px;
 }
-
 input{
   padding:12px;
   border:none;
   border-radius:8px;
 }
-
 button{
   background:var(--primary);
   color:#fff;
@@ -46,17 +41,14 @@ button{
   border-radius:8px;
   padding:12px;
 }
-
 .top{
   display:flex;
   gap:6px;
 }
-
 .top button{
   flex:1;
   background:var(--accent);
 }
-
 ol{
   list-style:none;
   padding:0;
@@ -64,7 +56,6 @@ ol{
   flex-direction:column;
   gap:6px;
 }
-
 li{
   background:#fff;
   border-radius:12px;
@@ -73,14 +64,12 @@ li{
   justify-content:space-between;
   align-items:center;
 }
-
 .left{
   display:flex;
   align-items:center;
   gap:8px;
   flex-wrap:wrap;
 }
-
 .mini{
   width:28px;
   height:28px;
@@ -93,17 +82,9 @@ li{
   background:#eee;
   color:#333;
 }
-
 .map-inline{ color:var(--accent); }
 .del-btn{ color:var(--danger); }
-
 </style>
-
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
 </head>
 
 <body>
@@ -129,16 +110,14 @@ const list=document.getElementById("data-list");
 const input1=document.getElementById("input1");
 const note=document.getElementById("myInput");
 
-// 🗺️ карта
+// карта
 const map=L.map('map').setView([41.7151,44.8271],13);
-
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
   maxZoom:19
 }).addTo(map);
-
 let marker;
 
-// 💾 сохранить
+// сохранение
 function saveList(){
   const data=[];
   list.querySelectorAll("li").forEach(li=>{
@@ -150,13 +129,21 @@ function saveList(){
   localStorage.setItem("savefoun",JSON.stringify(data));
 }
 
-// 📂 загрузка
+// загрузка
 function loadList(){
   const data=JSON.parse(localStorage.getItem("savefoun")||"[]");
   data.forEach(i=>addItem(i.text,i.coords));
 }
 
-// ➕ добавить
+// показать точку на карте
+function showOnMap(lat,lon){
+  if(!lat||!lon) return;
+  if(marker) map.removeLayer(marker);
+  marker=L.marker([lat,lon]).addTo(map);
+  map.setView([lat,lon],15);
+}
+
+// добавить запись
 function addItem(text,coords=""){
   const li=document.createElement("li");
   li.dataset.coords=coords;
@@ -166,39 +153,39 @@ function addItem(text,coords=""){
 
   const txt=document.createElement("span");
   txt.textContent=text;
-
   left.appendChild(txt);
 
-  // ⦿ кнопка карты
+  // кнопка карты
   if(coords){
     const mapBtn=document.createElement("button");
     mapBtn.className="mini map-inline";
     mapBtn.textContent="⦿";
 
-    mapBtn.onclick=()=>{
-      const[lat,lon]=coords.split(/[\s,]+/);
+    // кликаем только по кнопке
+    mapBtn.addEventListener("click",(e)=>{
+      e.stopPropagation(); // предотвращаем клик по родителю
+      const [lat,lon]=coords.split(/[\s,]+/);
       showOnMap(lat,lon);
-    };
+    });
 
     left.appendChild(mapBtn);
   }
 
-  // 🗑️ удалить
+  // клик по тексту
+  left.addEventListener("click",()=>{
+    if(coords){
+      const [lat,lon]=coords.split(/[\s,]+/);
+      showOnMap(lat,lon);
+    }
+  });
+
+  // удалить
   const del=document.createElement("button");
   del.className="mini del-btn";
   del.textContent="🗑️";
-
   del.onclick=()=>{
     li.remove();
     saveList();
-  };
-
-  // клик по записи
-  left.onclick=()=>{
-    if(coords){
-      const[lat,lon]=coords.split(/[\s,]+/);
-      showOnMap(lat,lon);
-    }
   };
 
   li.appendChild(left);
@@ -206,32 +193,18 @@ function addItem(text,coords=""){
   list.appendChild(li);
 }
 
-// 📍 показать на карте
-function showOnMap(lat,lon){
-  if(!lat||!lon) return;
-
-  if(marker) map.removeLayer(marker);
-
-  marker=L.marker([lat,lon]).addTo(map);
-  map.setView([lat,lon],15);
-}
-
 // SAVE
 document.getElementById("myButton").onclick=()=>{
   const txt=note.value.trim();
   const coords=input1.value.trim();
-
   if(!txt) return;
-
   addItem(txt,coords);
-
   note.value="";
   input1.value="";
-
   saveList();
 };
 
-// ⦿ геолокация
+// геолокация
 document.getElementById("alertBtn").onclick=()=>{
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat=pos.coords.latitude.toFixed(6);
@@ -241,7 +214,7 @@ document.getElementById("alertBtn").onclick=()=>{
   });
 };
 
-// 📤 SHARE
+// SHARE
 document.getElementById("shareBtn").onclick=async()=>{
   const items=[];
   list.querySelectorAll("li").forEach(li=>{
@@ -249,9 +222,7 @@ document.getElementById("shareBtn").onclick=async()=>{
     const coords=li.dataset.coords||"";
     items.push(coords?`${text} (${coords})`:text);
   });
-
   const msg=items.join("\n")||"Empty";
-
   if(navigator.share){
     navigator.share({title:"Save-Found",text:msg});
   }else{
