@@ -1,4 +1,4 @@
-const CACHE_NAME = "savefound-pwa-v1";
+const CACHE_NAME = "fix-pwa-v1";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -7,7 +7,7 @@ const FILES_TO_CACHE = [
   "./icon-512.png"
 ];
 
-// install
+// installation
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
@@ -15,7 +15,7 @@ self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
-// activate
+// activation
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
