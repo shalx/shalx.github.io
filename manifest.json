@@ -1,15 +1,14 @@
 {
-  "name": "Save-Found",
-  "short_name": "Save-Found",
-  "description": "Material To‑Do со списками, чекбоксами, геолокацией, картами и возможностью шеринга.",
+  "name": "Save‑Found",
+  "short_name": "Save‑Found",
+  "description": "PWA Save‑Found: store places and notes with coordinates, open them on the map.",
   "id": "[shalx.github.io](https://shalx.github.io/)",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F5F5F5",
   "theme_color": "#6200EE",
-
   "icons": [
     {
       "src": "icon-192.png",
@@ -22,21 +21,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-
-  "screenshots": [
-    {
-      "src": "screenshot1.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "screenshot2.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow"
     }
   ]
 }
