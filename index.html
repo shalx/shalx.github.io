@@ -147,31 +147,34 @@ function addItem(text,coords=""){
   }
 
   // share кнопка (с ссылкой!)
-  const share=document.createElement("button");
-  share.className="mini share-btn";
-  share.textContent="🔗";
+ const share=document.createElement("button");
+share.className="mini share-btn";
+share.textContent="🔗";
 
-  share.addEventListener("click",(e)=>{
-    e.stopPropagation();
+share.addEventListener("click",(e)=>{
+  e.stopPropagation();
 
-    let msg = text;
+  let msg = text;
 
-    if(coords){
-      const [lat,lon]=coords.split(/[\s,]+/).map(Number);
-      const link = `https://maps.google.com/?q=${lat},${lon}`;
-      msg = `${text}\n${link}`;
-    }
+  if(coords){
+    const [lat,lon]=coords.split(/[\s,]+/).map(Number);
+    const link = `https://maps.google.com/?q=${lat},${lon}`;
 
-    if(navigator.share){
-      navigator.share({
-        title:"fix",
-        text:msg
-      });
-    } else {
-      navigator.clipboard.writeText(msg);
-      alert("Link copied!");
-    }
-  });
+    // ВАЖНО: ссылка первой!
+    msg = `${link} ${text}`;
+  }
+
+  if(navigator.share){
+    navigator.share({
+      title:"fix",
+      text: msg,
+      url: coords ? `https://maps.google.com/?q=${coords}` : ""
+    });
+  } else {
+    navigator.clipboard.writeText(msg);
+    alert("Link copied!");
+  }
+});
 
   // удалить
   const del=document.createElement("button");
