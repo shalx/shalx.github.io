@@ -137,25 +137,16 @@ function addItem(text,coords=""){
     mapBtn.className="mini map-inline";
     mapBtn.textContent="⦿";
 
-   mapBtn.addEventListener("click",(e)=>{
+mapBtn.addEventListener("click",(e)=>{
   e.stopPropagation();
 
   const [lat,lon]=coords.split(/[\s,]+/).map(Number);
-
   if(isNaN(lat) || isNaN(lon)) return;
 
-  // пробуем получить текущее местоположение
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const myLat = pos.coords.latitude;
-    const myLon = pos.coords.longitude;
+  // универсальная ссылка маршрута (работает ВСЕГДА)
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
 
-    const url = `https://www.google.com/maps/dir/${myLat},${myLon}/${lat},${lon}`;
-    window.open(url, "_blank");
-  }, ()=>{
-    // если геолокация не разрешена — просто открыть точку
-    const url = `https://www.google.com/maps?q=${lat},${lon}`;
-    window.open(url, "_blank");
-  });
+  window.open(url, "_blank");
 });
 
     left.appendChild(mapBtn);
