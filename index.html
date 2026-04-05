@@ -146,42 +146,33 @@ function addItem(text,coords=""){
     left.appendChild(mapBtn);
   }
 
-  const share=document.createElement("button");
+ const share=document.createElement("button");
 share.className="mini share-btn";
 share.textContent="🔗";
 
 share.addEventListener("click",(e)=>{
   e.stopPropagation();
 
+  let msg = text;
+
   if(coords){
     const [lat,lon]=coords.split(/[\s,]+/).map(Number);
     const link = `https://maps.google.com/?q=${lat},${lon}`;
 
-    if(navigator.share){
-      // 👉 ВАЖНО: ссылка только в url, не дублируем
-      navigator.share({
-        title:"fix",
-        text: text,
-        url: link
-      });
-    } else {
-      navigator.clipboard.writeText(`${link} ${text}`);
-      alert("Link copied!");
-    }
+    // ссылка ОДИН раз и первой строкой
+    msg = `${link}\n${text}`;
+  }
 
+  if(navigator.share){
+    navigator.share({
+      title:"fix",
+      text: msg
+    });
   } else {
-    if(navigator.share){
-      navigator.share({
-        title:"fix",
-        text: text
-      });
-    } else {
-      navigator.clipboard.writeText(text);
-      alert("Copied!");
-    }
+    navigator.clipboard.writeText(msg);
+    alert("Link copied!");
   }
 });
-
   // удалить
   const del=document.createElement("button");
   del.className="mini del-btn";
