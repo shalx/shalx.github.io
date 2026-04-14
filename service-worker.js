@@ -1,4 +1,4 @@
-const CACHE_NAME="fix-cache-v1";
+const CACHE_NAME="pin-cache-v1";
 const urlsToCache=["/","index.html","manifest.json","https://unpkg.com/leaflet@1.9.4/dist/leaflet.js","https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"];
 
 self.addEventListener("install", e=>{
