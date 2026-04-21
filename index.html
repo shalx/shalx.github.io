@@ -1,233 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>pin</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>fix</title>
 
 <meta name="theme-color" content="#6200EE">
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
 :root{
   --primary:#6200EE;
-  --accent:#03DAC5;
-  --danger:#CF6679;
-  --bg:#F5F5F5;
+  --bg:#F6F7FB;
+  --card:#FFFFFF;
+  --text:#1F1F1F;
+  --sub:#777;
+  --danger:#E53935;
 }
+
 body{
-  font-family:sans-serif;
   margin:0;
+  font-family:system-ui;
   background:var(--bg);
-  padding:14px;
+}
+
+/* HEADER */
+.header{
+  background:var(--primary);
+  color:white;
+  padding:16px;
+  font-size:20px;
+  font-weight:600;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* INPUT */
+.input-wrap{
+  padding:12px;
+  display:flex;
+  gap:8px;
+}
+
+input{
+  flex:1;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* LIST */
+.list{
+  padding:12px;
   display:flex;
   flex-direction:column;
   gap:10px;
 }
-#map{height:250px;border-radius:12px;}
-input{padding:12px;border:none;border-radius:8px;}
-button{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:12px;}
-.top{display:flex;gap:6px;}
-.top button{flex:1;background:var(--accent);}
-ol{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;}
-li{background:#fff;border-radius:12px;padding:10px;display:flex;justify-content:space-between;align-items:center;}
-.left{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.mini{width:28px;height:28px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:14px;background:#eee;color:#333;}
-.map-inline{ color:var(--accent); }
-.del-btn{ color:var(--danger); font-weight:bold; font-size:16px; }
-.share-btn{ background:#03DAC5; color:#fff; font-size:12px; }
 
-.pulse-marker {
-  width:16px;
-  height:16px;
-  background:var(--accent);
-  border-radius:50%;
-  box-shadow:0 0 0 0 var(--accent);
-  animation:pulse 1.5s infinite;
-  border:2px solid #fff;
+.item{
+  background:var(--card);
+  padding:14px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
-@keyframes pulse {
-  0% {box-shadow:0 0 0 0 rgba(3,218,197,0.5);}
-  70% {box-shadow:0 0 0 15px rgba(3,218,197,0);}
-  100% {box-shadow:0 0 0 0 rgba(3,218,197,0);}
+
+.left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.checked span{
+  text-decoration:line-through;
+  color:var(--sub);
+}
+
+/* ICON BUTTONS */
+.icon-btn{
+  background:none;
+  border:none;
+  font-size:20px;
+  cursor:pointer;
+}
+
+/* FLOAT BUTTON */
+.fab{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:var(--primary);
+  color:white;
+  font-size:28px;
+  border:none;
+  box-shadow:0 6px 16px rgba(0,0,0,0.2);
+  cursor:pointer;
+}
+
+/* ACTION BAR */
+.actions{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  display:flex;
+  gap:10px;
+}
+
+.action{
+  background:white;
+  border:none;
+  border-radius:50%;
+  width:48px;
+  height:48px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+  font-size:18px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="map"></div>
-
-<div class="top">
-  <button id="alertBtn">⦿</button>
+<div class="header">
+  fix
+  <div>
+    <button class="icon-btn" id="shareBtn">📤</button>
+  </div>
 </div>
 
-<input id="input1" placeholder="Lat, Lon">
-<input id="myInput" placeholder="Note...">
-<button id="myButton">SAVE</button>
+<div class="input-wrap">
+  <input id="myInput" placeholder="New task...">
+</div>
 
-<ol id="data-list"></ol>
+<div class="list" id="list"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<button class="fab" id="addBtn">＋</button>
+
+<div class="actions">
+  <button class="action" id="geoBtn">📍</button>
+</div>
 
 <script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
-}
+const list = document.getElementById("list");
 
-const list=document.getElementById("data-list");
-const input1=document.getElementById("input1");
-const note=document.getElementById("myInput");
-
-// карта
-const map=L.map('map').setView([41.7151,44.8271],13);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-
-let pulseMarker;
-
-// сохранить
-function saveList(){
+function save(){
   const data=[];
-  list.querySelectorAll("li").forEach(li=>{
+  list.querySelectorAll(".item").forEach(el=>{
     data.push({
-      text:li.querySelector("span").textContent,
-      coords:li.dataset.coords||""
+      text:el.querySelector("span").textContent,
+      checked:el.querySelector("input").checked
     });
   });
-  localStorage.setItem("savefoun",JSON.stringify(data));
+  localStorage.setItem("todo",JSON.stringify(data));
 }
 
-// загрузить
-function loadList(){
-  const data=JSON.parse(localStorage.getItem("savefoun")||"[]");
-  data.forEach(i=>addItem(i.text,i.coords));
+function load(){
+  JSON.parse(localStorage.getItem("todo")||"[]")
+  .forEach(i=>add(i.text,i.checked));
 }
 
-// показать точку
-function showPulse(lat,lon){
-  lat = Number(lat);
-  lon = Number(lon);
-
-  if(isNaN(lat) || isNaN(lon)) return;
-
-  if(pulseMarker) map.removeLayer(pulseMarker);
-
-  const divIcon=L.divIcon({className:'pulse-marker'});
-  pulseMarker=L.marker([lat,lon],{icon:divIcon}).addTo(map);
-
-  map.setView([lat,lon],15);
-}
-
-// добавить элемент
-function addItem(text,coords=""){
-  const li=document.createElement("li");
-  li.dataset.coords=coords;
+function add(text,checked=false){
+  const el=document.createElement("div");
+  el.className="item";
 
   const left=document.createElement("div");
   left.className="left";
 
-  const txt=document.createElement("span");
-  txt.textContent=text;
-  left.appendChild(txt);
+  const cb=document.createElement("input");
+  cb.type="checkbox";
+  cb.checked=checked;
 
-  // кнопка карты
-  if(coords){
-    const mapBtn=document.createElement("button");
-    mapBtn.className="mini map-inline";
-    mapBtn.textContent="⦿";
+  const span=document.createElement("span");
+  span.textContent=text;
 
-mapBtn.addEventListener("click",(e)=>{
-  e.stopPropagation();
+  if(checked) el.classList.add("checked");
 
-  const [lat,lon]=coords.split(/[\s,]+/).map(Number);
-  if(isNaN(lat) || isNaN(lon)) return;
-
-  // универсальная ссылка маршрута (работает ВСЕГДА)
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
-
-  window.open(url, "_blank");
-});
-
-    left.appendChild(mapBtn);
-  }
-
- const share=document.createElement("button");
-share.className="mini share-btn";
-share.textContent="🔗";
-
-share.addEventListener("click",(e)=>{
-  e.stopPropagation();
-
-  let msg = text;
-
-  if(coords){
-    const [lat,lon]=coords.split(/[\s,]+/).map(Number);
-    const link = `https://maps.google.com/?q=${lat},${lon}`;
-
-    // ссылка ОДИН раз и первой строкой
-    msg = `${link}\n${text}`;
-  }
-
-  if(navigator.share){
-    navigator.share({
-      title:"pin",
-      text: msg
-    });
-  } else {
-    navigator.clipboard.writeText(msg);
-    alert("Link copied!");
-  }
-});
-  // удалить
-  const del=document.createElement("button");
-  del.className="mini del-btn";
-  del.textContent="✖";
-  del.onclick=()=>{
-    li.remove();
-    saveList();
+  cb.onchange=()=>{
+    el.classList.toggle("checked");
+    save();
   };
 
-  li.appendChild(left);
-  li.appendChild(share);
-  li.appendChild(del);
+  left.append(cb,span);
 
-  list.appendChild(li);
+  const del=document.createElement("button");
+  del.className="icon-btn";
+  del.textContent="✖";
+  del.onclick=()=>{
+    el.remove();
+    save();
+  };
+
+  el.append(left,del);
+  list.append(el);
 }
 
-// кнопка save
-document.getElementById("myButton").onclick=()=>{
-  const txt=note.value.trim();
-  const coords=input1.value.trim();
-
-  if(!txt) return;
-
-  // проверка координат
-  if(coords && !/^[-\d.]+,\s*[-\d.]+$/.test(coords)){
-    alert("Invalid coordinates");
-    return;
-  }
-
-  addItem(txt,coords);
-
-  note.value="";
-  input1.value="";
-  saveList();
+document.getElementById("addBtn").onclick=()=>{
+  const v=document.getElementById("myInput").value.trim();
+  if(!v) return;
+  add(v);
+  document.getElementById("myInput").value="";
+  save();
 };
 
-// получить геолокацию
-document.getElementById("alertBtn").onclick=()=>{
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude.toFixed(6);
-    const lon=pos.coords.longitude.toFixed(6);
-
-    input1.value=`${lat},${lon}`;
-    showPulse(lat,lon);
+document.getElementById("geoBtn").onclick=()=>{
+  navigator.geolocation.getCurrentPosition(p=>{
+    add(p.coords.latitude.toFixed(6)+", "+p.coords.longitude.toFixed(6));
+    save();
   });
 };
 
-// загрузка
-loadList();
+document.getElementById("shareBtn").onclick=async()=>{
+  const items=[];
+  list.querySelectorAll(".item").forEach(el=>{
+    const c=el.querySelector("input").checked?"✔️":"⬜";
+    items.push(c+" "+el.querySelector("span").textContent);
+  });
+
+  const text=items.join("\n")||"Empty";
+
+  if(navigator.share){
+    navigator.share({title:"fix",text});
+  }else{
+    await navigator.clipboard.writeText(text);
+    alert("Copied");
+  }
+};
+
+load();
 </script>
 
 </body>
