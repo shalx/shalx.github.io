@@ -1,6 +1,6 @@
 {
-  "name": "pin",
-  "short_name": "pin",
+  "name": "fix pin",
+  "short_name": "fix pin",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F5F5F5",
