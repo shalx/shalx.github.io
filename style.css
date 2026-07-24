@@ -519,9 +519,17 @@ SMALL PHONE
         border-radius: 20px;
     }
 
-    #myButton {
-        width: 100%;
-    }
+ .actions {
+    gap: 6px;
+}
+
+#gotoButton,
+#shareButton,
+#deleteButton {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+}
 
     li {
         padding: 10px;
