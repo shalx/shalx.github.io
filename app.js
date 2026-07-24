@@ -590,8 +590,47 @@ noteInput.addEventListener(
 
     }
 );
+// =====================================
+// для получения выбранных точек
+// =====================================
+function getSelectedItems() {
+
+    return Array.from(
+        list.querySelectorAll("li")
+    ).filter(item => {
+
+        const checkbox =
+            item.querySelector(".point-checkbox");
+
+        return checkbox && checkbox.checked;
+
+    });
+}
 
 
+function getSelectedPoints() {
+
+    return getSelectedItems()
+        .map(item => {
+
+            const textElement =
+                item.querySelector(".item-text");
+
+            const point =
+                parseCoordinates(
+                    item.dataset.coords || ""
+                );
+
+            return {
+                item,
+                text: textElement
+                    ? textElement.textContent
+                    : "",
+                point
+            };
+
+        });
+}
 // =====================================
 // START
 // =====================================
