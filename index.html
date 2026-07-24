@@ -3,265 +3,80 @@
 
 <head>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
 
-<title>Fix-Pin</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta name="theme-color" content="#6200EE">
+    <title>Fix-Pin</title>
 
-<link rel="manifest" href="manifest.json">
+    <meta
+        name="theme-color"
+        content="#6750a4"
+    >
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link
+        rel="manifest"
+        href="manifest.json"
+    >
 
-<link rel="stylesheet"
-href="style.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
 </head>
 
 <body>
 
-<div id="map"></div>
-
-<div class="top">
-  <button id="alertBtn">⦿</button>
-</div>
-
-<input id="input1" placeholder="Lat, Lon">
-<input id="myInput" placeholder="Note...">
-
-<button id="myButton">SAVE</button>
-
-<ol id="data-list"></ol>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
-}
-
-const list=document.getElementById("data-list");
-const input1=document.getElementById("input1");
-const note=document.getElementById("myInput");
-
-// MAP
-const map=L.map('map').setView([41.7151,44.8271],13);
-
-// BASE MAP
-L.tileLayer(
-  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    maxZoom:19
-  }
-).addTo(map);
-
-
-let pulseMarker;
-
-// SAVE
-function saveList(){
-
-  const data=[];
-
-  list.querySelectorAll("li").forEach(li=>{
-
-    data.push({
-      text:li.querySelector("span").textContent,
-      coords:li.dataset.coords || ""
-    });
-
-  });
-
-  localStorage.setItem(
-    "savefoun",
-    JSON.stringify(data)
-  );
-}
-
-// LOAD
-function loadList(){
-
-  const data=JSON.parse(
-    localStorage.getItem("savefoun") || "[]"
-  );
-
-  data.forEach(i=>addItem(i.text,i.coords));
-}
-
-// SHOW POINT
-function showPulse(lat,lon){
-
-  lat=Number(lat);
-  lon=Number(lon);
-
-  if(isNaN(lat) || isNaN(lon)) return;
-
-  if(pulseMarker){
-    map.removeLayer(pulseMarker);
-  }
-
-  const divIcon=L.divIcon({
-    className:'pulse-marker'
-  });
-
-  pulseMarker=L.marker(
-    [lat,lon],
-    {icon:divIcon}
-  ).addTo(map);
-
-  map.setView([lat,lon],15);
-}
-
-// ADD ITEM
-function addItem(text,coords=""){
-
-  const li=document.createElement("li");
-
-  li.dataset.coords=coords;
-
-  const left=document.createElement("div");
-
-  left.className="left";
-
-  const txt=document.createElement("span");
-
-  txt.textContent=text;
-
-  left.appendChild(txt);
-
-  // MAP BUTTON
-  if(coords){
-
-    const mapBtn=document.createElement("button");
-
-    mapBtn.className="mini map-inline";
-    mapBtn.textContent="⦿";
-
-    mapBtn.addEventListener("click",(e)=>{
-
-      e.stopPropagation();
-
-      const [lat,lon]=coords
-        .split(/[\s,]+/)
-        .map(Number);
-
-      if(isNaN(lat) || isNaN(lon)) return;
-
-      const url=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
-
-      window.open(url,"_blank");
-
-    });
-
-    left.appendChild(mapBtn);
-  }
-
-  // SHARE
-  const share=document.createElement("button");
-
-  share.className="mini share-btn";
-  share.textContent=" ";
-
-  share.addEventListener("click",(e)=>{
-
-    e.stopPropagation();
-
-    let msg=text;
-
-    if(coords){
-
-      const [lat,lon]=coords
-        .split(/[\s,]+/)
-        .map(Number);
-
-      const link=`https://maps.google.com/?q=${lat},${lon}`;
-
-      msg=`${link}\n${text}`;
-    }
-
-    if(navigator.share){
-
-      navigator.share({
-        title:"fix pin",
-        text:msg
-      });
-
-    }else{
-
-      navigator.clipboard.writeText(msg);
-
-      alert("Link copied!");
-    }
-
-  });
-
-  // DELETE
-  const del=document.createElement("button");
-
-  del.className="mini del-btn";
-  del.textContent="✖";
-
-  del.onclick=()=>{
-
-    li.remove();
-
-    saveList();
-  };
-
-  li.appendChild(left);
-  li.appendChild(share);
-  li.appendChild(del);
-
-  list.appendChild(li);
-}
-
-// SAVE BUTTON
-document.getElementById("myButton").onclick=()=>{
-
-  const txt=note.value.trim();
-  const coords=input1.value.trim();
-
-  if(!txt) return;
-
-  if(
-    coords &&
-    !/^[-\d.]+,\s*[-\d.]+$/.test(coords)
-  ){
-    alert("Invalid coordinates");
-    return;
-  }
-
-  addItem(txt,coords);
-
-  note.value="";
-  input1.value="";
-
-  saveList();
-};
-
-// GEOLOCATION + TRAFFIC
-document.getElementById("alertBtn").onclick=()=>{
-
-  navigator.geolocation.getCurrentPosition(pos=>{
-
-    const lat=pos.coords.latitude.toFixed(6);
-    const lon=pos.coords.longitude.toFixed(6);
-
-    input1.value=`${lat},${lon}`;
-
-    showPulse(lat,lon);
-
-   
-
-  });
-
-};
-
-// LOAD
-loadList();
-</script>
+    <div id="map"></div>
+
+    <div class="top">
+
+        <button
+            id="alertBtn"
+            type="button"
+            aria-label="Get current location"
+        >
+            ⦿
+        </button>
+
+    </div>
+
+    <input
+        id="input1"
+        type="text"
+        placeholder="Lat, Lon"
+        autocomplete="off"
+    >
+
+    <input
+        id="myInput"
+        type="text"
+        placeholder="Note..."
+        autocomplete="off"
+    >
+
+    <button
+        id="myButton"
+        type="button"
+    >
+        SAVE
+    </button>
+
+    <ol id="data-list"></ol>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="app.js"></script>
 
 </body>
+
 </html>
