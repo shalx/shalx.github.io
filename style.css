@@ -223,6 +223,10 @@ SAVE BUTTON
 MAIN ACTIONS
 ===================================== */
 
+/* =====================================
+MAIN ACTIONS
+===================================== */
+
 .actions {
     width: 100%;
 
@@ -235,12 +239,14 @@ MAIN ACTIONS
     flex: 1;
 }
 
+#alertBtn,
 #gotoButton,
 #shareButton,
 #deleteButton {
     width: 48px;
     min-width: 48px;
     height: 48px;
+    min-height: 48px;
 
     padding: 0;
 
@@ -251,6 +257,13 @@ MAIN ACTIONS
     justify-content: center;
 
     font-size: 18px;
+
+    flex-shrink: 0;
+}
+
+#alertBtn {
+    background: var(--primary);
+    color: #ffffff;
 }
 
 #gotoButton {
@@ -267,7 +280,6 @@ MAIN ACTIONS
     background: var(--danger);
     color: #ffffff;
 }
-
 
 /* =====================================
 CHECKBOX
