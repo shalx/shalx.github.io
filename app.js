@@ -598,7 +598,12 @@ locationButton.addEventListener(
 
   }
 );
+function openSavedPoints() {
 
+    window.location.href =
+        "saved.html";
+
+}
 
 // =====================================
 // START
