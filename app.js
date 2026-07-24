@@ -43,6 +43,8 @@ const saveButton =
 
 const locationButton =
   document.getElementById("alertBtn");
+const locationButton =
+  document.getElementById("alertBtn");
 
 
 // =====================================
