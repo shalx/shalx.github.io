@@ -1,46 +1,67 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/*
+=========================================
+FIX-PIN
+Material Design
+style.css
+=========================================
+*/
+
+
+/* =====================================
+COLORS
+===================================== */
 
 :root {
-    --md-primary: #6750a4;
-    --md-on-primary: #ffffff;
+    --primary: #6750a4;
+    --primary-hover: #5b4495;
 
-    --md-primary-container: #eaddff;
-    --md-on-primary-container: #21005d;
+    --primary-container: #eaddff;
+    --on-primary-container: #21005d;
 
-    --md-secondary-container: #e8def8;
-    --md-on-secondary-container: #1d192b;
+    --secondary-container: #e8def8;
+    --on-secondary-container: #1d192b;
 
-    --md-error: #ba1a1a;
-    --md-on-error: #ffffff;
+    --danger: #ba1a1a;
+    --danger-hover: #a91616;
 
-    --md-surface: #fffbfe;
-    --md-surface-container: #f3edf7;
-    --md-outline: #79747e;
+    --background: #fffbfe;
+    --surface: #ffffff;
+    --surface-soft: #f7f2fa;
 
-    --md-text: #1d1b20;
-    --md-text-secondary: #49454f;
+    --text: #1d1b20;
+    --text-secondary: #49454f;
 
-    --md-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.18),
-        0 1px 3px rgba(0, 0, 0, 0.12);
+    --outline: #79747e;
+    --outline-soft: #cac4d0;
+
+    --shadow:
+        0 1px 2px rgba(0, 0, 0, 0.12),
+        0 2px 6px rgba(0, 0, 0, 0.08);
 }
+
+
+/* =====================================
+RESET
+===================================== */
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
+
+/* =====================================
+BODY
+===================================== */
 
 body {
     min-height: 100vh;
+
     padding: 16px;
 
-    background: var(--md-surface);
-    color: var(--md-text);
+    background: var(--background);
+    color: var(--text);
 
     font-family:
         Arial,
@@ -52,100 +73,168 @@ body {
     gap: 12px;
 }
 
+
+/* =====================================
+MAP
+===================================== */
+
 #map {
     width: 100%;
-    height: 280px;
+    height: 320px;
 
     border-radius: 24px;
     overflow: hidden;
 
-    box-shadow: var(--md-shadow);
+    background: var(--surface-soft);
+
+    box-shadow: var(--shadow);
 }
+
+
+/* =====================================
+TOP AREA
+===================================== */
 
 .top {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
 }
+
+
+/* =====================================
+GENERAL BUTTON
+===================================== */
 
 button {
     min-height: 48px;
+
     padding: 0 24px;
 
     border: none;
     border-radius: 24px;
 
-    background: var(--md-primary);
-    color: var(--md-on-primary);
+    background: var(--primary);
+    color: #ffffff;
 
     font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.1px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
 
     cursor: pointer;
 
-    box-shadow: var(--md-shadow);
+    box-shadow: var(--shadow);
 
     transition:
+        background 0.15s ease,
         transform 0.15s ease,
-        box-shadow 0.15s ease,
-        opacity 0.15s ease;
+        box-shadow 0.15s ease;
 }
 
 button:hover {
+    background: var(--primary-hover);
+
     box-shadow:
-        0 2px 4px rgba(0, 0, 0, 0.2),
-        0 3px 6px rgba(0, 0, 0, 0.14);
+        0 2px 4px rgba(0, 0, 0, 0.14),
+        0 4px 10px rgba(0, 0, 0, 0.10);
 }
 
 button:active {
     transform: scale(0.97);
 }
 
+
+/* =====================================
+PIN BUTTON
+===================================== */
+
 .top button {
     width: 56px;
     height: 56px;
     min-height: 56px;
+
     padding: 0;
 
-    border-radius: 18px;
+    border-radius: 50%;
 
-    background: var(--md-primary-container);
-    color: var(--md-on-primary-container);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
 
     font-size: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
+.top button:hover {
+    background: #dec8ff;
+}
+
+
+/* =====================================
+INPUTS
+===================================== */
 
 input {
     width: 100%;
     min-height: 56px;
+
     padding: 0 16px;
 
-    border: 1px solid var(--md-outline);
-    border-radius: 12px;
+    border: 1px solid var(--outline);
+    border-radius: 14px;
     outline: none;
 
-    background: transparent;
-    color: var(--md-text);
+    background: #fafafa;
+    color: var(--text);
 
     font-size: 16px;
 
     transition:
         border-color 0.15s ease,
-        box-shadow 0.15s ease;
+        box-shadow 0.15s ease,
+        background 0.15s ease;
 }
 
 input::placeholder {
-    color: var(--md-text-secondary);
+    color: var(--text-secondary);
+}
+
+input:hover {
+    background: #ffffff;
 }
 
 input:focus {
-    border: 2px solid var(--md-primary);
+    border: 2px solid var(--primary);
+
+    background: #ffffff;
 
     box-shadow:
         0 0 0 3px rgba(103, 80, 164, 0.12);
 }
 
+
+/* =====================================
+SAVE BUTTON
+===================================== */
+
+#myButton {
+    width: 180px;
+
+    margin: 0 auto;
+
+    display: block;
+}
+
+
+/* =====================================
+SAVED LIST
+===================================== */
+
 ol {
+    width: 100%;
+
     list-style: none;
 
     display: flex;
@@ -153,20 +242,33 @@ ol {
     gap: 10px;
 }
 
+
+/* =====================================
+SAVED ITEM
+===================================== */
+
 li {
     width: 100%;
     min-height: 72px;
-    padding: 12px;
 
-    background: var(--md-surface-container);
-    border-radius: 18px;
+    padding: 12px 14px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--outline-soft);
+    border-radius: 20px;
 
     display: flex;
     align-items: center;
     gap: 8px;
 
-    box-shadow: var(--md-shadow);
+    box-shadow: var(--shadow);
 }
+
+
+/* =====================================
+ITEM TEXT AREA
+===================================== */
 
 .left {
     min-width: 0;
@@ -182,7 +284,7 @@ li {
     min-width: 0;
     flex: 1;
 
-    color: var(--md-text);
+    color: var(--text);
 
     font-size: 15px;
     line-height: 1.4;
@@ -190,10 +292,16 @@ li {
     overflow-wrap: anywhere;
 }
 
+
+/* =====================================
+MINI BUTTONS
+===================================== */
+
 .mini {
     width: 40px;
     height: 40px;
     min-height: 40px;
+
     padding: 0;
 
     border-radius: 50%;
@@ -202,31 +310,68 @@ li {
     align-items: center;
     justify-content: center;
 
+    font-size: 16px;
+
     box-shadow: none;
+
+    flex-shrink: 0;
 }
+
+
+/* =====================================
+GO TO BUTTON
+===================================== */
 
 .map-inline {
-    background: var(--md-primary-container);
-    color: var(--md-on-primary-container);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
 }
+
+.map-inline:hover {
+    background: #dec8ff;
+}
+
+
+/* =====================================
+SHARE BUTTON
+===================================== */
 
 .share-btn {
-    background: var(--md-secondary-container);
-    color: var(--md-on-secondary-container);
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
 }
+
+.share-btn:hover {
+    background: #ddd1ec;
+}
+
+
+/* =====================================
+DELETE BUTTON
+===================================== */
 
 .del-btn {
-    background: var(--md-error);
-    color: var(--md-on-error);
+    background: var(--danger);
+    color: #ffffff;
 
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: bold;
 }
+
+.del-btn:hover {
+    background: var(--danger-hover);
+}
+
+
+/* =====================================
+PULSE MARKER
+===================================== */
 
 .pulse-marker {
     width: 18px;
     height: 18px;
 
-    background: var(--md-primary);
+    background: var(--primary);
 
     border: 3px solid #ffffff;
     border-radius: 50%;
@@ -254,14 +399,81 @@ li {
     }
 }
 
+
+/* =====================================
+LEAFLET
+===================================== */
+
+.leaflet-control-zoom {
+    border: none !important;
+
+    border-radius: 14px !important;
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow) !important;
+}
+
+.leaflet-control-zoom a {
+    color: var(--text) !important;
+    background: var(--surface) !important;
+}
+
+.leaflet-control-attribution {
+    border-radius: 8px 0 0 0;
+}
+
+
+/* =====================================
+DESKTOP
+===================================== */
+
 @media (min-width: 700px) {
+
     body {
         max-width: 900px;
+
         margin: 0 auto;
         padding: 24px;
     }
 
     #map {
         height: 360px;
+    }
+
+    #myButton {
+        width: 220px;
+    }
+}
+
+
+/* =====================================
+SMALL PHONE
+===================================== */
+
+@media (max-width: 420px) {
+
+    body {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    #map {
+        height: 260px;
+        border-radius: 20px;
+    }
+
+    #myButton {
+        width: 100%;
+    }
+
+    li {
+        padding: 10px;
+    }
+
+    .mini {
+        width: 38px;
+        height: 38px;
+        min-height: 38px;
     }
 }
