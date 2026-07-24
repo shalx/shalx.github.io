@@ -569,7 +569,20 @@ function getCurrentLocation() {
 // =====================================
 // EVENTS
 // =====================================
+goToButton.addEventListener(
+    "click",
+    goToSelected
+);
 
+shareSelectedButton.addEventListener(
+    "click",
+    shareSelected
+);
+
+deleteSelectedButton.addEventListener(
+    "click",
+    deleteSelected
+);
 saveButton.addEventListener(
     "click",
     savePoint
@@ -630,6 +643,147 @@ function getSelectedPoints() {
             };
 
         });
+}
+// =====================================
+// go to
+// =====================================
+function goToSelected() {
+
+    const selected =
+        getSelectedPoints()
+            .filter(entry => entry.point);
+
+    if (selected.length === 0) {
+
+        alert("Select at least one point");
+
+        return;
+    }
+
+    const first =
+        selected[0].point;
+
+    let url =
+        "https://www.google.com/maps/dir/?api=1";
+
+    if (selected.length === 1) {
+
+        url +=
+            `&destination=${first.lat},${first.lon}`;
+
+    } else {
+
+        const destination =
+            selected[selected.length - 1].point;
+
+        const waypoints =
+            selected
+                .slice(0, -1)
+                .map(entry =>
+                    `${entry.point.lat},${entry.point.lon}`
+                )
+                .join("|");
+
+        url +=
+            `&destination=${destination.lat},${destination.lon}`;
+
+        if (waypoints) {
+            url +=
+                `&waypoints=${encodeURIComponent(waypoints)}`;
+        }
+    }
+
+    window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+    );
+}
+// =====================================
+// Share
+// =====================================
+async function shareSelected() {
+
+    const selected =
+        getSelectedPoints();
+
+    if (selected.length === 0) {
+
+        alert("Select at least one point");
+
+        return;
+    }
+
+    const message =
+        selected
+            .map((entry, index) => {
+
+                let result =
+                    `${index + 1}. ${entry.text}`;
+
+                if (entry.point) {
+
+                    result +=
+                        "\n" +
+                        "https://maps.google.com/" +
+                        `?q=${entry.point.lat},${entry.point.lon}`;
+
+                }
+
+                return result;
+
+            })
+            .join("\n\n");
+
+    try {
+
+        if (navigator.share) {
+
+            await navigator.share({
+                title: "Fix-Pin",
+                text: message
+            });
+
+            return;
+        }
+
+        await navigator.clipboard.writeText(
+            message
+        );
+
+        alert("Links copied!");
+
+    } catch (error) {
+
+        if (error.name !== "AbortError") {
+            console.error(
+                "Share failed:",
+                error
+            );
+        }
+
+    }
+}
+// =====================================
+// delete
+// =====================================
+function deleteSelected() {
+
+    const selected =
+        getSelectedItems();
+
+    if (selected.length === 0) {
+
+        alert("Select at least one point");
+
+        return;
+    }
+
+    selected.forEach(item => {
+        item.remove();
+    });
+
+    saveList();
 }
 // =====================================
 // START
