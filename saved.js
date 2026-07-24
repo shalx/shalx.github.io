@@ -15,6 +15,8 @@ Saved Points
 
 let locations = [];
 
+let visibleLocations = [];
+
 const selectedLocationIds =
     new Set();
 
@@ -34,6 +36,11 @@ function init() {
     const searchInput =
         document.getElementById(
             "search-input"
+        );
+
+    const selectAllCheckbox =
+        document.getElementById(
+            "select-all-checkbox"
         );
 
     const gotoSelectedBtn =
@@ -62,6 +69,16 @@ function init() {
         searchInput.addEventListener(
             "input",
             searchLocations
+        );
+
+    }
+
+
+    if (selectAllCheckbox) {
+
+        selectAllCheckbox.addEventListener(
+            "change",
+            toggleSelectAll
         );
 
     }
@@ -121,11 +138,48 @@ function loadLocations() {
     locations =
         getLocations();
 
+
+    removeInvalidSelections();
+
+
     renderLocations(
         locations
     );
 
+
     updateActionButtons();
+
+}
+
+
+// =====================================
+// REMOVE INVALID SELECTIONS
+// =====================================
+
+function removeInvalidSelections() {
+
+    const availableIds =
+        new Set(
+            locations.map(
+                location =>
+                    String(location.id)
+            )
+        );
+
+
+    selectedLocationIds.forEach(
+        id => {
+
+            if (!availableIds.has(id)) {
+
+                selectedLocationIds.delete(
+                    id
+                );
+
+            }
+
+        }
+    );
 
 }
 
@@ -143,15 +197,22 @@ function renderLocations(
             "locations-list"
         );
 
+
     if (!list) {
         return;
     }
 
 
+    visibleLocations =
+        Array.isArray(locationsToRender)
+            ? locationsToRender
+            : [];
+
+
     list.replaceChildren();
 
 
-    if (locationsToRender.length === 0) {
+    if (visibleLocations.length === 0) {
 
         const message =
             document.createElement(
@@ -166,16 +227,20 @@ function renderLocations(
                 ? "No saved points."
                 : "No points found.";
 
+
         list.appendChild(
             message
         );
+
+
+        updateSelectAllCheckbox();
 
         return;
 
     }
 
 
-    locationsToRender.forEach(
+    visibleLocations.forEach(
         location => {
 
             const item =
@@ -189,6 +254,9 @@ function renderLocations(
 
         }
     );
+
+
+    updateSelectAllCheckbox();
 
 }
 
@@ -237,6 +305,7 @@ function createLocationItem(
             const id =
                 String(location.id);
 
+
             if (checkbox.checked) {
 
                 selectedLocationIds.add(
@@ -251,7 +320,10 @@ function createLocationItem(
 
             }
 
+
             updateActionButtons();
+
+            updateSelectAllCheckbox();
 
         }
     );
@@ -310,6 +382,7 @@ function getLocationName(
             location.note || ""
         ).trim();
 
+
     return note ||
         "Unnamed point";
 
@@ -326,6 +399,7 @@ function searchLocations() {
         document.getElementById(
             "search-input"
         );
+
 
     if (!searchInput) {
         return;
@@ -358,6 +432,7 @@ function searchLocations() {
                         location
                     ).toLowerCase();
 
+
                 return note.includes(
                     searchText
                 );
@@ -374,6 +449,126 @@ function searchLocations() {
 
 
 // =====================================
+// SELECT ALL
+// =====================================
+
+function toggleSelectAll() {
+
+    const selectAllCheckbox =
+        document.getElementById(
+            "select-all-checkbox"
+        );
+
+
+    if (!selectAllCheckbox) {
+        return;
+    }
+
+
+    if (visibleLocations.length === 0) {
+
+        selectAllCheckbox.checked =
+            false;
+
+        return;
+
+    }
+
+
+    visibleLocations.forEach(
+        location => {
+
+            const id =
+                String(location.id);
+
+
+            if (selectAllCheckbox.checked) {
+
+                selectedLocationIds.add(
+                    id
+                );
+
+            } else {
+
+                selectedLocationIds.delete(
+                    id
+                );
+
+            }
+
+        }
+    );
+
+
+    renderLocations(
+        visibleLocations
+    );
+
+
+    updateActionButtons();
+
+}
+
+
+// =====================================
+// UPDATE SELECT ALL
+// =====================================
+
+function updateSelectAllCheckbox() {
+
+    const selectAllCheckbox =
+        document.getElementById(
+            "select-all-checkbox"
+        );
+
+
+    if (!selectAllCheckbox) {
+        return;
+    }
+
+
+    if (visibleLocations.length === 0) {
+
+        selectAllCheckbox.checked =
+            false;
+
+        selectAllCheckbox.indeterminate =
+            false;
+
+        selectAllCheckbox.disabled =
+            true;
+
+        return;
+
+    }
+
+
+    selectAllCheckbox.disabled =
+        false;
+
+
+    const selectedVisibleCount =
+        visibleLocations.filter(
+            location =>
+                selectedLocationIds.has(
+                    String(location.id)
+                )
+        ).length;
+
+
+    selectAllCheckbox.checked =
+        selectedVisibleCount ===
+        visibleLocations.length;
+
+
+    selectAllCheckbox.indeterminate =
+        selectedVisibleCount > 0 &&
+        selectedVisibleCount <
+        visibleLocations.length;
+
+}
+
+// =====================================
 // GET SELECTED LOCATIONS
 // =====================================
 
@@ -387,8 +582,6 @@ function getSelectedLocations() {
     );
 
 }
-
-
 // =====================================
 // UPDATE BUTTONS
 // =====================================
@@ -438,8 +631,6 @@ function updateActionButtons() {
     }
 
 }
-
-
 // =====================================
 // GO TO SELECTED
 // =====================================
@@ -540,8 +731,6 @@ function goToSelected() {
         googleMapsUrl;
 
 }
-
-
 // =====================================
 // SHARE SELECTED
 // =====================================
@@ -582,8 +771,6 @@ function shareSelected() {
     );
 
 }
-
-
 // =====================================
 // DELETE SELECTED
 // =====================================
@@ -637,69 +824,5 @@ function deleteSelected() {
     selectedLocationIds.clear();
 
     loadLocations();
-
-}
-
-
-// =====================================
-// LOCATION VALIDATION
-// =====================================
-
-function isValidLocation(
-    location
-) {
-
-    const lat =
-        Number(location.lat);
-
-    const lng =
-        Number(
-            location.lng ??
-            location.lon
-        );
-
-
-    return (
-        Number.isFinite(lat) &&
-        Number.isFinite(lng) &&
-        lat >= -90 &&
-        lat <= 90 &&
-        lng >= -180 &&
-        lng <= 180
-    );
-
-}
-
-
-// =====================================
-// COORDINATES
-// =====================================
-
-function getCoordinates(
-    location
-) {
-
-    const lat =
-        Number(location.lat);
-
-    const lng =
-        Number(
-            location.lng ??
-            location.lon
-        );
-
-    return `${lat},${lng}`;
-
-}
-
-
-// =====================================
-// BACK
-// =====================================
-
-function openMainPage() {
-
-    window.location.href =
-        "index.html";
 
 }
