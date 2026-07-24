@@ -1,28 +1,11 @@
 "use strict";
 
-
-// =====================================
-// SERVICE WORKER
-// =====================================
-
-if ("serviceWorker" in navigator) {
-
-  window.addEventListener("load", () => {
-
-    navigator.serviceWorker
-      .register("service-worker.js")
-      .catch(error => {
-
-        console.error(
-          "Service Worker registration failed:",
-          error
-        );
-
-      });
-
-  });
-
-}
+/*
+=========================================
+FIX-PIN
+app.js
+=========================================
+*/
 
 
 // =====================================
@@ -30,23 +13,19 @@ if ("serviceWorker" in navigator) {
 // =====================================
 
 const list =
-  document.getElementById("data-list");
+    document.getElementById("data-list");
 
-const input1 =
-  document.getElementById("input1");
+const coordinatesInput =
+    document.getElementById("input1");
 
-const note =
-  document.getElementById("myInput");
+const noteInput =
+    document.getElementById("myInput");
 
 const saveButton =
-  document.getElementById("myButton");
+    document.getElementById("myButton");
 
 const locationButton =
-  document.getElementById("alertBtn");
-const savedPointsButton =
-  document.getElementById(
-    "saved-points-btn"
-  );
+    document.getElementById("alertBtn");
 
 
 // =====================================
@@ -54,20 +33,41 @@ const savedPointsButton =
 // =====================================
 
 const map = L.map("map").setView(
-  [41.7151, 44.8271],
-  13
+    [41.7151, 44.8271],
+    13
 );
 
 L.tileLayer(
-  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom: 19,
-    attribution:
-      "&copy; OpenStreetMap contributors"
-  }
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19
+    }
 ).addTo(map);
 
 let pulseMarker = null;
+
+
+// =====================================
+// SERVICE WORKER
+// =====================================
+
+registerServiceWorker();
+
+function registerServiceWorker() {
+
+    if (!("serviceWorker" in navigator)) {
+        return;
+    }
+
+    navigator.serviceWorker
+        .register("service-worker.js")
+        .catch(error => {
+            console.error(
+                "Service Worker registration failed:",
+                error
+            );
+        });
+}
 
 
 // =====================================
@@ -76,68 +76,65 @@ let pulseMarker = null;
 
 function saveList() {
 
-  const data = [];
+    const data = [];
 
-  list
-    .querySelectorAll("li")
-    .forEach(li => {
+    list
+        .querySelectorAll("li")
+        .forEach(item => {
 
-      const textElement =
-        li.querySelector(".item-text");
+            const textElement =
+                item.querySelector(".item-text");
 
-      data.push({
-        text: textElement
-          ? textElement.textContent
-          : "",
+            data.push({
+                text: textElement
+                    ? textElement.textContent
+                    : "",
+                coords:
+                    item.dataset.coords || ""
+            });
 
-        coords:
-          li.dataset.coords || ""
-      });
+        });
 
-    });
-
-  localStorage.setItem(
-    "savefoun",
-    JSON.stringify(data)
-  );
-
+    localStorage.setItem(
+        "savefoun",
+        JSON.stringify(data)
+    );
 }
 
 
 function loadList() {
 
-  let data = [];
+    let data = [];
 
-  try {
+    try {
 
-    data = JSON.parse(
-      localStorage.getItem("savefoun") || "[]"
-    );
+        data = JSON.parse(
+            localStorage.getItem("savefoun") ||
+            "[]"
+        );
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(
-      "Saved data could not be read:",
-      error
-    );
+        console.error(
+            "Saved data could not be read:",
+            error
+        );
 
-    data = [];
+        localStorage.removeItem("savefoun");
+    }
 
-  }
+    if (!Array.isArray(data)) {
+        return;
+    }
 
-  if (!Array.isArray(data)) {
-    return;
-  }
+    data.forEach(item => {
 
-  data.forEach(item => {
+        addItem(
+            String(item.text || ""),
+            String(item.coords || "")
+        );
 
-    addItem(
-      String(item.text || ""),
-      String(item.coords || "")
-    );
-
-  });
-
+    });
 }
 
 
@@ -147,38 +144,32 @@ function loadList() {
 
 function parseCoordinates(coords) {
 
-  const parts = coords
-    .split(",")
-    .map(value => Number(value.trim()));
+    const parts = coords
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .map(Number);
 
-  if (parts.length !== 2) {
-    return null;
-  }
+    if (parts.length !== 2) {
+        return null;
+    }
 
-  const lat = parts[0];
-  const lon = parts[1];
+    const [lat, lon] = parts;
 
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lon)
-  ) {
-    return null;
-  }
+    if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lon) ||
+        lat < -90 ||
+        lat > 90 ||
+        lon < -180 ||
+        lon > 180
+    ) {
+        return null;
+    }
 
-  if (
-    lat < -90 ||
-    lat > 90 ||
-    lon < -180 ||
-    lon > 180
-  ) {
-    return null;
-  }
-
-  return {
-    lat,
-    lon
-  };
-
+    return {
+        lat,
+        lon
+    };
 }
 
 
@@ -188,449 +179,387 @@ function parseCoordinates(coords) {
 
 function showPulse(lat, lon) {
 
-  lat = Number(lat);
-  lon = Number(lon);
-
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lon)
-  ) {
-    return;
-  }
-
-  if (pulseMarker) {
-    map.removeLayer(pulseMarker);
-  }
-
-  const divIcon = L.divIcon({
-    className: "",
-    html:
-      '<div class="pulse-marker"></div>',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
-  });
-
-  pulseMarker = L.marker(
-    [lat, lon],
-    {
-      icon: divIcon
+    if (
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lon)
+    ) {
+        return;
     }
-  ).addTo(map);
 
-  map.setView(
-    [lat, lon],
-    15
-  );
+    if (pulseMarker) {
+        map.removeLayer(pulseMarker);
+    }
 
+    const divIcon = L.divIcon({
+        className: "",
+        html: '<div class="pulse-marker"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+    });
+
+    pulseMarker = L.marker(
+        [lat, lon],
+        {
+            icon: divIcon
+        }
+    ).addTo(map);
+
+    map.setView(
+        [lat, lon],
+        15
+    );
 }
 
 
 // =====================================
-// OPEN GOOGLE MAPS
+// ADD SAVED ITEM
 // =====================================
 
-function openGoogleMaps(coords) {
+function addItem(text, coords = "") {
 
-  const point =
-    parseCoordinates(coords);
+    const listItem =
+        document.createElement("li");
 
-  if (!point) {
-    return;
-  }
+    listItem.dataset.coords = coords;
 
-  const url =
-    "https://www.google.com/maps/dir/" +
-    "?api=1" +
-    `&destination=${point.lat},${point.lon}`;
+    const left =
+        document.createElement("div");
 
-  window.open(
-    url,
-    "_blank",
-    "noopener"
-  );
+    left.className = "left";
 
-}
+    const textElement =
+        document.createElement("span");
+
+    textElement.className = "item-text";
+    textElement.textContent = text;
+
+    left.appendChild(textElement);
 
 
-// =====================================
-// SHARE
-// =====================================
+    // =================================
+    // GOOGLE MAPS BUTTON
+    // =================================
 
-async function shareItem(
-  text,
-  coords
-) {
+    if (coords) {
 
-  let message = text;
+        const mapButton =
+            document.createElement("button");
 
-  const point =
-    parseCoordinates(coords);
+        mapButton.type = "button";
+        mapButton.className =
+            "mini map-inline";
 
-  if (point) {
+        mapButton.textContent = "⦿";
 
-    const link =
-      "https://maps.google.com/" +
-      `?q=${point.lat},${point.lon}`;
+        mapButton.setAttribute(
+            "aria-label",
+            "Open in Google Maps"
+        );
 
-    message =
-      `${link}\n${text}`;
+        mapButton.addEventListener(
+            "click",
+            event => {
 
-  }
+                event.stopPropagation();
 
-  try {
+                const point =
+                    parseCoordinates(coords);
 
-    if (navigator.share) {
+                if (!point) {
+                    alert("Invalid coordinates");
+                    return;
+                }
 
-      await navigator.share({
-        title: "fix pin",
-        text: message
-      });
+                const url =
+                    "https://www.google.com/maps/dir/" +
+                    "?api=1" +
+                    `&destination=${point.lat},${point.lon}`;
 
-      return;
+                window.open(
+                    url,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
+
+            }
+        );
+
+        left.appendChild(mapButton);
     }
 
-    if (navigator.clipboard) {
 
-      await navigator.clipboard.writeText(
-        message
-      );
+    // =================================
+    // SHARE BUTTON
+    // =================================
 
-      alert("Link copied!");
+    const shareButton =
+        document.createElement("button");
 
-      return;
-    }
+    shareButton.type = "button";
+    shareButton.className =
+        "mini share-btn";
 
-    alert(message);
+    shareButton.textContent = "↗";
 
-  } catch (error) {
-
-    if (error.name !== "AbortError") {
-
-      console.error(
-        "Share failed:",
-        error
-      );
-
-    }
-
-  }
-
-}
-
-
-// =====================================
-// ADD ITEM
-// =====================================
-
-function addItem(
-  text,
-  coords = ""
-) {
-
-  const li =
-    document.createElement("li");
-
-  li.dataset.coords = coords;
-
-  const left =
-    document.createElement("div");
-
-  left.className = "left";
-
-  const textElement =
-    document.createElement("span");
-
-  textElement.className =
-    "item-text";
-
-  textElement.textContent = text;
-
-  left.appendChild(textElement);
-
-
-  // GOOGLE MAPS BUTTON
-
-  if (parseCoordinates(coords)) {
-
-    const mapButton =
-      document.createElement("button");
-
-    mapButton.type = "button";
-
-    mapButton.className =
-      "mini map-inline";
-
-    mapButton.textContent = "⦿";
-
-    mapButton.setAttribute(
-      "aria-label",
-      "Open in Google Maps"
+    shareButton.setAttribute(
+        "aria-label",
+        "Share location"
     );
 
-    mapButton.addEventListener(
-      "click",
-      event => {
+    shareButton.addEventListener(
+        "click",
+        async event => {
 
-        event.stopPropagation();
+            event.stopPropagation();
 
-        openGoogleMaps(coords);
+            let message = text;
 
-      }
+            const point =
+                parseCoordinates(coords);
+
+            if (point) {
+
+                const link =
+                    "https://maps.google.com/" +
+                    `?q=${point.lat},${point.lon}`;
+
+                message =
+                    `${link}\n${text}`;
+
+            }
+
+            try {
+
+                if (navigator.share) {
+
+                    await navigator.share({
+                        title: "Fix-Pin",
+                        text: message
+                    });
+
+                    return;
+                }
+
+                await navigator.clipboard.writeText(
+                    message
+                );
+
+                alert("Link copied!");
+
+            } catch (error) {
+
+                if (error.name !== "AbortError") {
+                    console.error(
+                        "Share failed:",
+                        error
+                    );
+                }
+
+            }
+
+        }
     );
 
-    left.appendChild(mapButton);
 
-  }
+    // =================================
+    // DELETE BUTTON
+    // =================================
 
+    const deleteButton =
+        document.createElement("button");
 
-  // SHARE BUTTON
+    deleteButton.type = "button";
+    deleteButton.className =
+        "mini del-btn";
 
-  const shareButton =
-    document.createElement("button");
+    deleteButton.textContent = "×";
 
-  shareButton.type = "button";
+    deleteButton.setAttribute(
+        "aria-label",
+        "Delete saved point"
+    );
 
-  shareButton.className =
-    "mini share-btn";
+    deleteButton.addEventListener(
+        "click",
+        event => {
 
-  shareButton.textContent = "🔗";
+            event.stopPropagation();
 
-  shareButton.setAttribute(
-    "aria-label",
-    "Share point"
-  );
+            listItem.remove();
 
-  shareButton.addEventListener(
-    "click",
-    event => {
+            saveList();
 
-      event.stopPropagation();
-
-      shareItem(
-        text,
-        coords
-      );
-
-    }
-  );
+        }
+    );
 
 
-  // DELETE BUTTON
+    listItem.appendChild(left);
+    listItem.appendChild(shareButton);
+    listItem.appendChild(deleteButton);
 
-  const deleteButton =
-    document.createElement("button");
-
-  deleteButton.type = "button";
-
-  deleteButton.className =
-    "mini del-btn";
-
-  deleteButton.textContent = "✖";
-
-  deleteButton.setAttribute(
-    "aria-label",
-    "Delete point"
-  );
-
-  deleteButton.addEventListener(
-    "click",
-    () => {
-
-      li.remove();
-
-      saveList();
-
-    }
-  );
-
-
-  li.appendChild(left);
-  li.appendChild(shareButton);
-  li.appendChild(deleteButton);
-
-  list.appendChild(li);
-
+    list.appendChild(listItem);
 }
 
 
 // =====================================
-// SAVE BUTTON
+// SAVE POINT
 // =====================================
 
-saveButton.addEventListener(
-  "click",
-  () => {
+function savePoint() {
 
     const text =
-      note.value.trim();
+        noteInput.value.trim();
 
     const coords =
-      input1.value.trim();
+        coordinatesInput.value.trim();
 
     if (!text) {
 
-      alert("Write a note");
+        alert("Enter a note");
 
-      note.focus();
+        noteInput.focus();
 
-      return;
+        return;
     }
 
-    if (
-      coords &&
-      !parseCoordinates(coords)
-    ) {
+    if (coords) {
 
-      alert("Invalid coordinates");
+        const point =
+            parseCoordinates(coords);
 
-      input1.focus();
+        if (!point) {
 
-      return;
+            alert("Invalid coordinates");
+
+            coordinatesInput.focus();
+
+            return;
+        }
+
     }
 
     addItem(
-      text,
-      coords
+        text,
+        coords
     );
 
-    note.value = "";
-    input1.value = "";
+    noteInput.value = "";
+    coordinatesInput.value = "";
 
     saveList();
 
-  }
-);
+    noteInput.focus();
+}
 
 
 // =====================================
 // GEOLOCATION
 // =====================================
 
-locationButton.addEventListener(
-  "click",
-  () => {
+function getCurrentLocation() {
 
     if (!navigator.geolocation) {
 
-      alert(
-        "Geolocation is not supported"
-      );
+        alert(
+            "Geolocation is not supported by this browser."
+        );
 
-      return;
+        return;
     }
 
     locationButton.disabled = true;
-    locationButton.textContent = "…";
 
-    navigator.geolocation
-      .getCurrentPosition(
+    navigator.geolocation.getCurrentPosition(
 
         position => {
 
-          const lat =
-            position.coords.latitude
-              .toFixed(6);
+            const lat =
+                position.coords.latitude;
 
-          const lon =
-            position.coords.longitude
-              .toFixed(6);
+            const lon =
+                position.coords.longitude;
 
-          input1.value =
-            `${lat},${lon}`;
+            coordinatesInput.value =
+                `${lat.toFixed(6)},${lon.toFixed(6)}`;
 
-          showPulse(
-            lat,
-            lon
-          );
+            showPulse(
+                lat,
+                lon
+            );
 
-          locationButton.disabled =
-            false;
-
-          locationButton.textContent =
-            "⦿";
+            locationButton.disabled = false;
 
         },
 
         error => {
 
-          console.error(
-            "Geolocation error:",
-            error
-          );
+            locationButton.disabled = false;
 
-          locationButton.disabled =
-            false;
+            switch (error.code) {
 
-          locationButton.textContent =
-            "⦿";
+                case error.PERMISSION_DENIED:
+                    alert(
+                        "Location permission was denied."
+                    );
+                    break;
 
-          if (
-            error.code ===
-            error.PERMISSION_DENIED
-          ) {
+                case error.POSITION_UNAVAILABLE:
+                    alert(
+                        "Location is unavailable."
+                    );
+                    break;
 
-            alert(
-              "Location permission denied"
-            );
+                case error.TIMEOUT:
+                    alert(
+                        "Location request timed out."
+                    );
+                    break;
 
-          } else if (
-            error.code ===
-            error.TIMEOUT
-          ) {
+                default:
+                    alert(
+                        "Could not get your location."
+                    );
 
-            alert(
-              "Location request timed out"
-            );
-
-          } else {
-
-            alert(
-              "Could not get location"
-            );
-
-          }
+            }
 
         },
 
         {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
         }
 
-      );
-
-  }
-);
-function openSavedPoints() {
-
-    window.location.href =
-        "saved.html";
-
-}
-function openSavedPoints() {
-
-  window.location.href =
-    "saved.html";
-
+    );
 }
 
 
 // =====================================
-// SAVED POINTS BUTTON
+// EVENTS
 // =====================================
 
-if (savedPointsButton) {
-
-  savedPointsButton.addEventListener(
+saveButton.addEventListener(
     "click",
-    openSavedPoints
-  );
+    savePoint
+);
 
-}
+locationButton.addEventListener(
+    "click",
+    getCurrentLocation
+);
+
+noteInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Enter") {
+            savePoint();
+        }
+
+    }
+);
 
 
-loadList();
 // =====================================
 // START
 // =====================================
