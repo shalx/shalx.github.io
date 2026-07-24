@@ -26,6 +26,14 @@ const saveButton =
 
 const locationButton =
     document.getElementById("alertBtn");
+const goToButton =
+    document.getElementById("gotoButton");
+
+const shareSelectedButton =
+    document.getElementById("shareButton");
+
+const deleteSelectedButton =
+    document.getElementById("deleteButton");
 
 
 // =====================================
