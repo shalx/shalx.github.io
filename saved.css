@@ -120,7 +120,53 @@ SEARCH
         0 0 0 3px rgba(0, 255, 136, 0.12);
 }
 
+/* =====================================
+SELECT ALL
+===================================== */
 
+.select-all-container {
+    display: flex;
+    align-items: center;
+
+    min-height: 54px;
+
+    margin-bottom: 12px;
+    padding: 12px 14px;
+
+    background: #0b1911;
+
+    border: 1px solid #204b34;
+    border-radius: 16px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+
+.select-all-container:hover {
+    background: #10251a;
+    border-color: #34704e;
+}
+
+
+.select-all-container:active {
+    transform: scale(0.99);
+}
+
+
+.select-all-text {
+    flex: 1;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+}
 /* =====================================
 LOCATIONS LIST
 ===================================== */
