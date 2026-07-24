@@ -26,6 +26,7 @@ const saveButton =
 
 const locationButton =
     document.getElementById("alertBtn");
+
 const goToButton =
     document.getElementById("gotoButton");
 
@@ -59,8 +60,6 @@ let pulseMarker = null;
 // SERVICE WORKER
 // =====================================
 
-registerServiceWorker();
-
 function registerServiceWorker() {
 
     if (!("serviceWorker" in navigator)) {
@@ -70,10 +69,12 @@ function registerServiceWorker() {
     navigator.serviceWorker
         .register("service-worker.js")
         .catch(error => {
+
             console.error(
                 "Service Worker registration failed:",
                 error
             );
+
         });
 }
 
@@ -94,11 +95,14 @@ function saveList() {
                 item.querySelector(".item-text");
 
             data.push({
+
                 text: textElement
                     ? textElement.textContent
                     : "",
+
                 coords:
                     item.dataset.coords || ""
+
             });
 
         });
@@ -129,6 +133,8 @@ function loadList() {
         );
 
         localStorage.removeItem("savefoun");
+
+        return;
     }
 
     if (!Array.isArray(data)) {
@@ -199,10 +205,16 @@ function showPulse(lat, lon) {
     }
 
     const divIcon = L.divIcon({
+
         className: "",
-        html: '<div class="pulse-marker"></div>',
+
+        html:
+            '<div class="pulse-marker"></div>',
+
         iconSize: [18, 18],
+
         iconAnchor: [9, 9]
+
     });
 
     pulseMarker = L.marker(
@@ -237,7 +249,9 @@ function addItem(text, coords = "") {
         document.createElement("input");
 
     checkbox.type = "checkbox";
-    checkbox.className = "point-checkbox";
+
+    checkbox.className =
+        "point-checkbox";
 
     checkbox.setAttribute(
         "aria-label",
@@ -245,191 +259,91 @@ function addItem(text, coords = "") {
     );
 
 
-    // TEXT AREA
+    // TEXT
 
-    const left =
+    const textArea =
         document.createElement("div");
 
-    left.className = "left";
+    textArea.className = "left";
 
     const textElement =
         document.createElement("span");
 
-    textElement.className = "item-text";
+    textElement.className =
+        "item-text";
+
     textElement.textContent = text;
 
-    left.appendChild(textElement);
+    textArea.appendChild(
+        textElement
+    );
 
+    listItem.appendChild(
+        checkbox
+    );
 
-    listItem.appendChild(checkbox);
-    listItem.appendChild(left);
+    listItem.appendChild(
+        textArea
+    );
 
-    list.appendChild(listItem);
+    list.appendChild(
+        listItem
+    );
 }
 
 
-    // =================================
-    // GOOGLE MAPS BUTTON
-    // =================================
+// =====================================
+// GET SELECTED ITEMS
+// =====================================
 
-    if (coords) {
+function getSelectedItems() {
 
-        const mapButton =
-            document.createElement("button");
+    return Array.from(
+        list.querySelectorAll("li")
+    ).filter(item => {
 
-        mapButton.type = "button";
-        mapButton.className =
-            "mini map-inline";
+        const checkbox =
+            item.querySelector(
+                ".point-checkbox"
+            );
 
-        mapButton.textContent = "⦿";
-
-        mapButton.setAttribute(
-            "aria-label",
-            "Open in Google Maps"
+        return (
+            checkbox &&
+            checkbox.checked
         );
 
-        mapButton.addEventListener(
-            "click",
-            event => {
+    });
+}
 
-                event.stopPropagation();
 
-                const point =
-                    parseCoordinates(coords);
+function getSelectedPoints() {
 
-                if (!point) {
-                    alert("Invalid coordinates");
-                    return;
-                }
+    return getSelectedItems()
+        .map(item => {
 
-                const url =
-                    "https://www.google.com/maps/dir/" +
-                    "?api=1" +
-                    `&destination=${point.lat},${point.lon}`;
-
-                window.open(
-                    url,
-                    "_blank",
-                    "noopener,noreferrer"
+            const textElement =
+                item.querySelector(
+                    ".item-text"
                 );
-
-            }
-        );
-
-        left.appendChild(mapButton);
-    }
-
-
-    // =================================
-    // SHARE BUTTON
-    // =================================
-
-    const shareButton =
-        document.createElement("button");
-
-    shareButton.type = "button";
-    shareButton.className =
-        "mini share-btn";
-
-    shareButton.textContent = "↗";
-
-    shareButton.setAttribute(
-        "aria-label",
-        "Share location"
-    );
-
-    shareButton.addEventListener(
-        "click",
-        async event => {
-
-            event.stopPropagation();
-
-            let message = text;
 
             const point =
-                parseCoordinates(coords);
-
-            if (point) {
-
-                const link =
-                    "https://maps.google.com/" +
-                    `?q=${point.lat},${point.lon}`;
-
-                message =
-                    `${link}\n${text}`;
-
-            }
-
-            try {
-
-                if (navigator.share) {
-
-                    await navigator.share({
-                        title: "Fix-Pin",
-                        text: message
-                    });
-
-                    return;
-                }
-
-                await navigator.clipboard.writeText(
-                    message
+                parseCoordinates(
+                    item.dataset.coords || ""
                 );
 
-                alert("Link copied!");
+            return {
 
-            } catch (error) {
+                item,
 
-                if (error.name !== "AbortError") {
-                    console.error(
-                        "Share failed:",
-                        error
-                    );
-                }
+                text: textElement
+                    ? textElement.textContent
+                    : "",
 
-            }
+                point
 
-        }
-    );
+            };
 
-
-    // =================================
-    // DELETE BUTTON
-    // =================================
-
-    const deleteButton =
-        document.createElement("button");
-
-    deleteButton.type = "button";
-    deleteButton.className =
-        "mini del-btn";
-
-    deleteButton.textContent = "×";
-
-    deleteButton.setAttribute(
-        "aria-label",
-        "Delete saved point"
-    );
-
-    deleteButton.addEventListener(
-        "click",
-        event => {
-
-            event.stopPropagation();
-
-            listItem.remove();
-
-            saveList();
-
-        }
-    );
-
-
-    listItem.appendChild(left);
-    listItem.appendChild(shareButton);
-    listItem.appendChild(deleteButton);
-
-    list.appendChild(listItem);
+        });
 }
 
 
@@ -476,6 +390,7 @@ function savePoint() {
     );
 
     noteInput.value = "";
+
     coordinatesInput.value = "";
 
     saveList();
@@ -530,24 +445,31 @@ function getCurrentLocation() {
             switch (error.code) {
 
                 case error.PERMISSION_DENIED:
+
                     alert(
                         "Location permission was denied."
                     );
+
                     break;
 
                 case error.POSITION_UNAVAILABLE:
+
                     alert(
                         "Location is unavailable."
                     );
+
                     break;
 
                 case error.TIMEOUT:
+
                     alert(
                         "Location request timed out."
                     );
+
                     break;
 
                 default:
+
                     alert(
                         "Could not get your location."
                     );
@@ -567,86 +489,9 @@ function getCurrentLocation() {
 
 
 // =====================================
-// EVENTS
+// GO TO SELECTED
 // =====================================
-goToButton.addEventListener(
-    "click",
-    goToSelected
-);
 
-shareSelectedButton.addEventListener(
-    "click",
-    shareSelected
-);
-
-deleteSelectedButton.addEventListener(
-    "click",
-    deleteSelected
-);
-saveButton.addEventListener(
-    "click",
-    savePoint
-);
-
-locationButton.addEventListener(
-    "click",
-    getCurrentLocation
-);
-
-noteInput.addEventListener(
-    "keydown",
-    event => {
-
-        if (event.key === "Enter") {
-            savePoint();
-        }
-
-    }
-);
-// =====================================
-// для получения выбранных точек
-// =====================================
-function getSelectedItems() {
-
-    return Array.from(
-        list.querySelectorAll("li")
-    ).filter(item => {
-
-        const checkbox =
-            item.querySelector(".point-checkbox");
-
-        return checkbox && checkbox.checked;
-
-    });
-}
-
-
-function getSelectedPoints() {
-
-    return getSelectedItems()
-        .map(item => {
-
-            const textElement =
-                item.querySelector(".item-text");
-
-            const point =
-                parseCoordinates(
-                    item.dataset.coords || ""
-                );
-
-            return {
-                item,
-                text: textElement
-                    ? textElement.textContent
-                    : "",
-                point
-            };
-
-        });
-}
-// =====================================
-// go to
-// =====================================
 function goToSelected() {
 
     const selected =
@@ -655,42 +500,40 @@ function goToSelected() {
 
     if (selected.length === 0) {
 
-        alert("Select at least one point");
+        alert(
+            "Select at least one point"
+        );
 
         return;
     }
 
-    const first =
-        selected[0].point;
+    const destination =
+        selected[
+            selected.length - 1
+        ].point;
 
     let url =
-        "https://www.google.com/maps/dir/?api=1";
+        "https://www.google.com/maps/dir/" +
+        "?api=1" +
+        `&destination=${destination.lat},${destination.lon}`;
 
-    if (selected.length === 1) {
-
-        url +=
-            `&destination=${first.lat},${first.lon}`;
-
-    } else {
-
-        const destination =
-            selected[selected.length - 1].point;
+    if (selected.length > 1) {
 
         const waypoints =
             selected
                 .slice(0, -1)
-                .map(entry =>
-                    `${entry.point.lat},${entry.point.lon}`
-                )
+                .map(entry => {
+
+                    return (
+                        `${entry.point.lat},` +
+                        `${entry.point.lon}`
+                    );
+
+                })
                 .join("|");
 
         url +=
-            `&destination=${destination.lat},${destination.lon}`;
-
-        if (waypoints) {
-            url +=
-                `&waypoints=${encodeURIComponent(waypoints)}`;
-        }
+            `&waypoints=${encodeURIComponent(waypoints)}`;
     }
 
     window.open(
@@ -699,9 +542,12 @@ function goToSelected() {
         "noopener,noreferrer"
     );
 }
+
+
 // =====================================
-// Share
+// SHARE SELECTED
 // =====================================
+
 async function shareSelected() {
 
     const selected =
@@ -709,7 +555,9 @@ async function shareSelected() {
 
     if (selected.length === 0) {
 
-        alert("Select at least one point");
+        alert(
+            "Select at least one point"
+        );
 
         return;
     }
@@ -756,17 +604,22 @@ async function shareSelected() {
     } catch (error) {
 
         if (error.name !== "AbortError") {
+
             console.error(
                 "Share failed:",
                 error
             );
+
         }
 
     }
 }
+
+
 // =====================================
-// delete
+// DELETE SELECTED
 // =====================================
+
 function deleteSelected() {
 
     const selected =
@@ -774,7 +627,9 @@ function deleteSelected() {
 
     if (selected.length === 0) {
 
-        alert("Select at least one point");
+        alert(
+            "Select at least one point"
+        );
 
         return;
     }
@@ -785,8 +640,53 @@ function deleteSelected() {
 
     saveList();
 }
+
+
+// =====================================
+// EVENTS
+// =====================================
+
+saveButton.addEventListener(
+    "click",
+    savePoint
+);
+
+locationButton.addEventListener(
+    "click",
+    getCurrentLocation
+);
+
+goToButton.addEventListener(
+    "click",
+    goToSelected
+);
+
+shareSelectedButton.addEventListener(
+    "click",
+    shareSelected
+);
+
+deleteSelectedButton.addEventListener(
+    "click",
+    deleteSelected
+);
+
+noteInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Enter") {
+            savePoint();
+        }
+
+    }
+);
+
+
 // =====================================
 // START
 // =====================================
+
+registerServiceWorker();
 
 loadList();
