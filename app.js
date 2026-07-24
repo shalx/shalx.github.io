@@ -230,6 +230,23 @@ function addItem(text, coords = "") {
 
     listItem.dataset.coords = coords;
 
+
+    // CHECKBOX
+
+    const checkbox =
+        document.createElement("input");
+
+    checkbox.type = "checkbox";
+    checkbox.className = "point-checkbox";
+
+    checkbox.setAttribute(
+        "aria-label",
+        "Select saved point"
+    );
+
+
+    // TEXT AREA
+
     const left =
         document.createElement("div");
 
@@ -242,6 +259,13 @@ function addItem(text, coords = "") {
     textElement.textContent = text;
 
     left.appendChild(textElement);
+
+
+    listItem.appendChild(checkbox);
+    listItem.appendChild(left);
+
+    list.appendChild(listItem);
+}
 
 
     // =================================
