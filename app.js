@@ -43,8 +43,10 @@ const saveButton =
 
 const locationButton =
   document.getElementById("alertBtn");
-const locationButton =
-  document.getElementById("alertBtn");
+const savedPointsButton =
+  document.getElementById(
+    "saved-points-btn"
+  );
 
 
 // =====================================
@@ -606,7 +608,29 @@ function openSavedPoints() {
         "saved.html";
 
 }
+function openSavedPoints() {
 
+  window.location.href =
+    "saved.html";
+
+}
+
+
+// =====================================
+// SAVED POINTS BUTTON
+// =====================================
+
+if (savedPointsButton) {
+
+  savedPointsButton.addEventListener(
+    "click",
+    openSavedPoints
+  );
+
+}
+
+
+loadList();
 // =====================================
 // START
 // =====================================
