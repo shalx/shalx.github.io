@@ -280,6 +280,27 @@ MAIN ACTIONS
     background: var(--danger);
     color: #ffffff;
 }
+@media (max-width: 420px) {
+
+    .actions {
+        gap: 5px;
+    }
+
+    #alertBtn,
+    #gotoButton,
+    #shareButton,
+    #deleteButton {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+    }
+
+    #myButton {
+        min-height: 44px;
+        padding: 0 12px;
+    }
+}
 
 /* =====================================
 CHECKBOX
