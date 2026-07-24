@@ -819,7 +819,65 @@ function deleteSelected() {
     deleteLocations(
         selectedIds
     );
+// =====================================
+// LOCATION VALIDATION
+// =====================================
 
+function isValidLocation(
+    location
+) {
+
+    const lat =
+        Number(location.lat);
+
+    const lng =
+        Number(
+            location.lng ??
+            location.lon
+        );
+
+
+    return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+    );
+
+}
+    // =====================================
+// COORDINATES
+// =====================================
+
+function getCoordinates(
+    location
+) {
+
+    const lat =
+        Number(location.lat);
+
+    const lng =
+        Number(
+            location.lng ??
+            location.lon
+        );
+
+
+    return `${lat},${lng}`;
+
+}
+    // =====================================
+// BACK
+// =====================================
+
+function openMainPage() {
+
+    window.location.href =
+        "index.html";
+
+}
 
     selectedLocationIds.clear();
 
