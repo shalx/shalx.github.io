@@ -219,87 +219,103 @@ input:focus {
 SAVE BUTTON
 ===================================== */
 
-/* =====================================
-MAIN ACTIONS
-===================================== */
-
-/* =====================================
-MAIN ACTIONS
-===================================== */
+/* ==========================
+   ACTION BUTTONS
+========================== */
 
 .actions {
-    width: 100%;
 
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 16px;
+
+    margin: 20px 0;
+
 }
 
-#myButton {
-    flex: 1;
-}
 
-#alertBtn,
-#gotoButton,
-#shareButton,
-#deleteButton {
-    width: 48px;
-    min-width: 48px;
-    height: 48px;
-    min-height: 48px;
+/* ==========================
+   BUTTON
+========================== */
 
-    padding: 0;
+.actions button {
 
-    border-radius: 50%;
+    height: 64px;
+
+    border: none;
+
+    border-radius: 18px;
+
+    background: #6750A4;
+
+    color: #ffffff;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
-    font-size: 18px;
+    gap: 10px;
 
-    flex-shrink: 0;
+    transition: .2s;
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.18);
+
 }
 
-#alertBtn {
-    background: var(--primary);
-    color: #ffffff;
+.actions button:hover {
+
+    background: #7d65c2;
+
+    transform: translateY(-2px);
+
 }
 
-#gotoButton {
-    background: var(--primary-container);
-    color: var(--on-primary-container);
+.actions button:active {
+
+    transform: scale(.97);
+
 }
 
-#shareButton {
-    background: var(--secondary-container);
-    color: var(--on-secondary-container);
+.button-icon {
+
+    font-size: 22px;
+
 }
 
-#deleteButton {
-    background: var(--danger);
-    color: #ffffff;
-}
-@media (max-width: 420px) {
 
-    .actions {
-        gap: 5px;
+/* ==========================
+   MOBILE
+========================== */
+
+@media (max-width:700px){
+
+    .actions{
+
+        grid-template-columns: repeat(2,1fr);
+
     }
 
-    #alertBtn,
-    #gotoButton,
-    #shareButton,
-    #deleteButton {
-        width: 44px;
-        min-width: 44px;
-        height: 44px;
-        min-height: 44px;
+}
+
+@media (max-width:480px){
+
+    .actions{
+
+        grid-template-columns: 1fr;
+
     }
 
-    #myButton {
-        min-height: 44px;
-        padding: 0 12px;
-    }
 }
 
 /* =====================================
