@@ -219,104 +219,86 @@ input:focus {
 SAVE BUTTON
 ===================================== */
 
-/* ==========================
-   ACTION BUTTONS
-========================== */
+/* =====================================
+ACTION BUTTONS
+===================================== */
 
 .actions {
+    width: 100%;
 
     display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 16px;
-
-    margin: 20px 0;
-
-}
-
-
-/* ==========================
-   BUTTON
-========================== */
-
-.actions button {
-
-    height: 64px;
-
-    border: none;
-
-    border-radius: 18px;
-
-    background: #6750A4;
-
-    color: #ffffff;
-
-    font-size: 16px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     gap: 10px;
 
-    transition: .2s;
+    margin: 4px 0 8px;
+}
 
-    box-shadow:
-        0 3px 10px rgba(0,0,0,.18);
+.actions button {
+    width: 100%;
+    min-width: 0;
+    min-height: 60px;
 
+    padding: 8px 10px;
+
+    border-radius: 18px;
+
+    background: var(--primary);
+    color: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+
+    box-shadow: var(--shadow);
 }
 
 .actions button:hover {
-
-    background: #7d65c2;
-
-    transform: translateY(-2px);
-
+    background: var(--primary-hover);
 }
 
 .actions button:active {
-
-    transform: scale(.97);
-
+    transform: scale(0.97);
 }
 
 .button-icon {
-
-    font-size: 22px;
-
+    font-size: 21px;
+    line-height: 1;
 }
 
 
-/* ==========================
-   MOBILE
-========================== */
+/* =====================================
+SPECIAL ACTION BUTTONS
+===================================== */
 
-@media (max-width:700px){
-
-    .actions{
-
-        grid-template-columns: repeat(2,1fr);
-
-    }
-
+#importButton,
+#exportButton {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
 }
 
-@media (max-width:480px){
-
-    .actions{
-
-        grid-template-columns: 1fr;
-
-    }
-
+#importButton:hover,
+#exportButton:hover {
+    background: #ddd1ec;
 }
+
+#deleteButton {
+    background: var(--danger);
+    color: #ffffff;
+}
+
+#deleteButton:hover {
+    background: var(--danger-hover);
+}
+
 
 /* =====================================
 CHECKBOX
@@ -326,12 +308,16 @@ CHECKBOX
     width: 22px;
     height: 22px;
 
+    min-height: 22px;
+    padding: 0;
+
     flex-shrink: 0;
 
     accent-color: var(--primary);
 
     cursor: pointer;
 }
+
 
 /* =====================================
 SAVED LIST
@@ -344,6 +330,7 @@ ol {
 
     display: flex;
     flex-direction: column;
+
     gap: 10px;
 }
 
@@ -365,6 +352,7 @@ li {
 
     display: flex;
     align-items: center;
+
     gap: 8px;
 
     box-shadow: var(--shadow);
@@ -381,7 +369,9 @@ ITEM TEXT AREA
 
     display: flex;
     align-items: center;
+
     gap: 8px;
+
     flex-wrap: wrap;
 }
 
@@ -434,20 +424,6 @@ GO TO BUTTON
 
 .map-inline:hover {
     background: #dec8ff;
-}
-
-
-/* =====================================
-SHARE BUTTON
-===================================== */
-
-.share-btn {
-    background: var(--secondary-container);
-    color: var(--on-secondary-container);
-}
-
-.share-btn:hover {
-    background: #ddd1ec;
 }
 
 
@@ -546,8 +522,18 @@ DESKTOP
         height: 360px;
     }
 
-    #myButton {
-        width: 220px;
+    .actions {
+        gap: 14px;
+    }
+
+    .actions button {
+        min-height: 64px;
+
+        flex-direction: row;
+
+        gap: 8px;
+
+        font-size: 14px;
     }
 }
 
@@ -568,17 +554,26 @@ SMALL PHONE
         border-radius: 20px;
     }
 
- .actions {
-    gap: 6px;
-}
+    .actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
 
-#gotoButton,
-#shareButton,
-#deleteButton {
-    width: 46px;
-    min-width: 46px;
-    height: 46px;
-}
+        gap: 7px;
+    }
+
+    .actions button {
+        min-height: 58px;
+
+        padding: 6px 4px;
+
+        border-radius: 16px;
+
+        font-size: 10px;
+        letter-spacing: 0;
+    }
+
+    .button-icon {
+        font-size: 19px;
+    }
 
     li {
         padding: 10px;
