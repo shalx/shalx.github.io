@@ -36,103 +36,93 @@
 
 <body>
 
-    <div id="map"></div>
+    <main class="app-container">
 
-  <div class="actions">
+        <div id="map"></div>
 
-    <button
-        id="alertBtn"
-        type="button"
-        aria-label="Get current location"
-    >
-        ⦿
-    </button>
+        <input
+            id="input1"
+            type="text"
+            placeholder="Lat, Lon"
+            autocomplete="off"
+            readonly
+        >
 
-    <button
-        id="myButton"
-        type="button"
-    >
-        SAVE
-    </button>
+        <input
+            id="myInput"
+            type="text"
+            placeholder="Note..."
+            autocomplete="off"
+        >
 
-    <button
-        id="gotoButton"
-        type="button"
-        aria-label="Open selected points in Google Maps"
-    >
-        ⦿
-    </button>
+        <div class="actions">
 
-    <button
-        id="shareButton"
-        type="button"
-        aria-label="Share selected points"
-    >
-        ↗
-    </button>
+            <button
+                id="alertBtn"
+                type="button"
+                aria-label="Get current location"
+            >
+                <span class="button-icon">⦿</span>
+                <span>GET LOCATION</span>
+            </button>
 
-    <button
-        id="deleteButton"
-        type="button"
-        aria-label="Delete selected points"
-    >
-        ×
-    </button>
+            <button
+                id="myButton"
+                type="button"
+                aria-label="Save point"
+            >
+                <span class="button-icon">▣</span>
+                <span>SAVE</span>
+            </button>
 
-</div>
+            <button
+                id="gotoButton"
+                type="button"
+                aria-label="Open selected points in Google Maps"
+            >
+                <span class="button-icon">➤</span>
+                <span>GO TO</span>
+            </button>
 
-    </div>
+            <button
+                id="importButton"
+                type="button"
+                aria-label="Import points"
+            >
+                <span class="button-icon">⇩</span>
+                <span>IMPORT</span>
+            </button>
 
-    <input
-        id="input1"
-        type="text"
-        placeholder="Lat, Lon"
-        autocomplete="off"
-    >
+            <button
+                id="exportButton"
+                type="button"
+                aria-label="Export points"
+            >
+                <span class="button-icon">⇧</span>
+                <span>EXPORT</span>
+            </button>
 
-    <input
-        id="myInput"
-        type="text"
-        placeholder="Note..."
-        autocomplete="off"
-    >
+            <button
+                id="deleteButton"
+                type="button"
+                aria-label="Delete selected points"
+            >
+                <span class="button-icon">×</span>
+                <span>DELETE</span>
+            </button>
 
-<div class="actions">
+        </div>
 
-    <button
-        id="myButton"
-        type="button"
-    >
-        SAVE
-    </button>
+        <input
+            id="importFileInput"
+            type="file"
+            accept=".fixpin,application/json"
+            hidden
+        >
 
-    <button
-        id="gotoButton"
-        type="button"
-        aria-label="Open selected points in Google Maps"
-    >
-        ⦿
-    </button>
+        <ol id="data-list"></ol>
 
-    <button
-        id="shareButton"
-        type="button"
-        aria-label="Share selected points"
-    >
-        ↗
-    </button>
-
-    <button
-        id="deleteButton"
-        type="button"
-        aria-label="Delete selected points"
-    >
-        ×
-    </button>
-
-</div>
-
-    <ol id="data-list"></ol>
+    </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
