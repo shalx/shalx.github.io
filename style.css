@@ -6,33 +6,347 @@ style.css
 =========================================
 */
 
-/* COLORS */
 
-/* RESET */
+/* =====================================
+COLORS
+===================================== */
 
-/* BODY */
+:root {
+    --background: #f8f9fa;
+    --surface: #ffffff;
 
-/* APP */
+    --text: #202124;
+    --text-secondary: #5f6368;
 
-/* MAP */
+    --outline: #dadce0;
+    --outline-strong: #bdc1c6;
 
-/* INPUT */
+    --blue: #4285f4;
+    --blue-hover: #3367d6;
+    --blue-active: #2a56c6;
 
-/* BUTTONS */
+    --red: #ea4335;
+    --red-hover: #d93025;
+    --red-active: #c5221f;
 
-/* ACTIONS */
+    --yellow: #fbbc05;
+    --yellow-hover: #f9ab00;
+    --yellow-active: #e39b00;
 
-/* SAVED LIST */
+    --green: #34a853;
+    --green-hover: #2d9248;
+    --green-active: #257a3c;
 
-/* CHECKBOX */
+    --shadow:
+        0 1px 2px rgba(60, 64, 67, 0.15),
+        0 2px 6px rgba(60, 64, 67, 0.10);
+}
 
-/* MINI BUTTONS */
 
-/* PULSE MARKER */
+/* =====================================
+RESET
+===================================== */
 
-/* LEAFLET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-/* RESPONSIVE */
+
+/* =====================================
+HTML AND BODY
+===================================== */
+
+html {
+    min-height: 100%;
+    background: var(--background);
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+
+    padding: 12px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #e8f0fe 0,
+            var(--background) 280px
+        );
+
+    color: var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+/* =====================================
+APP CONTAINER
+===================================== */
+
+.app-container {
+    width: 100%;
+    max-width: 820px;
+
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+/* =====================================
+MAP
+===================================== */
+
+#map {
+    width: 100%;
+    height: 260px;
+
+    border: 1px solid var(--outline);
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    background: #e8eaed;
+
+    box-shadow: var(--shadow);
+}
+
+
+/* =====================================
+NOTE INPUT
+===================================== */
+
+#myInput {
+    width: 100%;
+    min-height: 52px;
+
+    padding: 0 16px;
+
+    border: 1px solid var(--outline-strong);
+    border-radius: 16px;
+
+    outline: none;
+
+    background: var(--surface);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 16px;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+#myInput::placeholder {
+    color: var(--text-secondary);
+}
+
+#myInput:focus {
+    border: 2px solid var(--blue);
+
+    padding-left: 15px;
+    padding-right: 15px;
+
+    box-shadow:
+        0 0 0 3px rgba(66, 133, 244, 0.14);
+}
+
+
+/* =====================================
+HIDDEN FILE INPUT
+===================================== */
+
+#importFileInput {
+    display: none;
+}
+
+
+/* =====================================
+ACTION GRID
+===================================== */
+
+.actions {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+
+/* =====================================
+GENERAL ACTION BUTTON
+===================================== */
+
+.actions button {
+    width: 100%;
+    min-width: 0;
+    min-height: 64px;
+
+    padding: 8px 5px;
+
+    border: none;
+    border-radius: 18px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+
+    cursor: pointer;
+
+    box-shadow: var(--shadow);
+
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.actions button:hover {
+    box-shadow:
+        0 2px 4px rgba(60, 64, 67, 0.18),
+        0 4px 10px rgba(60, 64, 67, 0.12);
+}
+
+.actions button:active {
+    transform: scale(0.97);
+}
+
+.actions button:focus-visible {
+    outline: 3px solid rgba(66, 133, 244, 0.28);
+    outline-offset: 2px;
+}
+
+.actions button:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* =====================================
+GET GPS
+===================================== */
+
+#alertBtn {
+    background: var(--blue);
+    color: #ffffff;
+}
+
+#alertBtn:hover {
+    background: var(--blue-hover);
+}
+
+#alertBtn:active {
+    background: var(--blue-active);
+}
+
+
+/* =====================================
+SAVE
+===================================== */
+
+#myButton {
+    background: var(--red);
+    color: #ffffff;
+}
+
+#myButton:hover {
+    background: var(--red-hover);
+}
+
+#myButton:active {
+    background: var(--red-active);
+}
+
+
+/* =====================================
+GO TO
+===================================== */
+
+#gotoButton {
+    background: var(--yellow);
+    color: #202124;
+}
+
+#gotoButton:hover {
+    background: var(--yellow-hover);
+}
+
+#gotoButton:active {
+    background: var(--yellow-active);
+}
+
+
+/* =====================================
+IMPORT
+===================================== */
+
+#importButton {
+    background: var(--blue);
+    color: #ffffff;
+}
+
+#importButton:hover {
+    background: var(--blue-hover);
+}
+
+#importButton:active {
+    background: var(--blue-active);
+}
+
+
+/* =====================================
+EXPORT
+===================================== */
+
+#exportButton {
+    background: var(--green);
+    color: #ffffff;
+}
+
+#exportButton:hover {
+    background: var(--green-hover);
+}
+
+#exportButton:active {
+    background: var(--green-active);
+}
+
+
+/* =====================================
+DELETE
+===================================== */
+
+#deleteButton {
+    background: var(--red);
+    color: #ffffff;
+}
+
+#deleteButton:hover {
+    background: var(--red-hover);
+}
+
+#deleteButton:active {
+    background: var(--red-active);
+}
+
+
 /* =====================================
 CHECKBOX
 ===================================== */
@@ -49,7 +363,7 @@ CHECKBOX
 
     flex-shrink: 0;
 
-    accent-color: #4285f4;
+    accent-color: var(--blue);
 
     cursor: pointer;
 }
@@ -84,10 +398,10 @@ SAVED ITEM
 
     padding: 10px 12px;
 
-    border: 1px solid #dadce0;
+    border: 1px solid var(--outline);
     border-radius: 16px;
 
-    background: #ffffff;
+    background: var(--surface);
 
     display: flex;
     align-items: center;
@@ -97,11 +411,6 @@ SAVED ITEM
     box-shadow:
         0 1px 2px rgba(60, 64, 67, 0.08),
         0 1px 3px rgba(60, 64, 67, 0.12);
-
-    transition:
-        border-color 0.15s ease,
-        background 0.15s ease,
-        box-shadow 0.15s ease;
 }
 
 
@@ -110,7 +419,7 @@ SELECTED ITEM
 ===================================== */
 
 #data-list li:has(.point-checkbox:checked) {
-    border-color: #4285f4;
+    border-color: var(--blue);
 
     background: #e8f0fe;
 
@@ -135,7 +444,7 @@ ITEM TEXT
 .item-text {
     min-width: 0;
 
-    color: #202124;
+    color: var(--text);
 
     font-size: 14px;
     font-weight: 500;
@@ -143,28 +452,6 @@ ITEM TEXT
 
     overflow-wrap: anywhere;
     word-break: break-word;
-}
-
-
-/* =====================================
-EMPTY LIST MESSAGE
-===================================== */
-
-.empty-message {
-    width: 100%;
-
-    padding: 20px 14px;
-
-    border: 1px dashed #bdc1c6;
-    border-radius: 16px;
-
-    background: #ffffff;
-
-    color: #5f6368;
-
-    font-size: 14px;
-    line-height: 1.4;
-    text-align: center;
 }
 
 
@@ -179,7 +466,7 @@ PULSE MARKER
     border: 3px solid #ffffff;
     border-radius: 50%;
 
-    background: #4285f4;
+    background: var(--blue);
 
     box-shadow:
         0 0 0 0 rgba(66, 133, 244, 0.5);
@@ -188,7 +475,6 @@ PULSE MARKER
 }
 
 @keyframes pulse {
-
     0% {
         box-shadow:
             0 0 0 0 rgba(66, 133, 244, 0.5);
@@ -223,13 +509,11 @@ LEAFLET
 
     overflow: hidden;
 
-    box-shadow:
-        0 1px 2px rgba(60, 64, 67, 0.15),
-        0 2px 6px rgba(60, 64, 67, 0.12) !important;
+    box-shadow: var(--shadow) !important;
 }
 
 .leaflet-control-zoom a {
-    color: #202124 !important;
+    color: var(--text) !important;
     background: #ffffff !important;
 }
 
@@ -239,7 +523,6 @@ LEAFLET
 
 .leaflet-control-attribution {
     border-radius: 8px 0 0 0;
-
     font-size: 9px;
 }
 
@@ -249,11 +532,8 @@ DESKTOP
 ===================================== */
 
 @media (min-width: 700px) {
-
-    .app-container {
-        max-width: 820px;
-
-        margin: 0 auto;
+    body {
+        padding: 18px;
     }
 
     #map {
@@ -261,18 +541,16 @@ DESKTOP
     }
 
     .actions {
-        gap: 12px;
+        gap: 11px;
     }
 
     .actions button {
         min-height: 68px;
-
         font-size: 14px;
     }
 
     #data-list li {
         min-height: 62px;
-
         padding: 11px 14px;
     }
 
@@ -287,7 +565,6 @@ SMALL PHONE
 ===================================== */
 
 @media (max-width: 420px) {
-
     body {
         padding: 9px;
     }
@@ -298,13 +575,11 @@ SMALL PHONE
 
     #map {
         height: 225px;
-
         border-radius: 17px;
     }
 
     #myInput {
         min-height: 50px;
-
         border-radius: 14px;
     }
 
@@ -320,7 +595,6 @@ SMALL PHONE
         border-radius: 15px;
 
         font-size: 11px;
-        letter-spacing: 0;
     }
 
     #data-list li {
@@ -352,7 +626,6 @@ VERY SMALL PHONE
 ===================================== */
 
 @media (max-width: 340px) {
-
     body {
         padding: 7px;
     }
@@ -368,7 +641,6 @@ VERY SMALL PHONE
 
     .actions button {
         min-height: 56px;
-
         font-size: 11px;
     }
 
