@@ -14,7 +14,7 @@
 
     <meta
         name="theme-color"
-        content="#6750a4"
+        content="#4285F4"
     >
 
     <link
@@ -38,21 +38,17 @@
 
     <main class="app-container">
 
-        <div id="map"></div>
-
-        <input
-            id="input1"
-            type="text"
-            placeholder="Lat, Lon"
-            autocomplete="off"
-            readonly
-        >
+        <div
+            id="map"
+            aria-label="Map"
+        ></div>
 
         <input
             id="myInput"
             type="text"
-            placeholder="Note..."
+            placeholder="Add note..."
             autocomplete="off"
+            maxlength="200"
         >
 
         <div class="actions">
@@ -60,19 +56,19 @@
             <button
                 id="alertBtn"
                 type="button"
-                aria-label="Get current location"
+                aria-label="Get GPS location"
             >
                 <span class="button-icon">⦿</span>
-                <span>GET LOCATION</span>
+                <span>Get GPS</span>
             </button>
 
             <button
                 id="myButton"
                 type="button"
-                aria-label="Save point"
+                aria-label="Save current point"
             >
                 <span class="button-icon">▣</span>
-                <span>SAVE</span>
+                <span>Save</span>
             </button>
 
             <button
@@ -81,25 +77,25 @@
                 aria-label="Open selected points in Google Maps"
             >
                 <span class="button-icon">➤</span>
-                <span>GO TO</span>
+                <span>Go To</span>
             </button>
 
             <button
                 id="importButton"
                 type="button"
-                aria-label="Import points"
+                aria-label="Import saved points"
             >
                 <span class="button-icon">⇩</span>
-                <span>IMPORT</span>
+                <span>Import</span>
             </button>
 
             <button
                 id="exportButton"
                 type="button"
-                aria-label="Export points"
+                aria-label="Export saved points"
             >
                 <span class="button-icon">⇧</span>
-                <span>EXPORT</span>
+                <span>Export</span>
             </button>
 
             <button
@@ -108,7 +104,7 @@
                 aria-label="Delete selected points"
             >
                 <span class="button-icon">×</span>
-                <span>DELETE</span>
+                <span>Delete</span>
             </button>
 
         </div>
@@ -120,7 +116,10 @@
             hidden
         >
 
-        <ol id="data-list"></ol>
+        <ol
+            id="data-list"
+            aria-label="Saved points"
+        ></ol>
 
     </main>
 
