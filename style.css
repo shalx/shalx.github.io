@@ -194,11 +194,10 @@ button:disabled {
 
 
 /* =====================================
-GPS / PIN BUTTON
+OPTIONAL ROUND TOP BUTTON
 ===================================== */
 
-.top button,
-#alertBtn {
+.top button {
     width: 52px;
     height: 52px;
     min-height: 52px;
@@ -219,13 +218,11 @@ GPS / PIN BUTTON
     box-shadow: var(--shadow);
 }
 
-.top button:hover,
-#alertBtn:hover {
+.top button:hover {
     background: #a8e8c0;
 }
 
-.top button:active,
-#alertBtn:active {
+.top button:active {
     background: #95d9ae;
 }
 
@@ -347,8 +344,16 @@ GET GPS BUTTON
 
 #getGpsButton:hover,
 #getGPSButton:hover,
-#gpsButton:hover {
+#gpsButton:hover,
+#alertBtn:hover {
     background: #115a39;
+}
+
+#getGpsButton:active,
+#getGPSButton:active,
+#gpsButton:active,
+#alertBtn:active {
+    background: #0d4d30;
 }
 
 
@@ -367,6 +372,11 @@ SAVE BUTTON
     background: #206b32;
 }
 
+#myButton:active,
+#saveButton:active {
+    background: #195a29;
+}
+
 
 /* =====================================
 GO TO BUTTON
@@ -383,6 +393,11 @@ GO TO BUTTON
     background: #125b73;
 }
 
+#goToButton:active,
+#gotoButton:active {
+    background: #0d4c61;
+}
+
 
 /* =====================================
 IMPORT BUTTON
@@ -395,6 +410,10 @@ IMPORT BUTTON
 
 #importButton:hover {
     background: #c8dece;
+}
+
+#importButton:active {
+    background: #b8d1bf;
 }
 
 
@@ -411,6 +430,10 @@ EXPORT BUTTON
     background: #c7dce4;
 }
 
+#exportButton:active {
+    background: #b7ced8;
+}
+
 
 /* =====================================
 DELETE BUTTON
@@ -423,6 +446,10 @@ DELETE BUTTON
 
 #deleteButton:hover {
     background: var(--danger-hover);
+}
+
+#deleteButton:active {
+    background: #8f1212;
 }
 
 
