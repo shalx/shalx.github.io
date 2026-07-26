@@ -279,17 +279,17 @@ SAVE
 GO TO
 ===================================== */
 
-#gotoButton {
-    background: var(--yellow);
-    color: #202124;
+#gotoButton{
+    background:#34A853;
+    color:#ffffff;
 }
 
-#gotoButton:hover {
-    background: var(--yellow-hover);
+#gotoButton:hover{
+    background:#2D9248;
 }
 
-#gotoButton:active {
-    background: var(--yellow-active);
+#gotoButton:active{
+    background:#257A3C;
 }
 
 
@@ -297,17 +297,17 @@ GO TO
 IMPORT
 ===================================== */
 
-#importButton {
-    background: var(--blue);
-    color: #ffffff;
+#importButton{
+    background:#FBBC05;
+    color:#202124;
 }
 
-#importButton:hover {
-    background: var(--blue-hover);
+#importButton:hover{
+    background:#F9AB00;
 }
 
-#importButton:active {
-    background: var(--blue-active);
+#importButton:active{
+    background:#E39B00;
 }
 
 
