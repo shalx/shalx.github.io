@@ -30,8 +30,7 @@ const locationButton =
 const goToButton =
     document.getElementById("gotoButton");
 
-const shareSelectedButton =
-    document.getElementById("shareButton");
+
 
 const deleteSelectedButton =
     document.getElementById("deleteButton");
@@ -661,10 +660,6 @@ goToButton.addEventListener(
     goToSelected
 );
 
-shareSelectedButton.addEventListener(
-    "click",
-    shareSelected
-);
 
 deleteSelectedButton.addEventListener(
     "click",
