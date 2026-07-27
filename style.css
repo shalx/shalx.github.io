@@ -23,8 +23,26 @@ COLORS
 
 :root {
 
-    --primary: #4285F4;
+    --primary: #4285f4;
     --primary-hover: #2f6fe0;
+
+    --pin: #4285f4;
+    --pin-hover: #2f6fe0;
+
+    --save: #34a853;
+    --save-hover: #278642;
+
+    --go-to: #f9ab00;
+    --go-to-hover: #dd9300;
+
+    --open-file: #a142f4;
+    --open-file-hover: #8533d1;
+
+    --save-file: #00a7a7;
+    --save-file-hover: #008989;
+
+    --danger: #d93025;
+    --danger-soft: #fce8e6;
 
     --surface: #ffffff;
     --surface-soft: #f5f7fb;
@@ -37,10 +55,10 @@ COLORS
     --outline: #d0d7e2;
 
     --shadow:
-        0 2px 6px rgba(0,0,0,.08),
-        0 8px 24px rgba(0,0,0,.05);
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.05);
 
-    --radius:16px;
+    --radius: 16px;
 
 }
 
@@ -49,11 +67,13 @@ COLORS
 BODY
 ===================================== */
 
-body{
+body {
 
-    background:var(--background);
+    min-height: 100vh;
 
-    color:var(--text);
+    background: var(--background);
+
+    color: var(--text);
 
     font-family:
         Arial,
@@ -67,13 +87,15 @@ body{
 APP
 ===================================== */
 
-.app-container{
+.app-container {
 
-    max-width:700px;
+    width: 100%;
 
-    margin:auto;
+    max-width: 700px;
 
-    padding:14px;
+    margin: 0 auto;
+
+    padding: 12px;
 
 }
 
@@ -82,19 +104,23 @@ APP
 MAP
 ===================================== */
 
-#map{
+#map {
 
-    height:38vh;
+    width: 100%;
 
-    min-height:230px;
+    height: 31vh;
 
-    border-radius:var(--radius);
+    min-height: 190px;
 
-    overflow:hidden;
+    max-height: 270px;
 
-    box-shadow:var(--shadow);
+    margin-bottom: 10px;
 
-    margin-bottom:12px;
+    overflow: hidden;
+
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow);
 
 }
 
@@ -103,93 +129,220 @@ MAP
 INPUTS
 ===================================== */
 
-input{
+input {
 
-    width:100%;
+    width: 100%;
 
-    height:42px;
+    height: 42px;
 
-    padding:0 14px;
+    margin-bottom: 10px;
 
-    border:1px solid var(--outline);
+    padding: 0 14px;
 
-    border-radius:12px;
+    border: 1px solid var(--outline);
 
-    background:white;
+    border-radius: 12px;
 
-    font-size:15px;
+    background: var(--surface);
 
-    outline:none;
+    color: var(--text);
 
-    margin-bottom:10px;
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 
 }
 
 
-input:focus{
+input:focus {
 
-    border-color:var(--primary);
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(66, 133, 244, 0.14);
+
+}
+
+
+input::placeholder {
+
+    color: var(--text-secondary);
 
 }
 
 
 /* =====================================
-BUTTONS
+MAIN BUTTONS
 ===================================== */
 
-.actions{
+.actions {
 
-    display:grid;
+    display: grid;
 
     grid-template-columns:
-        repeat(4,1fr);
+        repeat(5, minmax(0, 1fr));
 
-    gap:8px;
+    gap: 7px;
 
-    margin-bottom:10px;
-
-}
-
-
-.actions button{
-
-    height:42px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:var(--primary);
-
-    color:white;
-
-    cursor:pointer;
-
-    font-size:14px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:6px;
-
-    transition:.2s;
+    margin-bottom: 10px;
 
 }
 
 
-.actions button:hover{
+.actions button {
 
-    background:var(--primary-hover);
+    min-width: 0;
+
+    height: 42px;
+
+    padding: 0 7px;
+
+    border: none;
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    transition:
+        background-color 0.2s,
+        transform 0.1s,
+        opacity 0.2s;
 
 }
 
 
-.actions i{
+.actions button:hover {
 
-    font-size:18px;
+    transform: translateY(-1px);
+
+}
+
+
+.actions button:active {
+
+    transform: translateY(0);
+
+}
+
+
+.actions button:disabled {
+
+    cursor: default;
+
+    opacity: 0.55;
+
+    transform: none;
+
+}
+
+
+.actions button i {
+
+    flex-shrink: 0;
+
+    font-size: 18px;
+
+}
+
+
+/* PIN */
+
+#alertBtn {
+
+    background: var(--pin);
+
+}
+
+
+#alertBtn:hover {
+
+    background: var(--pin-hover);
+
+}
+
+
+/* SAVE */
+
+#myButton {
+
+    background: var(--save);
+
+}
+
+
+#myButton:hover {
+
+    background: var(--save-hover);
+
+}
+
+
+/* GO TO */
+
+#goToSelectedBtn {
+
+    background: var(--go-to);
+
+}
+
+
+#goToSelectedBtn:hover {
+
+    background: var(--go-to-hover);
+
+}
+
+
+/* OPEN FILE */
+
+#openFileBtn {
+
+    background: var(--open-file);
+
+}
+
+
+#openFileBtn:hover {
+
+    background: var(--open-file-hover);
+
+}
+
+
+/* SAVE TO FILE */
+
+#saveFileBtn {
+
+    background: var(--save-file);
+
+}
+
+
+#saveFileBtn:hover {
+
+    background: var(--save-file-hover);
 
 }
 
@@ -198,9 +351,9 @@ BUTTONS
 SEARCH
 ===================================== */
 
-#searchInput{
+#searchInput {
 
-    margin-bottom:12px;
+    margin-bottom: 10px;
 
 }
 
@@ -209,102 +362,225 @@ SEARCH
 LIST
 ===================================== */
 
-#data-list{
+#data-list {
 
-    list-style:none;
+    list-style: none;
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    gap:10px;
-
-}
-
-
-#data-list li{
-
-    background:var(--surface);
-
-    border-radius:14px;
-
-    border:1px solid var(--outline);
-
-    padding:12px 14px;
-
-    box-shadow:var(--shadow);
+    gap: 7px;
 
 }
 
 
-.note{
+/*
+Каждая точка занимает одну строку:
 
-    font-weight:600;
+Point 1                         Show   Delete
+*/
 
-    font-size:15px;
+#data-list li {
 
-    margin-bottom:6px;
+    min-height: 50px;
 
-}
+    padding: 6px 8px 6px 14px;
 
+    background: var(--surface);
 
-.time{
+    border: 1px solid var(--outline);
 
-    font-size:12px;
+    border-radius: 13px;
 
-    color:var(--text-secondary);
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.06);
 
-}
+    display: flex;
 
+    align-items: center;
 
-.row{
+    justify-content: space-between;
 
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    gap:10px;
-
-}
-
-
-.icon-btn{
-
-    width:36px;
-
-    height:36px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:transparent;
-
-    cursor:pointer;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    transition:.2s;
+    gap: 10px;
 
 }
 
 
-.icon-btn:hover{
+/*
+Поддержка существующего контейнера .row,
+который создаётся в JavaScript.
+*/
 
-    background:#edf2ff;
+#data-list .row {
+
+    width: 100%;
+
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
 
 }
 
 
-.icon-btn i{
+/* Название точки */
 
-    font-size:20px;
+.note {
+
+    min-width: 0;
+
+    flex: 1;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    color: var(--text);
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    line-height: 1.25;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* Дату и время больше не показываем */
+
+.time {
+
+    display: none;
+
+}
+
+
+/*
+Контейнер кнопок карточки.
+Поддерживаются разные возможные названия класса.
+*/
+
+.point-actions,
+.item-actions,
+.row-actions,
+.list-actions {
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+}
+
+
+/* Кнопки внутри карточки */
+
+.icon-btn {
+
+    flex: 0 0 36px;
+
+    width: 36px;
+
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.icon-btn:hover {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+.icon-btn i {
+
+    font-size: 20px;
+
+}
+
+
+/* Активная точка, уже показанная на карте */
+
+.icon-btn.active,
+.icon-btn.is-visible,
+.show-map-btn.active {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+/* Кнопка удаления */
+
+.delete-btn {
+
+    color: var(--danger);
+
+}
+
+
+.delete-btn:hover {
+
+    background: var(--danger-soft);
+
+    color: var(--danger);
+
+}
+
+
+/* =====================================
+LEAFLET POPUP
+===================================== */
+
+.leaflet-popup-content {
+
+    margin: 10px 14px;
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    font-weight: 600;
 
 }
 
@@ -313,12 +589,141 @@ LIST
 PHONE
 ===================================== */
 
-@media (max-width:600px){
+@media (max-width: 600px) {
 
-    .actions{
+    .app-container {
+
+        padding: 8px;
+
+    }
+
+
+    #map {
+
+        height: 29vh;
+
+        min-height: 175px;
+
+        margin-bottom: 8px;
+
+        border-radius: 14px;
+
+    }
+
+
+    input {
+
+        height: 40px;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .actions {
 
         grid-template-columns:
-            repeat(2,1fr);
+            repeat(5, minmax(0, 1fr));
+
+        gap: 4px;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .actions button {
+
+        height: 40px;
+
+        padding: 0 4px;
+
+        border-radius: 9px;
+
+        font-size: 10px;
+
+        gap: 3px;
+
+    }
+
+
+    .actions button i {
+
+        font-size: 17px;
+
+    }
+
+
+    #data-list {
+
+        gap: 6px;
+
+    }
+
+
+    #data-list li {
+
+        min-height: 48px;
+
+        padding:
+            5px
+            6px
+            5px
+            12px;
+
+    }
+
+
+    .note {
+
+        font-size: 14px;
+
+    }
+
+
+    .icon-btn {
+
+        flex-basis: 34px;
+
+        width: 34px;
+
+        height: 34px;
+
+    }
+
+
+    .icon-btn i {
+
+        font-size: 19px;
+
+    }
+
+}
+
+
+/* =====================================
+VERY SMALL PHONE
+===================================== */
+
+@media (max-width: 430px) {
+
+    .actions button span {
+
+        display: none;
+
+    }
+
+
+    .actions button {
+
+        padding: 0;
+
+    }
+
+
+    .actions button i {
+
+        font-size: 20px;
 
     }
 
