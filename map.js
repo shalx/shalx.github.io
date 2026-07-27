@@ -24,13 +24,18 @@ const FixPinMap = (() => {
 
     const CURRENT_LOCATION_ZOOM = 17;
 
+    const MAX_SAVED_MARKERS = 9;
+
     const TILE_URL =
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
     const TILE_OPTIONS = {
+
         maxZoom: 19,
+
         attribution:
             "&copy; OpenStreetMap contributors"
+
     };
 
 
@@ -67,6 +72,7 @@ const FixPinMap = (() => {
             );
 
             return null;
+
         }
 
         if (typeof L === "undefined") {
@@ -76,6 +82,7 @@ const FixPinMap = (() => {
             );
 
             return null;
+
         }
 
         map = L.map(
@@ -101,6 +108,7 @@ const FixPinMap = (() => {
         }, 0);
 
         return map;
+
     }
 
 
@@ -111,12 +119,14 @@ const FixPinMap = (() => {
     function getMap() {
 
         return map;
+
     }
 
 
     function isInitialized() {
 
         return map !== null;
+
     }
 
 
@@ -127,6 +137,7 @@ const FixPinMap = (() => {
         }
 
         map.invalidateSize();
+
     }
 
 
@@ -147,6 +158,7 @@ const FixPinMap = (() => {
                 );
 
                 return;
+
             }
 
             const geolocationOptions = {
@@ -159,12 +171,15 @@ const FixPinMap = (() => {
 
                 maximumAge:
                     options.maximumAge ?? 0
+
             };
 
             navigator.geolocation.getCurrentPosition(
+
                 position => {
 
                     resolve({
+
                         lat:
                             position.coords.latitude,
 
@@ -188,9 +203,11 @@ const FixPinMap = (() => {
 
                         timestamp:
                             position.timestamp
+
                     });
 
                 },
+
                 error => {
 
                     reject(
@@ -198,7 +215,9 @@ const FixPinMap = (() => {
                     );
 
                 },
+
                 geolocationOptions
+
             );
 
         });
@@ -243,6 +262,7 @@ const FixPinMap = (() => {
             error.code;
 
         return locationError;
+
     }
 
 
@@ -266,6 +286,7 @@ const FixPinMap = (() => {
             );
 
             return null;
+
         }
 
         removeCurrentLocation();
@@ -322,9 +343,11 @@ const FixPinMap = (() => {
                 );
 
             currentAccuracyCircle.addTo(map);
+
         }
 
         return currentLocationMarker;
+
     }
 
 
@@ -334,14 +357,14 @@ const FixPinMap = (() => {
     ) {
 
         if (!ensureMap()) {
-            return;
+            return false;
         }
 
         const coordinates =
             normalizeCoordinates(location);
 
         if (!coordinates) {
-            return;
+            return false;
         }
 
         map.setView(
@@ -354,6 +377,8 @@ const FixPinMap = (() => {
                 CURRENT_LOCATION_ZOOM
             )
         );
+
+        return true;
 
     }
 
@@ -376,6 +401,7 @@ const FixPinMap = (() => {
         );
 
         return marker;
+
     }
 
 
@@ -392,6 +418,7 @@ const FixPinMap = (() => {
             );
 
             currentLocationMarker = null;
+
         }
 
         if (currentAccuracyCircle) {
@@ -401,6 +428,7 @@ const FixPinMap = (() => {
             );
 
             currentAccuracyCircle = null;
+
         }
 
     }
@@ -409,6 +437,7 @@ const FixPinMap = (() => {
     function getCurrentLocationMarker() {
 
         return currentLocationMarker;
+
     }
 
 
@@ -429,6 +458,7 @@ const FixPinMap = (() => {
             );
 
             return null;
+
         }
 
         const coordinates =
@@ -441,12 +471,29 @@ const FixPinMap = (() => {
             );
 
             return null;
+
         }
 
         const pointId =
             String(point.id);
 
-        removeSavedMarker(pointId);
+        const markerAlreadyExists =
+            savedMarkers.has(pointId);
+
+        if (
+            !markerAlreadyExists &&
+            hasReachedSavedMarkerLimit()
+        ) {
+
+            return null;
+
+        }
+
+        if (markerAlreadyExists) {
+
+            removeSavedMarker(pointId);
+
+        }
 
         const marker =
             L.marker(
@@ -470,13 +517,18 @@ const FixPinMap = (() => {
             pointId;
 
         marker.pointData = {
+
             ...point,
+
             id:
                 pointId,
+
             lat:
                 coordinates.lat,
+
             lng:
                 coordinates.lng
+
         };
 
         marker.bindPopup(
@@ -491,12 +543,14 @@ const FixPinMap = (() => {
         );
 
         return marker;
+
     }
 
 
     function updateSavedMarker(point) {
 
         return addSavedMarker(point);
+
     }
 
 
@@ -508,7 +562,19 @@ const FixPinMap = (() => {
 
         const markers = [];
 
-        points.forEach(point => {
+        for (const point of points) {
+
+            const pointId =
+                point && point.id !== undefined
+                    ? String(point.id)
+                    : "";
+
+            if (
+                !savedMarkers.has(pointId) &&
+                hasReachedSavedMarkerLimit()
+            ) {
+                break;
+            }
 
             const marker =
                 addSavedMarker(point);
@@ -517,9 +583,10 @@ const FixPinMap = (() => {
                 markers.push(marker);
             }
 
-        });
+        }
 
         return markers;
+
     }
 
 
@@ -536,12 +603,64 @@ const FixPinMap = (() => {
         }
 
         if (map) {
+
             map.removeLayer(marker);
+
         }
 
         savedMarkers.delete(id);
 
         return true;
+
+    }
+
+
+    function toggleSavedMarker(point) {
+
+        if (!point || point.id === undefined) {
+
+            return {
+                visible: false,
+                limitReached: false,
+                marker: null
+            };
+
+        }
+
+        const pointId =
+            String(point.id);
+
+        if (hasSavedMarker(pointId)) {
+
+            removeSavedMarker(pointId);
+
+            return {
+                visible: false,
+                limitReached: false,
+                marker: null
+            };
+
+        }
+
+        if (hasReachedSavedMarkerLimit()) {
+
+            return {
+                visible: false,
+                limitReached: true,
+                marker: null
+            };
+
+        }
+
+        const marker =
+            addSavedMarker(point);
+
+        return {
+            visible: Boolean(marker),
+            limitReached: false,
+            marker
+        };
+
     }
 
 
@@ -550,12 +669,15 @@ const FixPinMap = (() => {
         savedMarkers.forEach(marker => {
 
             if (map) {
+
                 map.removeLayer(marker);
+
             }
 
         });
 
         savedMarkers.clear();
+
     }
 
 
@@ -579,11 +701,44 @@ const FixPinMap = (() => {
     }
 
 
+    function getSavedMarkerCount() {
+
+        return savedMarkers.size;
+
+    }
+
+
+    function getSavedMarkerPoints() {
+
+        return getSavedMarkers()
+            .map(marker => marker.pointData)
+            .filter(Boolean);
+
+    }
+
+
     function hasSavedMarker(pointId) {
 
         return savedMarkers.has(
             String(pointId)
         );
+
+    }
+
+
+    function hasReachedSavedMarkerLimit() {
+
+        return (
+            savedMarkers.size >=
+            MAX_SAVED_MARKERS
+        );
+
+    }
+
+
+    function getSavedMarkerLimit() {
+
+        return MAX_SAVED_MARKERS;
 
     }
 
@@ -604,6 +759,7 @@ const FixPinMap = (() => {
         marker.openPopup();
 
         return true;
+
     }
 
 
@@ -653,6 +809,7 @@ const FixPinMap = (() => {
             );
 
             return true;
+
         }
 
         const bounds =
@@ -673,6 +830,7 @@ const FixPinMap = (() => {
         );
 
         return true;
+
     }
 
 
@@ -704,6 +862,7 @@ const FixPinMap = (() => {
         );
 
         return true;
+
     }
 
 
@@ -717,10 +876,13 @@ const FixPinMap = (() => {
             map.getCenter();
 
         return {
+
             lat:
                 center.lat,
+
             lng:
                 center.lng
+
         };
 
     }
@@ -733,6 +895,7 @@ const FixPinMap = (() => {
         }
 
         return map.getZoom();
+
     }
 
 
@@ -769,6 +932,7 @@ const FixPinMap = (() => {
             event => {
 
                 callback({
+
                     lat:
                         event.latlng.lat,
 
@@ -777,6 +941,7 @@ const FixPinMap = (() => {
 
                     originalEvent:
                         event
+
                 });
 
             }
@@ -796,6 +961,7 @@ const FixPinMap = (() => {
         }
 
         return map !== null;
+
     }
 
 
@@ -871,8 +1037,14 @@ const FixPinMap = (() => {
             String(note || "").trim();
 
         return value || "Saved point";
+
     }
 
+
+    /*
+    Popup показывает только название точки.
+    Координаты больше не отображаются.
+    */
 
     function createMarkerPopup(point) {
 
@@ -885,39 +1057,12 @@ const FixPinMap = (() => {
         noteElement.textContent =
             normalizeNote(point.note);
 
-        const coordinatesElement =
-            document.createElement("div");
-
-        coordinatesElement.textContent =
-            `${formatCoordinate(point.lat)}, ` +
-            `${formatCoordinate(point.lng)}`;
-
         wrapper.appendChild(
             noteElement
         );
 
-        wrapper.appendChild(
-            document.createElement("br")
-        );
-
-        wrapper.appendChild(
-            coordinatesElement
-        );
-
         return wrapper;
-    }
 
-
-    function formatCoordinate(value) {
-
-        const number =
-            Number(value);
-
-        if (!Number.isFinite(number)) {
-            return "";
-        }
-
-        return number.toFixed(6);
     }
 
 
@@ -944,10 +1089,15 @@ const FixPinMap = (() => {
         updateSavedMarker,
         addSavedMarkers,
         removeSavedMarker,
+        toggleSavedMarker,
         clearSavedMarkers,
         getSavedMarker,
         getSavedMarkers,
+        getSavedMarkerCount,
+        getSavedMarkerPoints,
         hasSavedMarker,
+        hasReachedSavedMarkerLimit,
+        getSavedMarkerLimit,
         openSavedMarkerPopup,
 
         fitAllMarkers,
