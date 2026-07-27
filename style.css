@@ -1,46 +1,9 @@
 /*
 =========================================
 FIX-PIN
-Material Design
 style.css
 =========================================
 */
-
-
-/* =====================================
-COLORS
-===================================== */
-
-:root {
-    --background: #f8f9fa;
-    --surface: #ffffff;
-
-    --text: #202124;
-    --text-secondary: #5f6368;
-
-    --outline: #dadce0;
-    --outline-strong: #bdc1c6;
-
-    --blue: #4285f4;
-    --blue-hover: #3367d6;
-    --blue-active: #2a56c6;
-
-    --red: #ea4335;
-    --red-hover: #d93025;
-    --red-active: #c5221f;
-
-    --yellow: #fbbc05;
-    --yellow-hover: #f9ab00;
-    --yellow-active: #e39b00;
-
-    --green: #34a853;
-    --green-hover: #2d9248;
-    --green-active: #257a3c;
-
-    --shadow:
-        0 1px 2px rgba(60, 64, 67, 0.15),
-        0 2px 6px rgba(60, 64, 67, 0.10);
-}
 
 
 /* =====================================
@@ -55,50 +18,63 @@ RESET
 
 
 /* =====================================
-HTML AND BODY
+COLORS
 ===================================== */
 
-html {
-    min-height: 100%;
-    background: var(--background);
+:root {
+
+    --primary: #4285F4;
+    --primary-hover: #2f6fe0;
+
+    --surface: #ffffff;
+    --surface-soft: #f5f7fb;
+
+    --background: #eef2f7;
+
+    --text: #202124;
+    --text-secondary: #5f6368;
+
+    --outline: #d0d7e2;
+
+    --shadow:
+        0 2px 6px rgba(0,0,0,.08),
+        0 8px 24px rgba(0,0,0,.05);
+
+    --radius:16px;
+
 }
 
-body {
-    width: 100%;
-    min-height: 100vh;
 
-    padding: 12px;
+/* =====================================
+BODY
+===================================== */
 
-    background:
-        linear-gradient(
-            180deg,
-            #e8f0fe 0,
-            var(--background) 280px
-        );
+body{
 
-    color: var(--text);
+    background:var(--background);
+
+    color:var(--text);
 
     font-family:
         Arial,
         Helvetica,
         sans-serif;
+
 }
 
 
 /* =====================================
-APP CONTAINER
+APP
 ===================================== */
 
-.app-container {
-    width: 100%;
-    max-width: 820px;
+.app-container{
 
-    margin: 0 auto;
+    max-width:700px;
 
-    display: flex;
-    flex-direction: column;
+    margin:auto;
 
-    gap: 10px;
+    padding:14px;
+
 }
 
 
@@ -106,545 +82,244 @@ APP CONTAINER
 MAP
 ===================================== */
 
-#map {
-    width: 100%;
-    height: 260px;
+#map{
 
-    border: 1px solid var(--outline);
-    border-radius: 20px;
+    height:38vh;
 
-    overflow: hidden;
+    min-height:230px;
 
-    background: #e8eaed;
+    border-radius:var(--radius);
 
-    box-shadow: var(--shadow);
+    overflow:hidden;
+
+    box-shadow:var(--shadow);
+
+    margin-bottom:12px;
+
 }
 
 
 /* =====================================
-NOTE INPUT
+INPUTS
 ===================================== */
 
-#myInput {
-    width: 100%;
-    min-height: 52px;
+input{
 
-    padding: 0 16px;
+    width:100%;
 
-    border: 1px solid var(--outline-strong);
-    border-radius: 16px;
+    height:42px;
 
-    outline: none;
+    padding:0 14px;
 
-    background: var(--surface);
-    color: var(--text);
+    border:1px solid var(--outline);
 
-    font-family: inherit;
-    font-size: 16px;
+    border-radius:12px;
 
-    transition:
-        border-color 0.15s ease,
-        box-shadow 0.15s ease;
+    background:white;
+
+    font-size:15px;
+
+    outline:none;
+
+    margin-bottom:10px;
+
 }
 
-#myInput::placeholder {
-    color: var(--text-secondary);
-}
 
-#myInput:focus {
-    border: 2px solid var(--blue);
+input:focus{
 
-    padding-left: 15px;
-    padding-right: 15px;
+    border-color:var(--primary);
 
-    box-shadow:
-        0 0 0 3px rgba(66, 133, 244, 0.14);
 }
 
 
 /* =====================================
-HIDDEN FILE INPUT
+BUTTONS
 ===================================== */
 
-#importFileInput {
-    display: none;
-}
+.actions{
 
+    display:grid;
 
-/* =====================================
-ACTION GRID
-===================================== */
-
-.actions {
-    width: 100%;
-
-    display: grid;
     grid-template-columns:
-        repeat(3, minmax(0, 1fr));
+        repeat(4,1fr);
 
-    gap: 8px;
+    gap:8px;
+
+    margin-bottom:10px;
+
+}
+
+
+.actions button{
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:var(--primary);
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:6px;
+
+    transition:.2s;
+
+}
+
+
+.actions button:hover{
+
+    background:var(--primary-hover);
+
+}
+
+
+.actions i{
+
+    font-size:18px;
+
 }
 
 
 /* =====================================
-GENERAL ACTION BUTTON
+SEARCH
 ===================================== */
 
-.actions button {
-    width: 100%;
-    min-width: 0;
-    min-height: 64px;
+#searchInput{
 
-    padding: 8px 5px;
+    margin-bottom:12px;
 
-    border: none;
-    border-radius: 18px;
-
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.15;
-    text-align: center;
-
-    cursor: pointer;
-
-    box-shadow: var(--shadow);
-
-    transition:
-        background 0.15s ease,
-        transform 0.15s ease,
-        box-shadow 0.15s ease,
-        opacity 0.15s ease;
-}
-
-.actions button:hover {
-    box-shadow:
-        0 2px 4px rgba(60, 64, 67, 0.18),
-        0 4px 10px rgba(60, 64, 67, 0.12);
-}
-
-.actions button:active {
-    transform: scale(0.97);
-}
-
-.actions button:focus-visible {
-    outline: 3px solid rgba(66, 133, 244, 0.28);
-    outline-offset: 2px;
-}
-
-.actions button:disabled {
-    opacity: 0.48;
-    cursor: not-allowed;
-    transform: none;
 }
 
 
 /* =====================================
-GET GPS
+LIST
 ===================================== */
 
-#alertBtn {
-    background: var(--blue);
-    color: #ffffff;
+#data-list{
+
+    list-style:none;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
 }
 
-#alertBtn:hover {
-    background: var(--blue-hover);
+
+#data-list li{
+
+    background:var(--surface);
+
+    border-radius:14px;
+
+    border:1px solid var(--outline);
+
+    padding:12px 14px;
+
+    box-shadow:var(--shadow);
+
 }
 
-#alertBtn:active {
-    background: var(--blue-active);
+
+.note{
+
+    font-weight:600;
+
+    font-size:15px;
+
+    margin-bottom:6px;
+
+}
+
+
+.time{
+
+    font-size:12px;
+
+    color:var(--text-secondary);
+
+}
+
+
+.row{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+}
+
+
+.icon-btn{
+
+    width:36px;
+
+    height:36px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:transparent;
+
+    cursor:pointer;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    transition:.2s;
+
+}
+
+
+.icon-btn:hover{
+
+    background:#edf2ff;
+
+}
+
+
+.icon-btn i{
+
+    font-size:20px;
+
 }
 
 
 /* =====================================
-SAVE
+PHONE
 ===================================== */
 
-#myButton {
-    background: var(--red);
-    color: #ffffff;
-}
+@media (max-width:600px){
 
-#myButton:hover {
-    background: var(--red-hover);
-}
+    .actions{
 
-#myButton:active {
-    background: var(--red-active);
-}
-
-
-/* =====================================
-GO TO
-===================================== */
-
-#gotoButton{
-    background:#34A853;
-    color:#ffffff;
-}
-
-#gotoButton:hover{
-    background:#2D9248;
-}
-
-#gotoButton:active{
-    background:#257A3C;
-}
-
-
-/* =====================================
-IMPORT
-===================================== */
-
-#importButton{
-    background:#FBBC05;
-    color:#202124;
-}
-
-#importButton:hover{
-    background:#F9AB00;
-}
-
-#importButton:active{
-    background:#E39B00;
-}
-
-
-/* =====================================
-EXPORT
-===================================== */
-
-#exportButton {
-    background: var(--green);
-    color: #ffffff;
-}
-
-#exportButton:hover {
-    background: var(--green-hover);
-}
-
-#exportButton:active {
-    background: var(--green-active);
-}
-
-
-/* =====================================
-DELETE
-===================================== */
-
-#deleteButton {
-    background: var(--red);
-    color: #ffffff;
-}
-
-#deleteButton:hover {
-    background: var(--red-hover);
-}
-
-#deleteButton:active {
-    background: var(--red-active);
-}
-
-
-/* =====================================
-CHECKBOX
-===================================== */
-
-.point-checkbox {
-    width: 22px;
-    height: 22px;
-
-    min-width: 22px;
-    min-height: 22px;
-
-    margin: 0;
-    padding: 0;
-
-    flex-shrink: 0;
-
-    accent-color: var(--blue);
-
-    cursor: pointer;
-}
-
-
-/* =====================================
-SAVED LIST
-===================================== */
-
-#data-list {
-    width: 100%;
-
-    margin: 0;
-    padding: 0;
-
-    list-style: none;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 8px;
-}
-
-
-/* =====================================
-SAVED ITEM
-===================================== */
-
-#data-list li {
-    width: 100%;
-    min-height: 58px;
-
-    padding: 10px 12px;
-
-    border: 1px solid var(--outline);
-    border-radius: 16px;
-
-    background: var(--surface);
-
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    box-shadow:
-        0 1px 2px rgba(60, 64, 67, 0.08),
-        0 1px 3px rgba(60, 64, 67, 0.12);
-}
-
-
-/* =====================================
-SELECTED ITEM
-===================================== */
-
-#data-list li:has(.point-checkbox:checked) {
-    border-color: var(--blue);
-
-    background: #e8f0fe;
-
-    box-shadow:
-        0 0 0 2px rgba(66, 133, 244, 0.12);
-}
-
-
-/* =====================================
-ITEM TEXT
-===================================== */
-
-.left {
-    min-width: 0;
-
-    flex: 1;
-
-    display: flex;
-    align-items: center;
-}
-
-.item-text {
-    min-width: 0;
-
-    color: var(--text);
-
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-
-    overflow-wrap: anywhere;
-    word-break: break-word;
-}
-
-
-/* =====================================
-PULSE MARKER
-===================================== */
-
-.pulse-marker {
-    width: 18px;
-    height: 18px;
-
-    border: 3px solid #ffffff;
-    border-radius: 50%;
-
-    background: var(--blue);
-
-    box-shadow:
-        0 0 0 0 rgba(66, 133, 244, 0.5);
-
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow:
-            0 0 0 0 rgba(66, 133, 244, 0.5);
-    }
-
-    70% {
-        box-shadow:
-            0 0 0 18px rgba(66, 133, 244, 0);
-    }
-
-    100% {
-        box-shadow:
-            0 0 0 0 rgba(66, 133, 244, 0);
-    }
-}
-
-
-/* =====================================
-LEAFLET
-===================================== */
-
-.leaflet-container {
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-}
-
-.leaflet-control-zoom {
-    border: none !important;
-    border-radius: 12px !important;
-
-    overflow: hidden;
-
-    box-shadow: var(--shadow) !important;
-}
-
-.leaflet-control-zoom a {
-    color: var(--text) !important;
-    background: #ffffff !important;
-}
-
-.leaflet-control-zoom a:hover {
-    background: #f1f3f4 !important;
-}
-
-.leaflet-control-attribution {
-    border-radius: 8px 0 0 0;
-    font-size: 9px;
-}
-
-
-/* =====================================
-DESKTOP
-===================================== */
-
-@media (min-width: 700px) {
-    body {
-        padding: 18px;
-    }
-
-    #map {
-        height: 300px;
-    }
-
-    .actions {
-        gap: 11px;
-    }
-
-    .actions button {
-        min-height: 68px;
-        font-size: 14px;
-    }
-
-    #data-list li {
-        min-height: 62px;
-        padding: 11px 14px;
-    }
-
-    .item-text {
-        font-size: 15px;
-    }
-}
-
-
-/* =====================================
-SMALL PHONE
-===================================== */
-
-@media (max-width: 420px) {
-    body {
-        padding: 9px;
-    }
-
-    .app-container {
-        gap: 8px;
-    }
-
-    #map {
-        height: 225px;
-        border-radius: 17px;
-    }
-
-    #myInput {
-        min-height: 50px;
-        border-radius: 14px;
-    }
-
-    .actions {
-        gap: 6px;
-    }
-
-    .actions button {
-        min-height: 60px;
-
-        padding: 6px 3px;
-
-        border-radius: 15px;
-
-        font-size: 11px;
-    }
-
-    #data-list li {
-        min-height: 54px;
-
-        padding: 8px 10px;
-
-        border-radius: 14px;
-
-        gap: 8px;
-    }
-
-    .item-text {
-        font-size: 13px;
-    }
-
-    .point-checkbox {
-        width: 20px;
-        height: 20px;
-
-        min-width: 20px;
-        min-height: 20px;
-    }
-}
-
-
-/* =====================================
-VERY SMALL PHONE
-===================================== */
-
-@media (max-width: 340px) {
-    body {
-        padding: 7px;
-    }
-
-    #map {
-        height: 205px;
-    }
-
-    .actions {
         grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(2,1fr);
+
     }
 
-    .actions button {
-        min-height: 56px;
-        font-size: 11px;
-    }
-
-    .item-text {
-        font-size: 12px;
-    }
 }
