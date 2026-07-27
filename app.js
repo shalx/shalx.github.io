@@ -24,13 +24,13 @@ let searchText = "";
 
 const elements = {
 
-    coordinatesInput: null,
-
     noteInput: null,
 
     gpsButton: null,
 
     saveButton: null,
+
+    goToSelectedButton: null,
 
     openFileButton: null,
 
@@ -71,7 +71,7 @@ function init() {
 
     bindEvents();
 
-    renderAll();
+    renderList();
 
     registerServiceWorker();
 
@@ -85,8 +85,11 @@ function init() {
 function checkModules() {
 
     const modulesAvailable =
+
         typeof FixPinMap !== "undefined" &&
+
         typeof FixPinStorage !== "undefined" &&
+
         typeof FixPinFiles !== "undefined";
 
     if (!modulesAvailable) {
@@ -114,9 +117,6 @@ function checkModules() {
 
 function getElements() {
 
-    elements.coordinatesInput =
-        document.getElementById("input1");
-
     elements.noteInput =
         document.getElementById("myInput");
 
@@ -126,20 +126,35 @@ function getElements() {
     elements.saveButton =
         document.getElementById("myButton");
 
+    elements.goToSelectedButton =
+        document.getElementById(
+            "goToSelectedBtn"
+        );
+
     elements.openFileButton =
-        document.getElementById("openFileBtn");
+        document.getElementById(
+            "openFileBtn"
+        );
 
     elements.saveFileButton =
-        document.getElementById("saveFileBtn");
+        document.getElementById(
+            "saveFileBtn"
+        );
 
     elements.searchInput =
-        document.getElementById("searchInput");
+        document.getElementById(
+            "searchInput"
+        );
 
     elements.fileInput =
-        document.getElementById("fileInput");
+        document.getElementById(
+            "fileInput"
+        );
 
     elements.dataList =
-        document.getElementById("data-list");
+        document.getElementById(
+            "data-list"
+        );
 
 }
 
@@ -147,9 +162,16 @@ function getElements() {
 function checkElements() {
 
     const missingElements =
+
         Object.entries(elements)
-            .filter(([, element]) => !element)
-            .map(([name]) => name);
+
+            .filter(
+                ([, element]) => !element
+            )
+
+            .map(
+                ([name]) => name
+            );
 
     if (missingElements.length === 0) {
         return true;
@@ -183,6 +205,11 @@ function bindEvents() {
     elements.saveButton.addEventListener(
         "click",
         saveCurrentPoint
+    );
+
+    elements.goToSelectedButton.addEventListener(
+        "click",
+        openVisiblePointsInGoogleMaps
     );
 
     elements.openFileButton.addEventListener(
@@ -231,9 +258,11 @@ async function getCurrentLocation() {
 
         currentLocation = {
 
-            lat: Number(location.lat),
+            lat:
+                Number(location.lat),
 
-            lng: Number(location.lng),
+            lng:
+                Number(location.lng),
 
             accuracy:
                 Number(location.accuracy),
@@ -245,11 +274,6 @@ async function getCurrentLocation() {
                 location.timestamp
 
         };
-
-        elements.coordinatesInput.value =
-            formatCoordinates(
-                currentLocation
-            );
 
         FixPinMap.showAndMoveToCurrentLocation(
             currentLocation
@@ -301,22 +325,22 @@ function saveCurrentPoint() {
 
         const point =
             FixPinStorage.createPoint(
+
                 currentLocation.lat,
+
                 currentLocation.lng,
+
                 note
+
             );
 
         FixPinStorage.save(point);
 
         elements.noteInput.value = "";
 
-        renderAll();
+        renderList();
 
-        FixPinMap.moveToPoint(point);
-
-        FixPinMap.openSavedMarkerPopup(
-            point.id
-        );
+        elements.noteInput.focus();
 
     } catch (error) {
 
@@ -339,8 +363,13 @@ function saveCurrentPoint() {
 function handleSearch(event) {
 
     searchText =
-        String(event.target.value || "")
+
+        String(
+            event.target.value || ""
+        )
+
             .trim()
+
             .toLowerCase();
 
     renderList();
@@ -349,39 +378,16 @@ function handleSearch(event) {
 
 
 // =====================================
-// RENDER
+// RENDER LIST
 // =====================================
-
-function renderAll() {
-
-    renderMarkers();
-
-    renderList();
-
-}
-
-
-function renderMarkers() {
-
-    const points =
-        FixPinStorage.getAll();
-
-    FixPinMap.clearSavedMarkers();
-
-    FixPinMap.addSavedMarkers(
-        points
-    );
-
-}
-
 
 function renderList() {
 
     const points =
         FixPinStorage.getAll();
 
-    const filteredPoints =
-        filterPoints(
+    const filteredEntries =
+        getFilteredEntries(
             points,
             searchText
         );
@@ -391,62 +397,81 @@ function renderList() {
     if (points.length === 0) {
 
         elements.dataList.appendChild(
+
             createEmptyItem(
                 "No saved points."
             )
+
         );
 
         return;
 
     }
 
-    if (filteredPoints.length === 0) {
+    if (filteredEntries.length === 0) {
 
         elements.dataList.appendChild(
+
             createEmptyItem(
                 "No matching points."
             )
+
         );
 
         return;
 
     }
 
-    filteredPoints.forEach(
-        (point, index) => {
+    filteredEntries.forEach(entry => {
 
-            const listItem =
-                createListItem(
-                    point,
-                    index
-                );
+        const listItem =
+            createListItem(
 
-            elements.dataList.appendChild(
-                listItem
+                entry.point,
+
+                entry.originalIndex
+
             );
 
-        }
-    );
+        elements.dataList.appendChild(
+            listItem
+        );
+
+    });
 
 }
 
 
-function filterPoints(
+// =====================================
+// FILTER
+// =====================================
+
+function getFilteredEntries(
     points,
     query
 ) {
 
+    const entries =
+        points.map(
+            (point, originalIndex) => ({
+                point,
+                originalIndex
+            })
+        );
+
     if (!query) {
-        return points;
+        return entries;
     }
 
-    return points.filter(point => {
+    return entries.filter(entry => {
 
-        const note =
-            String(point.note || "")
-                .toLowerCase();
+        const title =
+            getPointTitle(
+                entry.point,
+                entry.originalIndex
+            ).toLowerCase();
 
-        return note.includes(query);
+        return title.includes(query);
 
     });
 
@@ -469,21 +494,7 @@ function createListItem(
         "saved-point";
 
     listItem.dataset.pointId =
-        point.id;
-
-
-    const row =
-        document.createElement("div");
-
-    row.className =
-        "row";
-
-
-    const content =
-        document.createElement("div");
-
-    content.className =
-        "saved-point-content";
+        String(point.id);
 
 
     const title =
@@ -499,18 +510,6 @@ function createListItem(
         );
 
 
-    const time =
-        document.createElement("div");
-
-    time.className =
-        "time";
-
-    time.textContent =
-        formatDate(
-            point.created
-        );
-
-
     const actions =
         document.createElement("div");
 
@@ -518,35 +517,34 @@ function createListItem(
         "point-actions";
 
 
-    const gotoButton =
-        createIconButton({
-
-            icon:
-                "ph-navigation-arrow",
-
-            label:
-                "Open in Google Maps",
-
-            onClick:
-                () => openPointInGoogleMaps(
-                    point
-                )
-
-        });
+    const pointIsVisible =
+        FixPinMap.hasSavedMarker(
+            point.id
+        );
 
 
     const mapButton =
         createIconButton({
 
             icon:
-                "ph-map-pin",
+                pointIsVisible
+                    ? "ph-map-pin-simple-area"
+                    : "ph-map-pin",
 
             label:
-                "Show on map",
+                pointIsVisible
+                    ? "Hide from map"
+                    : "Show on map",
+
+            className:
+                pointIsVisible
+                    ? "show-map-btn active"
+                    : "show-map-btn",
 
             onClick:
-                () => showPointOnMap(
-                    point
+                () => togglePointOnMap(
+                    point,
+                    index
                 )
 
         });
@@ -561,17 +559,16 @@ function createListItem(
             label:
                 "Delete point",
 
+            className:
+                "delete-btn",
+
             onClick:
                 () => deletePoint(
-                    point
+                    point,
+                    index
                 )
 
         });
-
-
-    content.appendChild(title);
-
-    content.appendChild(time);
 
 
     actions.appendChild(
@@ -579,24 +576,16 @@ function createListItem(
     );
 
     actions.appendChild(
-        gotoButton
-    );
-
-    actions.appendChild(
         deleteButton
     );
 
 
-    row.appendChild(content);
+    listItem.appendChild(
+        title
+    );
 
-    row.appendChild(actions);
-
-    listItem.appendChild(row);
-
-
-    listItem.addEventListener(
-        "dblclick",
-        () => showPointOnMap(point)
+    listItem.appendChild(
+        actions
     );
 
     return listItem;
@@ -605,9 +594,15 @@ function createListItem(
 
 
 function createIconButton({
+
     icon,
+
     label,
+
+    className = "",
+
     onClick
+
 }) {
 
     const button =
@@ -617,7 +612,7 @@ function createIconButton({
         "button";
 
     button.className =
-        "icon-btn";
+        `icon-btn ${className}`.trim();
 
     button.setAttribute(
         "aria-label",
@@ -677,39 +672,95 @@ function createEmptyItem(message) {
 }
 
 
+// =====================================
+// POINT TITLE
+// =====================================
+
 function getPointTitle(
     point,
     index
 ) {
 
     const note =
-        String(point.note || "")
-            .trim();
+        String(point.note || "").trim();
 
-    return note ||
-        `Point ${index + 1}`;
+    return (
+        note ||
+        `Point ${index + 1}`
+    );
 
 }
 
 
 // =====================================
-// SHOW POINT ON MAP
+// SHOW / HIDE POINT ON MAP
 // =====================================
 
-function showPointOnMap(point) {
+function togglePointOnMap(
+    point,
+    index
+) {
 
-    FixPinMap.moveToPoint(
-        point
-    );
+    const pointForMap = {
 
-    FixPinMap.openSavedMarkerPopup(
-        point.id
-    );
+        ...point,
 
-    scrollToMap();
+        note:
+            getPointTitle(
+                point,
+                index
+            )
+
+    };
+
+    const result =
+        FixPinMap.toggleSavedMarker(
+            pointForMap
+        );
+
+    if (result.limitReached) {
+
+        showProLimitMessage();
+
+        return;
+
+    }
+
+    if (result.visible) {
+
+        FixPinMap.moveToPoint(
+            pointForMap
+        );
+
+        FixPinMap.openSavedMarkerPopup(
+            point.id
+        );
+
+        scrollToMap();
+
+    }
+
+    renderList();
 
 }
 
+
+function showProLimitMessage() {
+
+    showMessage(
+
+        "Maximum 9 points in Free version.\n\n" +
+
+        "Download Fix-Pin Pro for unlimited points."
+
+    );
+
+}
+
+
+// =====================================
+// SCROLL TO MAP
+// =====================================
 
 function scrollToMap() {
 
@@ -722,9 +773,11 @@ function scrollToMap() {
 
     mapElement.scrollIntoView({
 
-        behavior: "smooth",
+        behavior:
+            "smooth",
 
-        block: "start"
+        block:
+            "start"
 
     });
 
@@ -735,35 +788,87 @@ function scrollToMap() {
 // GOOGLE MAPS
 // =====================================
 
-function openPointInGoogleMaps(point) {
+function openVisiblePointsInGoogleMaps() {
 
-    const latitude =
-        Number(point.lat);
+    const points =
+        FixPinMap.getSavedMarkerPoints();
 
-    const longitude =
-        Number(point.lng);
-
-    if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude)
-    ) {
+    if (points.length === 0) {
 
         showMessage(
-            "Invalid point coordinates."
+            "Show points on the map first."
         );
 
         return;
 
     }
 
-    const destination =
-        encodeURIComponent(
-            `${latitude},${longitude}`
+    if (points.length > 9) {
+
+        showProLimitMessage();
+
+        return;
+
+    }
+
+    const validPoints =
+        points.filter(
+            hasValidCoordinates
         );
 
-    const url =
+    if (
+        validPoints.length !==
+        points.length
+    ) {
+
+        showMessage(
+            "One or more points have invalid coordinates."
+        );
+
+        return;
+
+    }
+
+    const destinationPoint =
+        validPoints[
+            validPoints.length - 1
+        ];
+
+    const destination =
+        encodeCoordinatePair(
+            destinationPoint
+        );
+
+    let url =
+
         "https://www.google.com/maps/dir/" +
-        `?api=1&destination=${destination}`;
+
+        "?api=1" +
+
+        `&destination=${destination}`;
+
+    if (validPoints.length > 1) {
+
+        const waypointPoints =
+            validPoints.slice(
+                0,
+                -1
+            );
+
+        const waypoints =
+
+            waypointPoints
+
+                .map(
+                    encodeCoordinatePair
+                )
+
+                .join("%7C");
+
+        url +=
+            `&waypoints=${waypoints}`;
+
+    }
 
     window.open(
         url,
@@ -774,14 +879,59 @@ function openPointInGoogleMaps(point) {
 }
 
 
+function hasValidCoordinates(point) {
+
+    const latitude =
+        Number(point.lat);
+
+    const longitude =
+        Number(point.lng);
+
+    return (
+
+        Number.isFinite(latitude) &&
+
+        Number.isFinite(longitude) &&
+
+        latitude >= -90 &&
+
+        latitude <= 90 &&
+
+        longitude >= -180 &&
+
+        longitude <= 180
+
+    );
+
+}
+
+
+function encodeCoordinatePair(point) {
+
+    return encodeURIComponent(
+
+        `${Number(point.lat)},` +
+        `${Number(point.lng)}`
+
+    );
+
+}
+
+
 // =====================================
 // DELETE
 // =====================================
 
-function deletePoint(point) {
+function deletePoint(
+    point,
+    index
+) {
 
     const pointName =
-        String(point.note || "Point");
+        getPointTitle(
+            point,
+            index
+        );
 
     const confirmed =
         window.confirm(
@@ -852,9 +1002,7 @@ async function savePointsToFile() {
             result &&
             result.cancelled
         ) {
-
             return;
-
         }
 
     } catch (error) {
@@ -894,7 +1042,9 @@ function openFileDialog() {
 async function openSelectedFile(event) {
 
     const file =
+
         event.target.files &&
+
         event.target.files[0];
 
     if (!file) {
@@ -915,7 +1065,11 @@ async function openSelectedFile(event) {
 
         const confirmed =
             window.confirm(
-                "Opening this file will replace all currently saved points. Continue?"
+
+                "Opening this file will replace all " +
+
+                "currently saved points. Continue?"
+
             );
 
         if (!confirmed) {
@@ -928,8 +1082,6 @@ async function openSelectedFile(event) {
 
         currentLocation = null;
 
-        elements.coordinatesInput.value = "";
-
         elements.noteInput.value = "";
 
         elements.searchInput.value = "";
@@ -938,15 +1090,11 @@ async function openSelectedFile(event) {
 
         FixPinMap.removeCurrentLocation();
 
-        renderAll();
+        FixPinMap.clearSavedMarkers();
 
-        FixPinMap.fitAllMarkers({
+        FixPinMap.resetMapView();
 
-            includeCurrent: false,
-
-            maxZoom: 17
-
-        });
+        renderList();
 
         showMessage(
             `${importedPoints.length} points opened.`
@@ -985,70 +1133,12 @@ function handleNoteKeydown(event) {
         event.key !== "Enter" ||
         event.shiftKey
     ) {
-
         return;
-
     }
 
     event.preventDefault();
 
     saveCurrentPoint();
-
-}
-
-
-// =====================================
-// FORMAT
-// =====================================
-
-function formatCoordinates(location) {
-
-    const latitude =
-        Number(location.lat);
-
-    const longitude =
-        Number(location.lng);
-
-    if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude)
-    ) {
-
-        return "";
-
-    }
-
-    return (
-        `${latitude.toFixed(6)}, ` +
-        `${longitude.toFixed(6)}`
-    );
-
-}
-
-
-function formatDate(value) {
-
-    const timestamp =
-        Number(value);
-
-    if (!Number.isFinite(timestamp)) {
-        return "";
-    }
-
-    const date =
-        new Date(timestamp);
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return "";
-
-    }
-
-    return date.toLocaleString();
 
 }
 
@@ -1070,8 +1160,13 @@ function setButtonBusy(
         Boolean(isBusy);
 
     button.setAttribute(
+
         "aria-busy",
-        String(Boolean(isBusy))
+
+        String(
+            Boolean(isBusy)
+        )
+
     );
 
 }
@@ -1099,9 +1194,7 @@ function registerServiceWorker() {
     if (
         !("serviceWorker" in navigator)
     ) {
-
         return;
-
     }
 
     window.addEventListener(
@@ -1109,14 +1202,20 @@ function registerServiceWorker() {
         () => {
 
             navigator.serviceWorker
+
                 .register(
                     "service-worker.js"
                 )
+
                 .catch(error => {
 
                     console.error(
-                        "Fix-Pin: service worker registration failed.",
+
+                        "Fix-Pin: service worker " +
+                        "registration failed.",
+
                         error
+
                     );
 
                 });
