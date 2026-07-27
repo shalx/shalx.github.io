@@ -29,6 +29,11 @@
 
     <link
         rel="stylesheet"
+        href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
+    >
+
+    <link
+        rel="stylesheet"
         href="style.css"
     >
 
@@ -38,99 +43,70 @@
 
     <main class="app-container">
 
-        <div
-            id="map"
-            aria-label="Map"
-        ></div>
+        <div id="map"></div>
+
+        <input
+            id="input1"
+            type="text"
+            placeholder="Lat, Lon"
+            readonly
+            autocomplete="off"
+        >
 
         <input
             id="myInput"
             type="text"
-            placeholder="Add note..."
+            placeholder="Note..."
             autocomplete="off"
-            maxlength="200"
         >
 
         <div class="actions">
 
-            <button
-                id="alertBtn"
-                type="button"
-                aria-label="Get GPS location"
-            >
-                <span class="button-icon">⦿</span>
-                <span>Get GPS</span>
+            <button id="alertBtn">
+                <i class="ph ph-crosshair"></i>
             </button>
 
-            <button
-                id="myButton"
-                type="button"
-                aria-label="Save current point"
-            >
-                <span class="button-icon">▣</span>
-                <span>Save</span>
+            <button id="myButton">
+                <i class="ph ph-floppy-disk"></i>
+                Save
             </button>
 
-            <button
-                id="gotoButton"
-                type="button"
-                aria-label="Open selected points in Google Maps"
-            >
-                <span class="button-icon">➤</span>
-                <span>Go To</span>
+            <button id="openFileBtn">
+                <i class="ph ph-folder-open"></i>
+                Open File
             </button>
 
-            <button
-                id="importButton"
-                type="button"
-                aria-label="Import saved points"
-            >
-                <span class="button-icon">⇩</span>
-                <span>Import</span>
-            </button>
-
-            <button
-                id="exportButton"
-                type="button"
-                aria-label="Export saved points"
-            >
-                <span class="button-icon">⇧</span>
-                <span>Export</span>
-            </button>
-
-            <button
-                id="deleteButton"
-                type="button"
-                aria-label="Delete selected points"
-            >
-               
-                <span>Delete</span>
+            <button id="saveFileBtn">
+                <i class="ph ph-download-simple"></i>
+                Save to File
             </button>
 
         </div>
 
-   <input
-    id="importFileInput"
-    type="file"
-    accept=".fxpn,application/json"
-    hidden
->
+        <input
+            id="searchInput"
+            type="text"
+            placeholder="Search..."
+            autocomplete="off"
+        >
 
-        <ol
-            id="data-list"
-            aria-label="Saved points"
-        ></ol>
+        <ol id="data-list"></ol>
+
+        <input
+            id="fileInput"
+            type="file"
+            accept=".fxpn"
+            hidden
+        >
 
     </main>
 
-   
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script src="map.js"></script>
-<script src="storage.js"></script>
-<script src="files.js"></script>
-<script src="app.js"></script>
+    <script src="storage.js"></script>
+    <script src="files.js"></script>
+    <script src="map.js"></script>
+    <script src="app.js"></script>
 
 </body>
 
