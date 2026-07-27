@@ -4,7 +4,7 @@
 =========================================
 FIX-PIN
 files.js
-Import / Export Module
+Open / Save File Module
 =========================================
 */
 
@@ -14,22 +14,40 @@ const FixPinFiles = (() => {
     // CONFIG
     // =====================================
 
-    const FORMAT = "FXPN";
+    const FORMAT =
+        "FXPN";
 
-    const VERSION = 1;
+    const VERSION =
+        1;
 
-    const APP_NAME = "Fix-Pin";
+    const APP_NAME =
+        "Fix-Pin";
 
-    const FILE_EXTENSION = ".fxpn";
+    const FILE_EXTENSION =
+        ".fxpn";
+
+    const MIME_TYPE =
+        "application/json";
 
 
     // =====================================
-    // EXPORT
+    // SAVE TO FILE
     // =====================================
 
-    function exportPoints(points) {
+    async function exportPoints(points) {
 
-        const file = {
+        if (!Array.isArray(points)) {
+
+            throw new TypeError(
+                "Points must be an array."
+            );
+
+        }
+
+        const normalizedPoints =
+            normalizeExportPoints(points);
+
+        const fileData = {
 
             format: FORMAT,
 
@@ -39,58 +57,254 @@ const FixPinFiles = (() => {
 
             exported: Date.now(),
 
-            points: Array.isArray(points)
-                ? points
-                : []
+            points: normalizedPoints
 
         };
 
-        const json =
+        const content =
             JSON.stringify(
-                file,
+                fileData,
                 null,
                 2
             );
 
+        const fileName =
+            createFileName();
+
+        /*
+        =====================================
+        FILE SYSTEM ACCESS API
+        Desktop Chrome and supported browsers
+        =====================================
+        */
+
+        if (
+            typeof window.showSaveFilePicker ===
+            "function"
+        ) {
+
+            try {
+
+                await saveWithFilePicker(
+                    fileName,
+                    content
+                );
+
+                return {
+                    saved: true,
+                    method: "file-picker",
+                    fileName
+                };
+
+            } catch (error) {
+
+                /*
+                User closed the system dialog.
+                Do not start an automatic download.
+                */
+
+                if (
+                    error &&
+                    error.name ===
+                        "AbortError"
+                ) {
+
+                    return {
+                        saved: false,
+                        cancelled: true,
+                        fileName
+                    };
+
+                }
+
+                console.warn(
+                    "Fix-Pin: system save dialog failed.",
+                    error
+                );
+
+            }
+
+        }
+
+        /*
+        =====================================
+        DOWNLOAD FALLBACK
+        Android Chrome and other browsers
+        =====================================
+        */
+
         downloadFile(
-            createFileName(),
-            json
+            fileName,
+            content
+        );
+
+        return {
+            saved: true,
+            method: "download",
+            fileName
+        };
+
+    }
+
+
+    // =====================================
+    // SAVE WITH FILE PICKER
+    // =====================================
+
+    async function saveWithFilePicker(
+        fileName,
+        content
+    ) {
+
+        const handle =
+            await window.showSaveFilePicker({
+
+                suggestedName: fileName,
+
+                types: [
+
+                    {
+                        description:
+                            "Fix-Pin file",
+
+                        accept: {
+
+                            [MIME_TYPE]: [
+                                FILE_EXTENSION
+                            ]
+
+                        }
+
+                    }
+
+                ]
+
+            });
+
+        const writable =
+            await handle.createWritable();
+
+        try {
+
+            await writable.write(
+                new Blob(
+                    [content],
+                    {
+                        type:
+                            `${MIME_TYPE};charset=utf-8`
+                    }
+                )
+            );
+
+            await writable.close();
+
+        } catch (error) {
+
+            try {
+                await writable.abort();
+            } catch {
+                // Nothing else is required.
+            }
+
+            throw error;
+
+        }
+
+    }
+
+
+    // =====================================
+    // OPEN FILE
+    // =====================================
+
+    async function importPoints(file) {
+
+        validateSelectedFile(file);
+
+        const text =
+            await readFile(file);
+
+        const cleanText =
+            removeByteOrderMark(text)
+                .trim();
+
+        if (!cleanText) {
+
+            throw new Error(
+                "The selected file is empty."
+            );
+
+        }
+
+        let data;
+
+        try {
+
+            data =
+                JSON.parse(cleanText);
+
+        } catch (error) {
+
+            console.error(
+                "Fix-Pin: invalid JSON.",
+                error
+            );
+
+            throw new Error(
+                "The selected .fxpn file is damaged or invalid."
+            );
+
+        }
+
+        validateFile(data);
+
+        return normalizeImportedPoints(
+            data.points
         );
 
     }
 
 
     // =====================================
-    // IMPORT
+    // SELECTED FILE VALIDATION
     // =====================================
 
-    function importPoints(file) {
+    function validateSelectedFile(file) {
 
-        return new Promise((resolve, reject) => {
+        if (!file) {
 
-            if (!file) {
+            throw new Error(
+                "No file selected."
+            );
 
-                reject(
-                    new Error("No file selected.")
-                );
+        }
 
-                return;
-            }
+        if (
+            typeof file.name ===
+                "string" &&
+            file.name &&
+            !file.name
+                .toLowerCase()
+                .endsWith(FILE_EXTENSION)
+        ) {
 
-            readFile(file)
-                .then(text => {
+            throw new Error(
+                "Please select a .fxpn file."
+            );
 
-                    const data =
-                        JSON.parse(text);
+        }
 
-                    validateFile(data);
+        if (
+            typeof file.size ===
+                "number" &&
+            file.size === 0
+        ) {
 
-                    resolve(data.points);
+            throw new Error(
+                "The selected file is empty."
+            );
 
-                })
-                .catch(reject);
-
-        });
+        }
 
     }
 
@@ -101,44 +315,83 @@ const FixPinFiles = (() => {
 
     function readFile(file) {
 
-        return new Promise((resolve, reject) => {
+        /*
+        Modern browsers support File.text().
+        FileReader remains as fallback.
+        */
 
-            const reader =
-                new FileReader();
+        if (
+            file &&
+            typeof file.text ===
+                "function"
+        ) {
 
-            reader.onload = () => {
+            return file.text();
 
-                resolve(reader.result);
+        }
 
-            };
+        return new Promise(
+            (resolve, reject) => {
 
-            reader.onerror = () => {
+                const reader =
+                    new FileReader();
 
-                reject(
-                    new Error(
-                        "Unable to read file."
-                    )
+                reader.onload = () => {
+
+                    resolve(
+                        String(
+                            reader.result || ""
+                        )
+                    );
+
+                };
+
+                reader.onerror = () => {
+
+                    reject(
+                        new Error(
+                            "Unable to read the selected file."
+                        )
+                    );
+
+                };
+
+                reader.onabort = () => {
+
+                    reject(
+                        new Error(
+                            "File opening was cancelled."
+                        )
+                    );
+
+                };
+
+                reader.readAsText(
+                    file,
+                    "UTF-8"
                 );
 
-            };
-
-            reader.readAsText(file);
-
-        });
+            }
+        );
 
     }
 
 
     // =====================================
-    // VALIDATE
+    // FILE VALIDATION
     // =====================================
 
     function validateFile(data) {
 
-        if (!data) {
+        if (
+            !data ||
+            typeof data !==
+                "object" ||
+            Array.isArray(data)
+        ) {
 
             throw new Error(
-                "Invalid file."
+                "Invalid Fix-Pin file."
             );
 
         }
@@ -152,12 +405,29 @@ const FixPinFiles = (() => {
         }
 
         if (
-            typeof data.version !==
-            "number"
+            !Number.isInteger(
+                data.version
+            )
         ) {
 
             throw new Error(
-                "Unsupported file version."
+                "Invalid Fix-Pin file version."
+            );
+
+        }
+
+        if (data.version > VERSION) {
+
+            throw new Error(
+                "This file was created by a newer version of Fix-Pin."
+            );
+
+        }
+
+        if (data.version < 1) {
+
+            throw new Error(
+                "Unsupported Fix-Pin file version."
             );
 
         }
@@ -169,13 +439,20 @@ const FixPinFiles = (() => {
         ) {
 
             throw new Error(
-                "Invalid points list."
+                "The file does not contain a valid points list."
             );
 
         }
 
         data.points.forEach(
-            validatePoint
+            (point, index) => {
+
+                validatePoint(
+                    point,
+                    index
+                );
+
+            }
         );
 
         return true;
@@ -184,74 +461,94 @@ const FixPinFiles = (() => {
 
 
     // =====================================
-    // VALIDATE POINT
+    // POINT VALIDATION
     // =====================================
 
-    function validatePoint(point) {
+    function validatePoint(
+        point,
+        index
+    ) {
+
+        const position =
+            index + 1;
 
         if (
-            typeof point !== "object"
+            !point ||
+            typeof point !==
+                "object" ||
+            Array.isArray(point)
         ) {
 
             throw new Error(
-                "Invalid point."
+                `Point ${position} is invalid.`
+            );
+
+        }
+
+        const latitude =
+            Number(point.lat);
+
+        const longitude =
+            Number(point.lng);
+
+        if (
+            !Number.isFinite(latitude) ||
+            latitude < -90 ||
+            latitude > 90
+        ) {
+
+            throw new Error(
+                `Point ${position} has an invalid latitude.`
             );
 
         }
 
         if (
+            !Number.isFinite(longitude) ||
+            longitude < -180 ||
+            longitude > 180
+        ) {
+
+            throw new Error(
+                `Point ${position} has an invalid longitude.`
+            );
+
+        }
+
+        if (
+            point.id !== undefined &&
             typeof point.id !==
-            "string"
+                "string"
         ) {
 
             throw new Error(
-                "Invalid point id."
+                `Point ${position} has an invalid ID.`
             );
 
         }
 
         if (
-            !Number.isFinite(
-                point.lat
-            )
-        ) {
-
-            throw new Error(
-                "Invalid latitude."
-            );
-
-        }
-
-        if (
-            !Number.isFinite(
-                point.lng
-            )
-        ) {
-
-            throw new Error(
-                "Invalid longitude."
-            );
-
-        }
-
-        if (
+            point.note !== undefined &&
+            point.note !== null &&
             typeof point.note !==
-            "string"
+                "string"
         ) {
 
             throw new Error(
-                "Invalid note."
+                `Point ${position} has an invalid note.`
             );
 
         }
 
         if (
-            typeof point.created !==
-            "number"
+            point.created !== undefined &&
+            !Number.isFinite(
+                Number(point.created)
+            )
         ) {
 
             throw new Error(
-                "Invalid creation date."
+                `Point ${position} has an invalid creation date.`
             );
 
         }
@@ -260,7 +557,227 @@ const FixPinFiles = (() => {
 
 
     // =====================================
-    // DOWNLOAD
+    // NORMALIZE EXPORTED POINTS
+    // =====================================
+
+    function normalizeExportPoints(points) {
+
+        return points.map(
+            (point, index) => {
+
+                validatePoint(
+                    point,
+                    index
+                );
+
+                return {
+
+                    id:
+                        normalizeId(
+                            point.id
+                        ),
+
+                    lat:
+                        Number(
+                            point.lat
+                        ),
+
+                    lng:
+                        Number(
+                            point.lng
+                        ),
+
+                    note:
+                        normalizeNote(
+                            point.note,
+                            index + 1
+                        ),
+
+                    created:
+                        normalizeCreated(
+                            point.created
+                        )
+
+                };
+
+            }
+        );
+
+    }
+
+
+    // =====================================
+    // NORMALIZE IMPORTED POINTS
+    // =====================================
+
+    function normalizeImportedPoints(
+        points
+    ) {
+
+        const usedIds =
+            new Set();
+
+        let nextDefaultNumber = 1;
+
+        return points.map(
+            (point, index) => {
+
+                let id =
+                    normalizeId(
+                        point.id
+                    );
+
+                while (usedIds.has(id)) {
+
+                    id =
+                        generateId();
+
+                }
+
+                usedIds.add(id);
+
+                let note =
+                    String(
+                        point.note || ""
+                    ).trim();
+
+                if (!note) {
+
+                    note =
+                        `Point ${nextDefaultNumber}`;
+
+                    nextDefaultNumber += 1;
+
+                }
+
+                return {
+
+                    id,
+
+                    lat:
+                        Number(
+                            point.lat
+                        ),
+
+                    lng:
+                        Number(
+                            point.lng
+                        ),
+
+                    note,
+
+                    created:
+                        normalizeCreated(
+                            point.created,
+                            index
+                        )
+
+                };
+
+            }
+        );
+
+    }
+
+
+    // =====================================
+    // NORMALIZATION HELPERS
+    // =====================================
+
+    function normalizeId(id) {
+
+        const value =
+            typeof id === "string"
+                ? id.trim()
+                : "";
+
+        return value ||
+            generateId();
+
+    }
+
+
+    function normalizeNote(
+        note,
+        pointNumber
+    ) {
+
+        const value =
+            String(note || "")
+                .trim();
+
+        return (
+            value ||
+            `Point ${pointNumber}`
+        );
+
+    }
+
+
+    function normalizeCreated(
+        created,
+        index = 0
+    ) {
+
+        const value =
+            Number(created);
+
+        if (
+            Number.isFinite(value) &&
+            value > 0
+        ) {
+
+            return value;
+
+        }
+
+        return Date.now() + index;
+
+    }
+
+
+    function generateId() {
+
+        if (
+            window.crypto &&
+            typeof crypto.randomUUID ===
+                "function"
+        ) {
+
+            return crypto.randomUUID();
+
+        }
+
+        return (
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .substring(2, 10)
+        );
+
+    }
+
+
+    // =====================================
+    // REMOVE BOM
+    // =====================================
+
+    function removeByteOrderMark(
+        text
+    ) {
+
+        return String(text || "")
+            .replace(
+                /^\uFEFF/,
+                ""
+            );
+
+    }
+
+
+    // =====================================
+    // DOWNLOAD FALLBACK
     // =====================================
 
     function downloadFile(
@@ -273,27 +790,47 @@ const FixPinFiles = (() => {
                 [content],
                 {
                     type:
-                        "application/json"
+                        `${MIME_TYPE};charset=utf-8`
                 }
             );
 
         const url =
-            URL.createObjectURL(blob);
+            URL.createObjectURL(
+                blob
+            );
 
         const link =
-            document.createElement("a");
+            document.createElement(
+                "a"
+            );
 
-        link.href = url;
+        link.href =
+            url;
 
-        link.download = fileName;
+        link.download =
+            fileName;
 
-        document.body.appendChild(link);
+        link.hidden =
+            true;
+
+        document.body.appendChild(
+            link
+        );
 
         link.click();
 
-        link.remove();
+        window.setTimeout(
+            () => {
 
-        URL.revokeObjectURL(url);
+                link.remove();
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+            },
+            1000
+        );
 
     }
 
@@ -313,21 +850,39 @@ const FixPinFiles = (() => {
         const mm =
             String(
                 now.getMonth() + 1
-            ).padStart(2, "0");
+            ).padStart(
+                2,
+                "0"
+            );
 
         const dd =
             String(
                 now.getDate()
-            ).padStart(2, "0");
+            ).padStart(
+                2,
+                "0"
+            );
+
+        const hours =
+            String(
+                now.getHours()
+            ).padStart(
+                2,
+                "0"
+            );
+
+        const minutes =
+            String(
+                now.getMinutes()
+            ).padStart(
+                2,
+                "0"
+            );
 
         return (
-            APP_NAME +
-            "-" +
-            yyyy +
-            "-" +
-            mm +
-            "-" +
-            dd +
+            `${APP_NAME}-` +
+            `${yyyy}-${mm}-${dd}-` +
+            `${hours}${minutes}` +
             FILE_EXTENSION
         );
 
@@ -344,6 +899,7 @@ const FixPinFiles = (() => {
         importPoints,
 
         validateFile,
+        validatePoint,
 
         createFileName
 
