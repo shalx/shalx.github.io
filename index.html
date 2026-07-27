@@ -46,14 +46,6 @@
         <div id="map"></div>
 
         <input
-            id="input1"
-            type="text"
-            placeholder="Lat, Lon"
-            readonly
-            autocomplete="off"
-        >
-
-        <input
             id="myInput"
             type="text"
             placeholder="Note..."
@@ -62,41 +54,69 @@
 
         <div class="actions">
 
-            <button id="alertBtn">
+            <button
+                id="alertBtn"
+                type="button"
+                title="Get current location"
+                aria-label="Get current location"
+            >
                 <i class="ph ph-crosshair"></i>
             </button>
 
-            <button id="myButton">
+            <button
+                id="myButton"
+                type="button"
+                title="Save point"
+            >
                 <i class="ph ph-floppy-disk"></i>
-                Save
+                <span>Save</span>
             </button>
 
-            <button id="openFileBtn">
+            <button
+                id="goToSelectedBtn"
+                type="button"
+                title="Open points shown on the map in Google Maps"
+            >
+                <i class="ph ph-navigation-arrow"></i>
+                <span>Go To</span>
+            </button>
+
+            <button
+                id="openFileBtn"
+                type="button"
+                title="Open an FXPN file"
+            >
                 <i class="ph ph-folder-open"></i>
-                Open File
+                <span>Open File</span>
             </button>
 
-            <button id="saveFileBtn">
+            <button
+                id="saveFileBtn"
+                type="button"
+                title="Save points to an FXPN file"
+            >
                 <i class="ph ph-download-simple"></i>
-                Save to File
+                <span>Save to File</span>
             </button>
 
         </div>
 
         <input
             id="searchInput"
-            type="text"
+            type="search"
             placeholder="Search..."
             autocomplete="off"
+            aria-label="Search saved points"
         >
 
         <ol id="data-list"></ol>
-<input
-    id="fileInput"
-    type="file"
-    accept=".fxpn,application/json"
-    hidden
->
+
+        <input
+            id="fileInput"
+            type="file"
+            accept=".fxpn,application/json"
+            hidden
+        >
 
     </main>
 
