@@ -14,7 +14,8 @@ const FixPinStorage = (() => {
     // CONFIG
     // =====================================
 
-    const STORAGE_KEY = "fixpin.points";
+    const STORAGE_KEY =
+        "fixpin.points";
 
 
     // =====================================
@@ -26,24 +27,31 @@ const FixPinStorage = (() => {
         try {
 
             const data =
-                localStorage.getItem(STORAGE_KEY);
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
 
             if (!data) {
                 return [];
             }
 
-            const points =
+            const parsedData =
                 JSON.parse(data);
 
-            if (!Array.isArray(points)) {
+            if (!Array.isArray(parsedData)) {
                 return [];
             }
 
-            return points;
+            return parsedData
+                .map(normalizePoint)
+                .filter(Boolean);
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                "Fix-Pin: unable to read points.",
+                error
+            );
 
             return [];
         }
@@ -57,10 +65,27 @@ const FixPinStorage = (() => {
 
     function saveAll(points) {
 
+        if (!Array.isArray(points)) {
+
+            throw new TypeError(
+                "Points must be an array."
+            );
+
+        }
+
+        const normalizedPoints =
+            points
+                .map(normalizePoint)
+                .filter(Boolean);
+
         localStorage.setItem(
             STORAGE_KEY,
-            JSON.stringify(points)
+            JSON.stringify(
+                normalizedPoints
+            )
         );
+
+        return normalizedPoints;
 
     }
 
@@ -71,9 +96,16 @@ const FixPinStorage = (() => {
 
     function getById(id) {
 
-        return getAll().find(
-            point => point.id === id
-        ) || null;
+        const normalizedId =
+            String(id || "");
+
+        return (
+            getAll().find(
+                point =>
+                    point.id === normalizedId
+            ) ||
+            null
+        );
 
     }
 
@@ -84,14 +116,43 @@ const FixPinStorage = (() => {
 
     function save(point) {
 
+        const normalizedPoint =
+            normalizePoint(point);
+
+        if (!normalizedPoint) {
+
+            throw new TypeError(
+                "Invalid point."
+            );
+
+        }
+
         const points =
             getAll();
 
-        points.push(point);
+        const existingIndex =
+            points.findIndex(
+                savedPoint =>
+                    savedPoint.id ===
+                    normalizedPoint.id
+            );
+
+        if (existingIndex === -1) {
+
+            points.push(
+                normalizedPoint
+            );
+
+        } else {
+
+            points[existingIndex] =
+                normalizedPoint;
+
+        }
 
         saveAll(points);
 
-        return point;
+        return normalizedPoint;
 
     }
 
@@ -102,24 +163,38 @@ const FixPinStorage = (() => {
 
     function update(id, newData) {
 
+        const normalizedId =
+            String(id || "");
+
         const points =
             getAll();
 
         const index =
             points.findIndex(
-                point => point.id === id
+                point =>
+                    point.id === normalizedId
             );
 
         if (index === -1) {
             return false;
         }
 
-        points[index] = {
+        const updatedPoint =
+            normalizePoint({
 
-            ...points[index],
-            ...newData
+                ...points[index],
+                ...newData,
 
-        };
+                id: points[index].id
+
+            });
+
+        if (!updatedPoint) {
+            return false;
+        }
+
+        points[index] =
+            updatedPoint;
 
         saveAll(points);
 
@@ -134,17 +209,30 @@ const FixPinStorage = (() => {
 
     function remove(id) {
 
+        const normalizedId =
+            String(id || "");
+
         const points =
             getAll();
 
-        const filtered =
+        const filteredPoints =
             points.filter(
-                point => point.id !== id
+                point =>
+                    point.id !== normalizedId
             );
 
-        saveAll(filtered);
+        if (
+            filteredPoints.length ===
+            points.length
+        ) {
 
-        return filtered.length !== points.length;
+            return false;
+
+        }
+
+        saveAll(filteredPoints);
+
+        return true;
 
     }
 
@@ -163,13 +251,30 @@ const FixPinStorage = (() => {
 
 
     // =====================================
+    // REPLACE ALL
+    // =====================================
+
+    function replaceAll(points) {
+
+        clear();
+
+        return saveAll(points);
+
+    }
+
+
+    // =====================================
     // EXISTS
     // =====================================
 
     function exists(id) {
 
+        const normalizedId =
+            String(id || "");
+
         return getAll().some(
-            point => point.id === id
+            point =>
+                point.id === normalizedId
         );
 
     }
@@ -194,7 +299,8 @@ const FixPinStorage = (() => {
 
         if (
             window.crypto &&
-            crypto.randomUUID
+            typeof crypto.randomUUID ===
+                "function"
         ) {
 
             return crypto.randomUUID();
@@ -203,6 +309,7 @@ const FixPinStorage = (() => {
 
         return (
             Date.now().toString(36) +
+            "-" +
             Math.random()
                 .toString(36)
                 .substring(2, 10)
@@ -215,21 +322,199 @@ const FixPinStorage = (() => {
     // CREATE POINT
     // =====================================
 
-    function createPoint(lat, lng, note = "") {
+    function createPoint(
+        lat,
+        lng,
+        note = ""
+    ) {
+
+        const latitude =
+            Number(lat);
+
+        const longitude =
+            Number(lng);
+
+        if (
+            !isValidLatitude(latitude) ||
+            !isValidLongitude(longitude)
+        ) {
+
+            throw new TypeError(
+                "Invalid coordinates."
+            );
+
+        }
+
+        const normalizedNote =
+            createPointName(note);
 
         return {
 
             id: generateId(),
 
-            lat: Number(lat),
+            lat: latitude,
 
-            lng: Number(lng),
+            lng: longitude,
 
-            note: note.trim(),
+            note: normalizedNote,
 
             created: Date.now()
 
         };
+
+    }
+
+
+    // =====================================
+    // DEFAULT POINT NAME
+    // =====================================
+
+    function createPointName(note) {
+
+        const normalizedNote =
+            String(note || "").trim();
+
+        if (normalizedNote) {
+            return normalizedNote;
+        }
+
+        return (
+            "Point " +
+            getNextPointNumber()
+        );
+
+    }
+
+
+    function getNextPointNumber() {
+
+        const points =
+            getAll();
+
+        let largestNumber = 0;
+
+        points.forEach(point => {
+
+            const match =
+                String(point.note || "")
+                    .trim()
+                    .match(
+                        /^Point\s+(\d+)$/i
+                    );
+
+            if (!match) {
+                return;
+            }
+
+            const pointNumber =
+                Number(match[1]);
+
+            if (
+                Number.isInteger(
+                    pointNumber
+                ) &&
+                pointNumber >
+                    largestNumber
+            ) {
+
+                largestNumber =
+                    pointNumber;
+
+            }
+
+        });
+
+        return largestNumber + 1;
+
+    }
+
+
+    // =====================================
+    // NORMALIZE POINT
+    // =====================================
+
+    function normalizePoint(point) {
+
+        if (
+            !point ||
+            typeof point !== "object"
+        ) {
+
+            return null;
+
+        }
+
+        const latitude =
+            Number(point.lat);
+
+        const longitude =
+            Number(point.lng);
+
+        if (
+            !isValidLatitude(latitude) ||
+            !isValidLongitude(longitude)
+        ) {
+
+            return null;
+
+        }
+
+        const id =
+            typeof point.id === "string" &&
+            point.id.trim()
+                ? point.id.trim()
+                : generateId();
+
+        const note =
+            String(point.note || "")
+                .trim();
+
+        const created =
+            Number(point.created);
+
+        return {
+
+            id,
+
+            lat: latitude,
+
+            lng: longitude,
+
+            note,
+
+            created:
+                Number.isFinite(created) &&
+                created > 0
+                    ? created
+                    : Date.now()
+
+        };
+
+    }
+
+
+    // =====================================
+    // VALIDATION
+    // =====================================
+
+    function isValidLatitude(value) {
+
+        return (
+            Number.isFinite(value) &&
+            value >= -90 &&
+            value <= 90
+        );
+
+    }
+
+
+    function isValidLongitude(value) {
+
+        return (
+            Number.isFinite(value) &&
+            value >= -180 &&
+            value <= 180
+        );
 
     }
 
@@ -244,6 +529,9 @@ const FixPinStorage = (() => {
         getById,
 
         save,
+        saveAll,
+        replaceAll,
+
         update,
         remove,
         clear,
