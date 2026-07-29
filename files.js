@@ -928,7 +928,6 @@ function downloadFile(
 
     }
 
-
     // =====================================
     // PUBLIC API
     // =====================================
@@ -945,7 +944,7 @@ function downloadFile(
 
     };
 
-
+})();
 
 
 window.FixPinFiles =
