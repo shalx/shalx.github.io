@@ -133,36 +133,37 @@ const MIME_TYPE =
         =====================================
         */
 
-  function downloadFile(
+function downloadFile(
     fileName,
     content
 ) {
 
-    const file =
-        new File(
+    const blob =
+        new Blob(
             [content],
-            fileName,
             {
                 type: MIME_TYPE
             }
         );
 
     const url =
-        URL.createObjectURL(file);
+        URL.createObjectURL(
+            blob
+        );
 
     const link =
-        document.createElement("a");
+        document.createElement(
+            "a"
+        );
 
     link.href =
         url;
 
-    link.setAttribute(
-        "download",
-        fileName
-    );
+    link.download =
+        fileName;
 
-    link.style.display =
-        "none";
+    link.hidden =
+        true;
 
     document.body.appendChild(
         link
@@ -180,7 +181,7 @@ const MIME_TYPE =
             );
 
         },
-        2000
+        1000
     );
 
 }
