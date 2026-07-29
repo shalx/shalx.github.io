@@ -1063,41 +1063,81 @@ async function openSelectedFile(event) {
                 file
             );
 
-        const confirmed =
-            window.confirm(
+        const existingPoints =
+            FixPinStorage.getAll();
 
-                "Opening this file will replace all " +
+        let added = 0;
 
-                "currently saved points. Continue?"
+        let skipped = 0;
 
+        importedPoints.forEach(point => {
+
+            const duplicate =
+                existingPoints.some(existingPoint =>
+
+                    Number(existingPoint.lat) ===
+                        Number(point.lat) &&
+
+                    Number(existingPoint.lng) ===
+                        Number(point.lng) &&
+
+                    String(existingPoint.note || "")
+                        .trim() ===
+
+                    String(point.note || "")
+                        .trim()
+
+                );
+
+            if (duplicate) {
+
+                skipped++;
+
+                return;
+
+            }
+
+            const importedPoint = {
+
+                id:
+                    point.id,
+
+                lat:
+                    Number(point.lat),
+
+                lng:
+                    Number(point.lng),
+
+                note:
+                    String(point.note || ""),
+
+                created:
+                    Number(point.created)
+
+            };
+
+            FixPinStorage.save(
+                importedPoint
             );
 
-        if (!confirmed) {
-            return;
-        }
+            existingPoints.push(
+                importedPoint
+            );
 
-        FixPinStorage.replaceAll(
-            importedPoints
-        );
+            added++;
 
-        currentLocation = null;
-
-        elements.noteInput.value = "";
-
-        elements.searchInput.value = "";
-
-        searchText = "";
-
-        FixPinMap.removeCurrentLocation();
-
-        FixPinMap.clearSavedMarkers();
-
-        FixPinMap.resetMapView();
+        });
 
         renderList();
 
         showMessage(
-            `${importedPoints.length} points opened.`
+
+            "Import completed\n\n" +
+
+            `Added: ${added}\n` +
+
+            `Skipped duplicates: ${skipped}`
+
         );
 
     } catch (error) {
@@ -1105,8 +1145,11 @@ async function openSelectedFile(event) {
         console.error(error);
 
         showMessage(
+
             error.message ||
+
             "Unable to open the file."
+
         );
 
     } finally {
@@ -1114,8 +1157,11 @@ async function openSelectedFile(event) {
         event.target.value = "";
 
         setButtonBusy(
+
             elements.openFileButton,
+
             false
+
         );
 
     }
