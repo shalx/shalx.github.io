@@ -133,58 +133,7 @@ const MIME_TYPE =
         =====================================
         */
 
-function downloadFile(
-    fileName,
-    content
-) {
 
-    const blob =
-        new Blob(
-            [content],
-            {
-                type: MIME_TYPE
-            }
-        );
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-    const link =
-        document.createElement(
-            "a"
-        );
-
-    link.href =
-        url;
-
-    link.download =
-        fileName;
-
-    link.hidden =
-        true;
-
-    document.body.appendChild(
-        link
-    );
-
-    link.click();
-
-    window.setTimeout(
-        () => {
-
-            link.remove();
-
-            URL.revokeObjectURL(
-                url
-            );
-
-        },
-        1000
-    );
-
-}
 
 
     // =====================================
