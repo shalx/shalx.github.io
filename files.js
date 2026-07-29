@@ -126,12 +126,25 @@ const MIME_TYPE =
 
         }
 
-        /*
+               /*
         =====================================
         DOWNLOAD FALLBACK
         Android Chrome and other browsers
         =====================================
         */
+
+        downloadFile(
+            fileName,
+            content
+        );
+
+        return {
+            saved: true,
+            method: "download",
+            fileName
+        };
+
+    }
 
 
 
