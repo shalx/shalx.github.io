@@ -945,7 +945,7 @@ function downloadFile(
 
     };
 
-})();
+
 
 
 window.FixPinFiles =
