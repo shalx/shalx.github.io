@@ -133,18 +133,57 @@ const MIME_TYPE =
         =====================================
         */
 
-        downloadFile(
+  function downloadFile(
+    fileName,
+    content
+) {
+
+    const file =
+        new File(
+            [content],
             fileName,
-            content
+            {
+                type: MIME_TYPE
+            }
         );
 
-        return {
-            saved: true,
-            method: "download",
-            fileName
-        };
+    const url =
+        URL.createObjectURL(file);
 
-    }
+    const link =
+        document.createElement("a");
+
+    link.href =
+        url;
+
+    link.setAttribute(
+        "download",
+        fileName
+    );
+
+    link.style.display =
+        "none";
+
+    document.body.appendChild(
+        link
+    );
+
+    link.click();
+
+    window.setTimeout(
+        () => {
+
+            link.remove();
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+        2000
+    );
+
+}
 
 
     // =====================================
