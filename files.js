@@ -26,8 +26,8 @@ const FixPinFiles = (() => {
     const FILE_EXTENSION =
         ".fxpn";
 
-    const MIME_TYPE =
-        "application/json";
+ const MIME_TYPE =
+    "application/octet-stream";
 
 
     // =====================================
