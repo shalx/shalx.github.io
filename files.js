@@ -281,20 +281,26 @@ const MIME_TYPE =
 
         }
 
-        if (
-            typeof file.name ===
-                "string" &&
-            file.name &&
-            !file.name
-                .toLowerCase()
-                .endsWith(FILE_EXTENSION)
-        ) {
+     if (
+    typeof file.name === "string" &&
+    file.name
+) {
 
-            throw new Error(
-                "Please select a .fxpn file."
-            );
+    const name =
+        file.name.toLowerCase();
 
-        }
+    if (
+        !name.endsWith(".fxpn") &&
+        !name.endsWith(".fxpn.json")
+    ) {
+
+        throw new Error(
+            "Please select a .fxpn or .fxpn.json file."
+        );
+
+    }
+
+}
 
         if (
             typeof file.size ===
