@@ -1252,7 +1252,7 @@ async function openSelectedFile(event) {
     try {
 
         const points =
-            await FixPinFiles.openFile(file);
+            await FixPinFiles.importPoints(file);
 
         if (!Array.isArray(points)) {
 
