@@ -35,12 +35,6 @@ COLORS
     --go-to: #f9ab00;
     --go-to-hover: #dd9300;
 
-    --open-file: #a142f4;
-    --open-file-hover: #8533d1;
-
-    --save-file: #00a7a7;
-    --save-file-hover: #008989;
-
     --danger: #d93025;
     --danger-soft: #fce8e6;
 
@@ -54,9 +48,16 @@ COLORS
 
     --outline: #d0d7e2;
 
+    --overlay:
+        rgba(32, 33, 36, 0.42);
+
     --shadow:
         0 2px 6px rgba(0, 0, 0, 0.08),
         0 8px 24px rgba(0, 0, 0, 0.05);
+
+    --menu-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.14),
+        0 20px 50px rgba(0, 0, 0, 0.12);
 
     --radius: 16px;
 
@@ -83,6 +84,18 @@ body {
 }
 
 
+/*
+Запрещает прокрутку страницы,
+когда открыто меню.
+*/
+
+body.menu-open {
+
+    overflow: hidden;
+
+}
+
+
 /* =====================================
 APP
 ===================================== */
@@ -96,6 +109,365 @@ APP
     margin: 0 auto;
 
     padding: 12px;
+
+}
+
+
+/* =====================================
+HEADER
+===================================== */
+
+.app-header {
+
+    min-height: 46px;
+
+    margin-bottom: 10px;
+
+    padding: 0 4px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+}
+
+
+.app-title {
+
+    color: var(--text);
+
+    font-size: 21px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+}
+
+
+/* =====================================
+MENU BUTTON
+===================================== */
+
+.menu-button {
+
+    flex: 0 0 42px;
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        transform 0.1s;
+
+}
+
+
+.menu-button:hover {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+.menu-button:active {
+
+    transform: scale(0.96);
+
+}
+
+
+.menu-button i {
+
+    font-size: 24px;
+
+}
+
+
+/* =====================================
+MENU OVERLAY
+===================================== */
+
+.menu-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    background: var(--overlay);
+
+    animation:
+        overlay-fade-in 0.2s ease-out;
+
+}
+
+
+.menu-overlay[hidden] {
+
+    display: none;
+
+}
+
+
+/* =====================================
+APP MENU
+===================================== */
+
+.app-menu {
+
+    position: fixed;
+
+    top: 12px;
+
+    right: 12px;
+
+    z-index: 1001;
+
+    width: min(300px, calc(100vw - 24px));
+
+    padding: 12px;
+
+    border: 1px solid var(--outline);
+
+    border-radius: 18px;
+
+    background: var(--surface);
+
+    box-shadow: var(--menu-shadow);
+
+    animation:
+        menu-slide-in 0.2s ease-out;
+
+}
+
+
+.app-menu[hidden] {
+
+    display: none;
+
+}
+
+
+/* =====================================
+MENU HEADER
+===================================== */
+
+.menu-header {
+
+    min-height: 42px;
+
+    margin-bottom: 6px;
+
+    padding: 0 4px 8px;
+
+    border-bottom: 1px solid var(--outline);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+.menu-header strong {
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+}
+
+
+/* =====================================
+MENU CLOSE BUTTON
+===================================== */
+
+.menu-close-button {
+
+    flex: 0 0 36px;
+
+    width: 36px;
+
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.menu-close-button:hover {
+
+    background: var(--surface-soft);
+
+    color: var(--text);
+
+}
+
+
+.menu-close-button i {
+
+    font-size: 21px;
+
+}
+
+
+/* =====================================
+MENU ITEMS
+===================================== */
+
+.menu-item {
+
+    width: 100%;
+
+    min-height: 48px;
+
+    margin-top: 4px;
+
+    padding: 0 14px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    gap: 12px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    text-align: left;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.menu-item:hover {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+.menu-item:active {
+
+    background: #dce8fc;
+
+}
+
+
+.menu-item i {
+
+    flex-shrink: 0;
+
+    width: 22px;
+
+    font-size: 21px;
+
+    text-align: center;
+
+}
+
+
+/*
+Тонкий разделитель перед About.
+*/
+
+#aboutBtn {
+
+    margin-top: 10px;
+
+    position: relative;
+
+}
+
+
+#aboutBtn::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: -6px;
+
+    left: 8px;
+
+    right: 8px;
+
+    height: 1px;
+
+    background: var(--outline);
 
 }
 
@@ -184,7 +556,7 @@ MAIN BUTTONS
     display: grid;
 
     grid-template-columns:
-        repeat(5, minmax(0, 1fr));
+        repeat(3, minmax(0, 1fr));
 
     gap: 7px;
 
@@ -199,7 +571,7 @@ MAIN BUTTONS
 
     height: 42px;
 
-    padding: 0 7px;
+    padding: 0 10px;
 
     border: none;
 
@@ -209,7 +581,7 @@ MAIN BUTTONS
 
     cursor: pointer;
 
-    font-size: 12px;
+    font-size: 13px;
 
     font-weight: 600;
 
@@ -219,7 +591,7 @@ MAIN BUTTONS
 
     justify-content: center;
 
-    gap: 5px;
+    gap: 6px;
 
     white-space: nowrap;
 
@@ -311,38 +683,6 @@ MAIN BUTTONS
 #goToSelectedBtn:hover {
 
     background: var(--go-to-hover);
-
-}
-
-
-/* OPEN FILE */
-
-#openFileBtn {
-
-    background: var(--open-file);
-
-}
-
-
-#openFileBtn:hover {
-
-    background: var(--open-file-hover);
-
-}
-
-
-/* SAVE TO FILE */
-
-#saveFileBtn {
-
-    background: var(--save-file);
-
-}
-
-
-#saveFileBtn:hover {
-
-    background: var(--save-file-hover);
 
 }
 
@@ -569,6 +909,184 @@ Point 1                         Show   Delete
 
 
 /* =====================================
+ABOUT DIALOG
+===================================== */
+
+.about-dialog {
+
+    width: min(440px, calc(100vw - 24px));
+
+    max-height: calc(100vh - 24px);
+
+    margin: auto;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid var(--outline);
+
+    border-radius: 18px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    box-shadow: var(--menu-shadow);
+
+}
+
+
+.about-dialog[open] {
+
+    animation:
+        dialog-show 0.2s ease-out;
+
+}
+
+
+.about-dialog::backdrop {
+
+    background: var(--overlay);
+
+    animation:
+        overlay-fade-in 0.2s ease-out;
+
+}
+
+
+/* =====================================
+ABOUT CONTENT
+===================================== */
+
+.about-content {
+
+    padding: 18px;
+
+}
+
+
+.about-header {
+
+    margin-bottom: 16px;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid var(--outline);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+}
+
+
+.about-header h2 {
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+
+}
+
+
+/* =====================================
+ABOUT CLOSE BUTTON
+===================================== */
+
+.about-close-button {
+
+    flex: 0 0 38px;
+
+    width: 38px;
+
+    height: 38px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.about-close-button:hover {
+
+    background: var(--surface-soft);
+
+    color: var(--text);
+
+}
+
+
+.about-close-button i {
+
+    font-size: 21px;
+
+}
+
+
+/* =====================================
+ABOUT TEXT
+===================================== */
+
+.about-content p {
+
+    margin-bottom: 12px;
+
+    color: var(--text-secondary);
+
+    font-size: 15px;
+
+    line-height: 1.55;
+
+}
+
+
+.about-content p:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.about-version {
+
+    padding-top: 4px;
+
+    color: var(--primary) !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700;
+
+}
+
+
+/* =====================================
 LEAFLET POPUP
 ===================================== */
 
@@ -586,6 +1104,53 @@ LEAFLET POPUP
 
 
 /* =====================================
+ANIMATIONS
+===================================== */
+
+@keyframes overlay-fade-in {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+}
+
+
+@keyframes menu-slide-in {
+
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+
+@keyframes dialog-show {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+
+/* =====================================
 PHONE
 ===================================== */
 
@@ -594,6 +1159,55 @@ PHONE
     .app-container {
 
         padding: 8px;
+
+    }
+
+
+    .app-header {
+
+        min-height: 42px;
+
+        margin-bottom: 8px;
+
+        padding: 0 2px;
+
+    }
+
+
+    .app-title {
+
+        font-size: 20px;
+
+    }
+
+
+    .menu-button {
+
+        flex-basis: 40px;
+
+        width: 40px;
+
+        height: 40px;
+
+        border-radius: 11px;
+
+    }
+
+
+    .menu-button i {
+
+        font-size: 23px;
+
+    }
+
+
+    .app-menu {
+
+        top: 8px;
+
+        right: 8px;
+
+        width: min(290px, calc(100vw - 16px));
 
     }
 
@@ -623,9 +1237,9 @@ PHONE
     .actions {
 
         grid-template-columns:
-            repeat(5, minmax(0, 1fr));
+            repeat(3, minmax(0, 1fr));
 
-        gap: 4px;
+        gap: 6px;
 
         margin-bottom: 8px;
 
@@ -636,13 +1250,13 @@ PHONE
 
         height: 40px;
 
-        padding: 0 4px;
+        padding: 0 7px;
 
         border-radius: 9px;
 
-        font-size: 10px;
+        font-size: 12px;
 
-        gap: 3px;
+        gap: 4px;
 
     }
 
@@ -698,6 +1312,13 @@ PHONE
 
     }
 
+
+    .about-content {
+
+        padding: 16px;
+
+    }
+
 }
 
 
@@ -705,7 +1326,7 @@ PHONE
 VERY SMALL PHONE
 ===================================== */
 
-@media (max-width: 430px) {
+@media (max-width: 360px) {
 
     .actions button span {
 
@@ -724,6 +1345,36 @@ VERY SMALL PHONE
     .actions button i {
 
         font-size: 20px;
+
+    }
+
+
+    .app-title {
+
+        font-size: 19px;
+
+    }
+
+}
+
+
+/* =====================================
+REDUCED MOTION
+===================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior: auto !important;
+
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
 
     }
 
