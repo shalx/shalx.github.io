@@ -1130,3 +1130,255 @@ function encodeCoordinatePair(point) {
     );
 
 }
+// =====================================
+// DELETE POINT
+// =====================================
+
+function deletePoint(
+    point,
+    index
+) {
+
+    const title =
+        getPointTitle(
+            point,
+            index
+        );
+
+    const confirmed =
+        window.confirm(
+            `Delete "${title}"?`
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        FixPinMap.removeSavedMarker(
+            point.id
+        );
+
+        FixPinStorage.remove(
+            point.id
+        );
+
+        renderList();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message ||
+            "Unable to delete the point."
+        );
+
+    }
+
+}
+// =====================================
+// SAVE TO FILE
+// =====================================
+
+function savePointsToFile() {
+
+    try {
+
+        const points =
+            FixPinStorage.getAll();
+
+        if (points.length === 0) {
+
+            showMessage(
+                "There are no saved points."
+            );
+
+            return;
+
+        }
+
+        const fileName =
+
+            "points_" +
+
+            new Date()
+                .toISOString()
+                .slice(0, 10) +
+
+            ".fxpn.json";
+
+        FixPinFiles.saveToFile(
+
+            points,
+            fileName
+
+        );
+
+        showMessage(
+            "File saved successfully."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+
+            error.message ||
+
+            "Unable to save the file."
+
+        );
+
+    }
+
+}
+// =====================================
+// OPEN FILE
+// =====================================
+
+function openFileDialog() {
+
+    elements.fileInput.value = "";
+
+    elements.fileInput.click();
+
+}
+
+
+async function openSelectedFile(event) {
+
+    const file =
+        event.target.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+
+        const points =
+            await FixPinFiles.openFile(file);
+
+        if (!Array.isArray(points)) {
+
+            throw new Error(
+                "Invalid file."
+            );
+
+        }
+
+        FixPinStorage.replaceAll(
+            points
+        );
+
+        FixPinMap.clearSavedMarkers();
+
+        renderList();
+
+        showMessage(
+            `${points.length} point(s) imported.`
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+
+            error.message ||
+
+            "Unable to open the file."
+
+        );
+
+    } finally {
+
+        elements.fileInput.value = "";
+
+    }
+
+}
+// =====================================
+// NOTE
+// =====================================
+
+function handleNoteKeydown(event) {
+
+    if (event.key !== "Enter") {
+        return;
+    }
+
+    event.preventDefault();
+
+    saveCurrentPoint();
+
+}
+
+
+// =====================================
+// BUTTON
+// =====================================
+
+function setButtonBusy(
+    button,
+    busy
+) {
+
+    if (!button) {
+        return;
+    }
+
+    button.disabled = busy;
+
+}
+
+
+// =====================================
+// MESSAGE
+// =====================================
+
+function showMessage(message) {
+
+    window.alert(
+        String(message)
+    );
+
+}
+
+
+// =====================================
+// SERVICE WORKER
+// =====================================
+
+function registerServiceWorker() {
+
+    if (
+        !("serviceWorker" in navigator)
+    ) {
+        return;
+    }
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            navigator.serviceWorker
+                .register(
+                    "./service-worker.js"
+                )
+                .catch(error => {
+
+                    console.error(
+                        "Service Worker:",
+                        error
+                    );
+
+                });
+
+        }
+    );
+
+}
