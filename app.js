@@ -36,6 +36,20 @@ const elements = {
 
     saveFileButton: null,
 
+    menuButton: null,
+
+    closeMenuButton: null,
+
+    menuOverlay: null,
+
+    appMenu: null,
+
+    aboutButton: null,
+
+    aboutDialog: null,
+
+    closeAboutButton: null,
+
     searchInput: null,
 
     fileInput: null,
@@ -141,6 +155,41 @@ function getElements() {
             "saveFileBtn"
         );
 
+    elements.menuButton =
+        document.getElementById(
+            "menuBtn"
+        );
+
+    elements.closeMenuButton =
+        document.getElementById(
+            "closeMenuBtn"
+        );
+
+    elements.menuOverlay =
+        document.getElementById(
+            "menuOverlay"
+        );
+
+    elements.appMenu =
+        document.getElementById(
+            "appMenu"
+        );
+
+    elements.aboutButton =
+        document.getElementById(
+            "aboutBtn"
+        );
+
+    elements.aboutDialog =
+        document.getElementById(
+            "aboutDialog"
+        );
+
+    elements.closeAboutButton =
+        document.getElementById(
+            "closeAboutBtn"
+        );
+
     elements.searchInput =
         document.getElementById(
             "searchInput"
@@ -214,12 +263,24 @@ function bindEvents() {
 
     elements.openFileButton.addEventListener(
         "click",
-        openFileDialog
+        () => {
+
+            closeMenu();
+
+            openFileDialog();
+
+        }
     );
 
     elements.saveFileButton.addEventListener(
         "click",
-        savePointsToFile
+        () => {
+
+            closeMenu();
+
+            savePointsToFile();
+
+        }
     );
 
     elements.fileInput.addEventListener(
@@ -236,6 +297,161 @@ function bindEvents() {
         "keydown",
         handleNoteKeydown
     );
+
+    elements.menuButton.addEventListener(
+        "click",
+        openMenu
+    );
+
+    elements.closeMenuButton.addEventListener(
+        "click",
+        closeMenu
+    );
+
+    elements.menuOverlay.addEventListener(
+        "click",
+        closeMenu
+    );
+
+    elements.aboutButton.addEventListener(
+        "click",
+        openAboutDialog
+    );
+
+    elements.closeAboutButton.addEventListener(
+        "click",
+        closeAboutDialog
+    );
+
+    elements.aboutDialog.addEventListener(
+        "click",
+        handleAboutBackdropClick
+    );
+
+    document.addEventListener(
+        "keydown",
+        handleDocumentKeydown
+    );
+
+}
+
+
+// =====================================
+// MENU
+// =====================================
+
+function openMenu() {
+
+    elements.appMenu.hidden = false;
+
+    elements.menuOverlay.hidden = false;
+
+    elements.menuButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
+    document.body.classList.add(
+        "menu-open"
+    );
+
+    elements.closeMenuButton.focus();
+
+}
+
+
+function closeMenu() {
+
+    if (elements.appMenu.hidden) {
+        return;
+    }
+
+    elements.appMenu.hidden = true;
+
+    elements.menuOverlay.hidden = true;
+
+    elements.menuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+    document.body.classList.remove(
+        "menu-open"
+    );
+
+}
+
+
+// =====================================
+// ABOUT
+// =====================================
+
+function openAboutDialog() {
+
+    closeMenu();
+
+    if (
+        typeof elements.aboutDialog.showModal ===
+        "function"
+    ) {
+
+        elements.aboutDialog.showModal();
+
+        return;
+
+    }
+
+    elements.aboutDialog.setAttribute(
+        "open",
+        ""
+    );
+
+}
+
+
+function closeAboutDialog() {
+
+    if (
+        typeof elements.aboutDialog.close ===
+        "function" &&
+        elements.aboutDialog.open
+    ) {
+
+        elements.aboutDialog.close();
+
+        return;
+
+    }
+
+    elements.aboutDialog.removeAttribute(
+        "open"
+    );
+
+}
+
+
+function handleAboutBackdropClick(event) {
+
+    if (event.target === elements.aboutDialog) {
+        closeAboutDialog();
+    }
+
+}
+
+
+function handleDocumentKeydown(event) {
+
+    if (event.key !== "Escape") {
+        return;
+    }
+
+    if (!elements.appMenu.hidden) {
+
+        closeMenu();
+
+        elements.menuButton.focus();
+
+    }
 
 }
 
@@ -375,8 +591,6 @@ function handleSearch(event) {
     renderList();
 
 }
-
-
 // =====================================
 // RENDER LIST
 // =====================================
@@ -913,360 +1127,6 @@ function encodeCoordinatePair(point) {
         `${Number(point.lat)},` +
         `${Number(point.lng)}`
 
-    );
-
-}
-
-
-// =====================================
-// DELETE
-// =====================================
-
-function deletePoint(
-    point,
-    index
-) {
-
-    const pointName =
-        getPointTitle(
-            point,
-            index
-        );
-
-    const confirmed =
-        window.confirm(
-            `Delete "${pointName}"?`
-        );
-
-    if (!confirmed) {
-        return;
-    }
-
-    try {
-
-        FixPinStorage.remove(
-            point.id
-        );
-
-        FixPinMap.removeSavedMarker(
-            point.id
-        );
-
-        renderList();
-
-    } catch (error) {
-
-        console.error(error);
-
-        showMessage(
-            "Unable to delete the point."
-        );
-
-    }
-
-}
-
-
-// =====================================
-// SAVE TO FILE
-// =====================================
-
-async function savePointsToFile() {
-
-    const points =
-        FixPinStorage.getAll();
-
-    if (points.length === 0) {
-
-        showMessage(
-            "There are no points to save."
-        );
-
-        return;
-
-    }
-
-    setButtonBusy(
-        elements.saveFileButton,
-        true
-    );
-
-    try {
-
-        const result =
-            await FixPinFiles.exportPoints(
-                points
-            );
-
-        if (
-            result &&
-            result.cancelled
-        ) {
-            return;
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-        showMessage(
-            error.message ||
-            "Unable to save the file."
-        );
-
-    } finally {
-
-        setButtonBusy(
-            elements.saveFileButton,
-            false
-        );
-
-    }
-
-}
-
-
-// =====================================
-// OPEN FILE
-// =====================================
-
-function openFileDialog() {
-
-    elements.fileInput.value = "";
-
-    elements.fileInput.click();
-
-}
-
-
-async function openSelectedFile(event) {
-
-    const file =
-
-        event.target.files &&
-
-        event.target.files[0];
-
-    if (!file) {
-        return;
-    }
-
-    setButtonBusy(
-        elements.openFileButton,
-        true
-    );
-
-    try {
-
-        const importedPoints =
-            await FixPinFiles.importPoints(
-                file
-            );
-
-        const existingPoints =
-            FixPinStorage.getAll();
-
-        let added = 0;
-
-        let skipped = 0;
-
-        importedPoints.forEach(point => {
-
-            const duplicate =
-                existingPoints.some(existingPoint =>
-
-                    Number(existingPoint.lat) ===
-                        Number(point.lat) &&
-
-                    Number(existingPoint.lng) ===
-                        Number(point.lng) &&
-
-                    String(existingPoint.note || "")
-                        .trim() ===
-
-                    String(point.note || "")
-                        .trim()
-
-                );
-
-            if (duplicate) {
-
-                skipped++;
-
-                return;
-
-            }
-
-            const importedPoint = {
-
-                id:
-                    point.id,
-
-                lat:
-                    Number(point.lat),
-
-                lng:
-                    Number(point.lng),
-
-                note:
-                    String(point.note || ""),
-
-                created:
-                    Number(point.created)
-
-            };
-
-            FixPinStorage.save(
-                importedPoint
-            );
-
-            existingPoints.push(
-                importedPoint
-            );
-
-            added++;
-
-        });
-
-        renderList();
-
-        showMessage(
-
-            "Import completed\n\n" +
-
-            `Added: ${added}\n` +
-
-            `Skipped duplicates: ${skipped}`
-
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        showMessage(
-
-            error.message ||
-
-            "Unable to open the file."
-
-        );
-
-    } finally {
-
-        event.target.value = "";
-
-        setButtonBusy(
-
-            elements.openFileButton,
-
-            false
-
-        );
-
-    }
-
-}
-
-
-// =====================================
-// NOTE INPUT
-// =====================================
-
-function handleNoteKeydown(event) {
-
-    if (
-        event.key !== "Enter" ||
-        event.shiftKey
-    ) {
-        return;
-    }
-
-    event.preventDefault();
-
-    saveCurrentPoint();
-
-}
-
-
-// =====================================
-// BUTTON STATE
-// =====================================
-
-function setButtonBusy(
-    button,
-    isBusy
-) {
-
-    if (!button) {
-        return;
-    }
-
-    button.disabled =
-        Boolean(isBusy);
-
-    button.setAttribute(
-
-        "aria-busy",
-
-        String(
-            Boolean(isBusy)
-        )
-
-    );
-
-}
-
-
-// =====================================
-// MESSAGE
-// =====================================
-
-function showMessage(message) {
-
-    window.alert(
-        String(message)
-    );
-
-}
-
-
-// =====================================
-// SERVICE WORKER
-// =====================================
-
-function registerServiceWorker() {
-
-    if (
-        !("serviceWorker" in navigator)
-    ) {
-        return;
-    }
-
-    window.addEventListener(
-        "load",
-        () => {
-
-            navigator.serviceWorker
-
-                .register(
-                    "service-worker.js"
-                )
-
-                .catch(error => {
-
-                    console.error(
-
-                        "Fix-Pin: service worker " +
-                        "registration failed.",
-
-                        error
-
-                    );
-
-                });
-
-        }
     );
 
 }
