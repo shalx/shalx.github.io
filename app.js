@@ -1182,7 +1182,7 @@ function deletePoint(
 // SAVE TO FILE
 // =====================================
 
-function savePointsToFile() {
+async function savePointsToFile() {
 
     try {
 
@@ -1199,22 +1199,17 @@ function savePointsToFile() {
 
         }
 
-        const fileName =
+        const result =
+            await FixPinFiles.exportPoints(
+                points
+            );
 
-            "points_" +
-
-            new Date()
-                .toISOString()
-                .slice(0, 10) +
-
-            ".fxpn.json";
-
-        FixPinFiles.saveToFile(
-
-            points,
-            fileName
-
-        );
+        if (
+            result &&
+            result.cancelled
+        ) {
+            return;
+        }
 
         showMessage(
             "File saved successfully."
@@ -1225,11 +1220,8 @@ function savePointsToFile() {
         console.error(error);
 
         showMessage(
-
             error.message ||
-
             "Unable to save the file."
-
         );
 
     }
