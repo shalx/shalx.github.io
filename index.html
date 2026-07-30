@@ -43,14 +43,131 @@
 
     <main class="app-container">
 
+        <!-- =====================================
+        HEADER
+        ====================================== -->
+
+        <header class="app-header">
+
+            <h1 class="app-title">
+                Fix-Pin
+            </h1>
+
+            <button
+                id="menuBtn"
+                class="menu-button"
+                type="button"
+                title="Open menu"
+                aria-label="Open menu"
+                aria-expanded="false"
+                aria-controls="appMenu"
+            >
+                <i class="ph ph-list"></i>
+            </button>
+
+        </header>
+
+
+        <!-- =====================================
+        MENU
+        ====================================== -->
+
+        <div
+            id="menuOverlay"
+            class="menu-overlay"
+            hidden
+        ></div>
+
+        <nav
+            id="appMenu"
+            class="app-menu"
+            aria-label="Fix-Pin menu"
+            hidden
+        >
+
+            <div class="menu-header">
+
+                <strong>
+                    Menu
+                </strong>
+
+                <button
+                    id="closeMenuBtn"
+                    class="menu-close-button"
+                    type="button"
+                    title="Close menu"
+                    aria-label="Close menu"
+                >
+                    <i class="ph ph-x"></i>
+                </button>
+
+            </div>
+
+            <button
+                id="openFileBtn"
+                class="menu-item"
+                type="button"
+                title="Open an FXPN file"
+            >
+                <i class="ph ph-folder-open"></i>
+
+                <span>
+                    Open File
+                </span>
+            </button>
+
+            <button
+                id="saveFileBtn"
+                class="menu-item"
+                type="button"
+                title="Save points to an FXPN file"
+            >
+                <i class="ph ph-download-simple"></i>
+
+                <span>
+                    Save to File
+                </span>
+            </button>
+
+            <button
+                id="aboutBtn"
+                class="menu-item"
+                type="button"
+                title="About Fix-Pin"
+            >
+                <i class="ph ph-info"></i>
+
+                <span>
+                    About Fix-Pin
+                </span>
+            </button>
+
+        </nav>
+
+
+        <!-- =====================================
+        MAP
+        ====================================== -->
+
         <div id="map"></div>
+
+
+        <!-- =====================================
+        NOTE
+        ====================================== -->
 
         <input
             id="myInput"
             type="text"
             placeholder="Note..."
             autocomplete="off"
+            aria-label="Point note"
         >
+
+
+        <!-- =====================================
+        MAIN ACTIONS
+        ====================================== -->
 
         <div class="actions">
 
@@ -69,7 +186,10 @@
                 title="Save point"
             >
                 <i class="ph ph-floppy-disk"></i>
-                <span>Save</span>
+
+                <span>
+                    Save
+                </span>
             </button>
 
             <button
@@ -78,28 +198,18 @@
                 title="Open points shown on the map in Google Maps"
             >
                 <i class="ph ph-navigation-arrow"></i>
-                <span>Go To</span>
-            </button>
 
-            <button
-                id="openFileBtn"
-                type="button"
-                title="Open an FXPN file"
-            >
-                <i class="ph ph-folder-open"></i>
-                <span>Open File</span>
-            </button>
-
-            <button
-                id="saveFileBtn"
-                type="button"
-                title="Save points to an FXPN file"
-            >
-                <i class="ph ph-download-simple"></i>
-                <span>Save to File</span>
+                <span>
+                    Go To
+                </span>
             </button>
 
         </div>
+
+
+        <!-- =====================================
+        SEARCH
+        ====================================== -->
 
         <input
             id="searchInput"
@@ -109,7 +219,17 @@
             aria-label="Search saved points"
         >
 
+
+        <!-- =====================================
+        SAVED POINTS
+        ====================================== -->
+
         <ol id="data-list"></ol>
+
+
+        <!-- =====================================
+        FILE INPUT
+        ====================================== -->
 
         <input
             id="fileInput"
@@ -119,6 +239,59 @@
         >
 
     </main>
+
+
+    <!-- =====================================
+    ABOUT FIX-PIN
+    ====================================== -->
+
+    <dialog
+        id="aboutDialog"
+        class="about-dialog"
+    >
+
+        <div class="about-content">
+
+            <div class="about-header">
+
+                <h2>
+                    About Fix-Pin
+                </h2>
+
+                <button
+                    id="closeAboutBtn"
+                    class="about-close-button"
+                    type="button"
+                    title="Close"
+                    aria-label="Close About Fix-Pin"
+                >
+                    <i class="ph ph-x"></i>
+                </button>
+
+            </div>
+
+            <p>
+                Fix-Pin is a simple application for saving locations,
+                adding notes and opening saved points in Google Maps.
+            </p>
+
+            <p>
+                Saved points are stored on your device.
+                You can also save them to an FXPN file and open them later.
+            </p>
+
+            <p class="about-version">
+                Version 1.0
+            </p>
+
+        </div>
+
+    </dialog>
+
+
+    <!-- =====================================
+    SCRIPTS
+    ====================================== -->
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
