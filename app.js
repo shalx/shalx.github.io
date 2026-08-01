@@ -571,11 +571,11 @@ function saveCurrentPoint() {
 
         FixPinStorage.save(point);
 
-        showToast("✓ Pin saved");
-
         elements.noteInput.value = "";
 
         renderList();
+
+        showMessage("✓ Pin saved");
 
         elements.noteInput.focus();
 
