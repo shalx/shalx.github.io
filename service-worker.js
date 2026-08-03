@@ -1,79 +1,238 @@
 "use strict";
 
-const CACHE_NAME = "fix-pin-cache-v2";
+/*
+=========================================
+FIX-PIN
+service-worker.js
+=========================================
+*/
 
-const URLS_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./app.js",
-  "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png",
+const CACHE_NAME =
+    "fix-pin-cache-v3";
 
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+
+const APP_FILES = [
+
+    "./",
+    "./index.html",
+
+    "./style.css",
+
+    "./storage.js",
+    "./files.js",
+    "./map.js",
+    "./app.js",
+
+    "./manifest.json",
+
+    "./icon-192.png",
+    "./icon-512.png"
+
 ];
 
 
-// INSTALL
-self.addEventListener("install", event => {
+/*
+=========================================
+INSTALL
+=========================================
+*/
 
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then(cache => cache.addAll(URLS_TO_CACHE))
-  );
+self.addEventListener(
+    "install",
+    event => {
 
-  self.skipWaiting();
+        event.waitUntil(
 
-});
+            caches
+                .open(CACHE_NAME)
+                .then(cache => {
 
+                    return cache.addAll(
+                        APP_FILES
+                    );
 
-// ACTIVATE
-self.addEventListener("activate", event => {
+                })
 
-  event.waitUntil(
-    caches
-      .keys()
-      .then(cacheNames => {
-
-        return Promise.all(
-          cacheNames.map(cacheName => {
-
-            if (cacheName !== CACHE_NAME) {
-              return caches.delete(cacheName);
-            }
-
-          })
         );
 
-      })
-  );
+        self.skipWaiting();
 
-  self.clients.claim();
-
-});
+    }
+);
 
 
-// FETCH
-self.addEventListener("fetch", event => {
+/*
+=========================================
+ACTIVATE
+=========================================
+*/
 
-  if (event.request.method !== "GET") {
-    return;
-  }
+self.addEventListener(
+    "activate",
+    event => {
 
-  event.respondWith(
-    caches
-      .match(event.request)
-      .then(cachedResponse => {
+        event.waitUntil(
 
-        if (cachedResponse) {
-          return cachedResponse;
+            caches
+                .keys()
+                .then(cacheNames => {
+
+                    return Promise.all(
+
+                        cacheNames.map(
+                            cacheName => {
+
+                                if (
+                                    cacheName !==
+                                    CACHE_NAME
+                                ) {
+
+                                    return caches.delete(
+                                        cacheName
+                                    );
+
+                                }
+
+                                return null;
+
+                            }
+                        )
+
+                    );
+
+                })
+
+        );
+
+        self.clients.claim();
+
+    }
+);
+
+
+/*
+=========================================
+FETCH
+=========================================
+*/
+
+self.addEventListener(
+    "fetch",
+    event => {
+
+        const request =
+            event.request;
+
+
+        if (
+            request.method !== "GET"
+        ) {
+
+            return;
+
         }
 
-        return fetch(event.request);
 
-      })
-  );
+        /*
+        =================================
+        PAGE NAVIGATION
+        =================================
+        */
 
-});
+        if (
+            request.mode === "navigate"
+        ) {
+
+            event.respondWith(
+
+                fetch(request)
+
+                    .then(response => {
+
+                        const copy =
+                            response.clone();
+
+                        caches
+                            .open(CACHE_NAME)
+                            .then(cache => {
+
+                                cache.put(
+                                    "./index.html",
+                                    copy
+                                );
+
+                            });
+
+                        return response;
+
+                    })
+
+                    .catch(() => {
+
+                        return caches.match(
+                            "./index.html"
+                        );
+
+                    })
+
+            );
+
+            return;
+
+        }
+
+
+        /*
+        =================================
+        FILES AND EXTERNAL RESOURCES
+        =================================
+        */
+
+        event.respondWith(
+
+            caches
+                .match(request)
+                .then(cachedResponse => {
+
+                    if (cachedResponse) {
+
+                        return cachedResponse;
+
+                    }
+
+                    return fetch(request)
+                        .then(response => {
+
+                            if (
+                                !response ||
+                                response.status !== 200
+                            ) {
+
+                                return response;
+
+                            }
+
+                            const copy =
+                                response.clone();
+
+                            caches
+                                .open(CACHE_NAME)
+                                .then(cache => {
+
+                                    cache.put(
+                                        request,
+                                        copy
+                                    );
+
+                                });
+
+                            return response;
+
+                        });
+
+                })
+
+        );
+
+    }
+);
