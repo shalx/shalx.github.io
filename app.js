@@ -1272,10 +1272,10 @@ async function openSelectedFile(event) {
 
     try {
 
-        const points =
+        const importedPoints =
             await FixPinFiles.importPoints(file);
 
-        if (!Array.isArray(points)) {
+        if (!Array.isArray(importedPoints)) {
 
             throw new Error(
                 "Invalid file."
@@ -1283,8 +1283,71 @@ async function openSelectedFile(event) {
 
         }
 
+        const localPoints =
+            FixPinStorage.getAll();
+
+        const combinedPoints = [
+            ...localPoints
+        ];
+
+        let addedCount = 0;
+        let duplicateCount = 0;
+
+        importedPoints.forEach(
+            importedPoint => {
+
+                const duplicate =
+                    combinedPoints.some(
+                        savedPoint => {
+
+                            const sameLatitude =
+                                Number(savedPoint.lat) ===
+                                Number(importedPoint.lat);
+
+                            const sameLongitude =
+                                Number(savedPoint.lng) ===
+                                Number(importedPoint.lng);
+
+                            const sameNote =
+                                String(
+                                    savedPoint.note || ""
+                                )
+                                    .trim()
+                                    .toLowerCase() ===
+                                String(
+                                    importedPoint.note || ""
+                                )
+                                    .trim()
+                                    .toLowerCase();
+
+                            return (
+                                sameLatitude &&
+                                sameLongitude &&
+                                sameNote
+                            );
+
+                        }
+                    );
+
+                if (duplicate) {
+
+                    duplicateCount++;
+
+                    return;
+
+                }
+
+                combinedPoints.push(
+                    importedPoint
+                );
+
+                addedCount++;
+
+            }
+        );
+
         FixPinStorage.replaceAll(
-            points
+            combinedPoints
         );
 
         FixPinMap.clearSavedMarkers();
@@ -1292,7 +1355,8 @@ async function openSelectedFile(event) {
         renderList();
 
         showMessage(
-            `${points.length} point(s) imported.`
+            `Added: ${addedCount}. ` +
+            `Duplicates skipped: ${duplicateCount}.`
         );
 
     } catch (error) {
@@ -1300,11 +1364,8 @@ async function openSelectedFile(event) {
         console.error(error);
 
         showMessage(
-
             error.message ||
-
             "Unable to open the file."
-
         );
 
     } finally {
