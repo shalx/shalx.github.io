@@ -1,1 +1,12 @@
-
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.fixpin.app",
+      "sha256_cert_fingerprints": [
+        "F3:5D:8D:15:0B:A1:8D:EF:65:80:CE:F4:52:FC:C7:10:C4:AA:60:84:AC:2A:FD:BC:A0:67:1F:37:5B:19:17:80"
+      ]
+    }
+  }
+]
