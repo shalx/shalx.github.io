@@ -785,6 +785,27 @@ function createListItem(
         });
 
 
+    const shareButton =
+        createIconButton({
+
+            icon:
+                "ph-share-network",
+
+            label:
+                "Share point",
+
+            className:
+                "share-btn",
+
+            onClick:
+                () => sharePoint(
+                    point,
+                    index
+                )
+
+        });
+
+
     const deleteButton =
         createIconButton({
 
@@ -808,6 +829,10 @@ function createListItem(
 
     actions.appendChild(
         mapButton
+    );
+
+    actions.appendChild(
+        shareButton
     );
 
     actions.appendChild(
