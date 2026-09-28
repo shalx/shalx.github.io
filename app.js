@@ -1177,6 +1177,116 @@ function encodeCoordinatePair(point) {
 
 }
 // =====================================
+// SHARE POINT
+// =====================================
+
+async function sharePoint(
+    point,
+    index
+) {
+
+    if (!hasValidCoordinates(point)) {
+
+        showMessage(
+            "This point has invalid coordinates."
+        );
+
+        return;
+
+    }
+
+    const title =
+        getPointTitle(
+            point,
+            index
+        );
+
+    const latitude =
+        Number(point.lat);
+
+    const longitude =
+        Number(point.lng);
+
+    const mapsUrl =
+        "https://www.google.com/maps/search/" +
+        "?api=1" +
+        `&query=${encodeURIComponent(
+            `${latitude},${longitude}`
+        )}`;
+
+    const shareText =
+        `${title}\n${mapsUrl}`;
+
+    if (navigator.share) {
+
+        try {
+
+            await navigator.share({
+
+                title:
+                    title,
+
+                text:
+                    shareText
+
+            });
+
+            return;
+
+        } catch (error) {
+
+            if (
+                error &&
+                error.name === "AbortError"
+            ) {
+                return;
+            }
+
+            console.error(
+                "Fix-Pin: share failed.",
+                error
+            );
+
+        }
+
+    }
+
+    if (
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText ===
+        "function"
+    ) {
+
+        try {
+
+            await navigator.clipboard.writeText(
+                shareText
+            );
+
+            showMessage(
+                "Location copied to clipboard."
+            );
+
+            return;
+
+        } catch (error) {
+
+            console.error(
+                "Fix-Pin: clipboard failed.",
+                error
+            );
+
+        }
+
+    }
+
+    window.prompt(
+        "Copy this location:",
+        shareText
+    );
+
+}
+// =====================================
 // DELETE POINT
 // =====================================
 
