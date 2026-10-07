@@ -1,13 +1,20 @@
 
 {
+  "id": "/",
   "name": "Fix-Pin",
   "short_name": "Fix-Pin",
   "description": "Save, manage and share GPS locations quickly.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#eef2f7",
   "theme_color": "#4285f4",
+  "categories": [
+    "navigation",
+    "utilities",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
