@@ -1,3 +1,4 @@
+
 {
   "name": "Fix-Pin",
   "short_name": "Fix-Pin",
@@ -19,6 +20,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-share.png.png",
+      "sizes": "940x1672",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Save GPS locations instantly"
+    },
+    {
+      "src": "/screenshot-saved.png.png",
+      "sizes": "941x1672",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Organize saved locations"
+    },
+    {
+      "src": "/screenshot-main.png.png",
+      "sizes": "941x1672",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Share saved locations"
     }
   ]
 }
