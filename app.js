@@ -625,6 +625,12 @@ function renderList() {
         getFilteredEntries(
             points,
             searchText
+        ).sort((a, b) =>
+            getPointTitle(a.point, a.originalIndex).localeCompare(
+                getPointTitle(b.point, b.originalIndex),
+                undefined,
+                { sensitivity: "base", numeric: true }
+            )
         );
 
     elements.dataList.replaceChildren();
