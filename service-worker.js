@@ -7,7 +7,7 @@ service-worker.js
 =========================================
 */
 
-const CACHE_NAME = "fix-pin-cache-v5";
+const CACHE_NAME = "fix-pin-cache-v6";
 
 
 const APP_FILES = [
