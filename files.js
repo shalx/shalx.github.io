@@ -47,19 +47,8 @@ const MIME_TYPE =
         const normalizedPoints =
             normalizeExportPoints(points);
 
-        const fileData = {
-
-            format: FORMAT,
-
-            version: VERSION,
-
-            app: APP_NAME,
-
-            exported: Date.now(),
-
-            points: normalizedPoints
-
-        };
+        // BeenBack-compatible JSON array (shared .fxpn format).
+        const fileData = normalizedPoints;
 
         const content =
             JSON.stringify(
@@ -258,12 +247,14 @@ const MIME_TYPE =
 
         }
 
+        // BeenBack exports a root array; legacy Fix-Pin uses {points: [...]}.
+        if (Array.isArray(data)) {
+            data.forEach((point, index) => validatePoint(point, index));
+            return normalizeImportedPoints(data);
+        }
+
         validateFile(data);
-
-        return normalizeImportedPoints(
-            data.points
-        );
-
+        return normalizeImportedPoints(data.points);
     }
 
 
@@ -536,10 +527,8 @@ const MIME_TYPE =
         }
 
         if (
-            point.note !== undefined &&
-            point.note !== null &&
-            typeof point.note !==
-                "string"
+            (point.note !== undefined && point.note !== null && typeof point.note !== "string") ||
+            (point.name !== undefined && point.name !== null && typeof point.name !== "string")
         ) {
 
             throw new Error(
@@ -549,10 +538,8 @@ const MIME_TYPE =
         }
 
         if (
-            point.created !== undefined &&
-            !Number.isFinite(
-                Number(point.created)
-            )
+            (point.created !== undefined && !Number.isFinite(Number(point.created))) ||
+            (point.time !== undefined && !Number.isFinite(Number(point.time)))
         ) {
 
             throw new Error(
@@ -579,33 +566,12 @@ const MIME_TYPE =
                 );
 
                 return {
-
-                    id:
-                        normalizeId(
-                            point.id
-                        ),
-
-                    lat:
-                        Number(
-                            point.lat
-                        ),
-
-                    lng:
-                        Number(
-                            point.lng
-                        ),
-
-                    note:
-                        normalizeNote(
-                            point.note,
-                            index + 1
-                        ),
-
-                    created:
-                        normalizeCreated(
-                            point.created
-                        )
-
+                    id: normalizeId(point.id),
+                    name: normalizeNote(point.note, index + 1),
+                    lat: Number(point.lat),
+                    lng: Number(point.lng),
+                    accuracy: 0.0,
+                    time: normalizeCreated(point.created)
                 };
 
             }
@@ -646,7 +612,7 @@ const MIME_TYPE =
 
                 let note =
                     String(
-                        point.note || ""
+                        point.note ?? point.name ?? ""
                     ).trim();
 
                 if (!note) {
@@ -676,7 +642,7 @@ const MIME_TYPE =
 
                     created:
                         normalizeCreated(
-                            point.created,
+                            point.created ?? point.time,
                             index
                         )
 
