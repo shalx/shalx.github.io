@@ -1469,3 +1469,47 @@ body.map-fullscreen { overflow: hidden; }
 }
 #map .map-expand-control:hover { background: #f1f5fb; }
 #map .map-expand-control:focus-visible { outline: 3px solid #4285f4; }
+
+/* FIX-PIN FULLSCREEN MAP FIX */
+
+body.map-fullscreen {
+    overflow: hidden;
+}
+
+#map.map-expanded {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    border-radius: 0 !important;
+    z-index: 2000 !important;
+}
+
+#map .map-expand-control {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+
+    width: 36px;
+    height: 36px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    color: #222;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#map.map-expanded .map-expand-control {
+    z-index: 2001;
+}
+
