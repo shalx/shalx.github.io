@@ -17,7 +17,8 @@ let currentLocation = null;
 
 let searchText = "";
 
-// Selection is kept by stable point ID, not list position.
+// Selection uses original storage positions to handle duplicate point IDs.
+// Sorting and filtering do not change these positions.
 const selectedPointIds = new Set();
 
 
@@ -638,10 +639,11 @@ function renderList() {
             )
         );
 
-    // Drop selections for points that no longer exist.
-    const existingIds = new Set(points.map(point => String(point.id)));
-    for (const id of selectedPointIds) {
-        if (!existingIds.has(id)) selectedPointIds.delete(id);
+    // Drop positions that no longer exist.
+    for (const index of selectedPointIds) {
+        if (!Number.isInteger(index) || index < 0 || index >= points.length) {
+            selectedPointIds.delete(index);
+        }
     }
 
     elements.dataList.replaceChildren();
@@ -766,12 +768,11 @@ function createListItem(
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "point-select-checkbox";
-    checkbox.checked = selectedPointIds.has(String(point.id));
+    checkbox.checked = selectedPointIds.has(index);
     checkbox.setAttribute("aria-label", `Select ${title.textContent}`);
     checkbox.addEventListener("change", () => {
-        const id = String(point.id);
-        if (checkbox.checked) selectedPointIds.add(id);
-        else selectedPointIds.delete(id);
+        if (checkbox.checked) selectedPointIds.add(index);
+        else selectedPointIds.delete(index);
         updateBulkToolbar();
     });
 
@@ -825,10 +826,9 @@ function createBulkToolbar() {
 
     allCheckbox.addEventListener("change", () => {
         const entries = getFilteredEntries(FixPinStorage.getAll(), searchText);
-        for (const {point} of entries) {
-            const id = String(point.id);
-            if (allCheckbox.checked) selectedPointIds.add(id);
-            else selectedPointIds.delete(id);
+        for (const {originalIndex} of entries) {
+            if (allCheckbox.checked) selectedPointIds.add(originalIndex);
+            else selectedPointIds.delete(originalIndex);
         }
         renderList();
     });
@@ -840,7 +840,7 @@ function updateBulkToolbar(entries = null) {
     const toolbar = document.getElementById("bulkToolbar");
     if (!toolbar) return;
     const visible = entries || getFilteredEntries(FixPinStorage.getAll(), searchText);
-    const checkedCount = visible.filter(({point}) => selectedPointIds.has(String(point.id))).length;
+    const checkedCount = visible.filter(({originalIndex}) => selectedPointIds.has(originalIndex)).length;
     const all = toolbar.querySelector("#selectAllPoints");
     all.checked = visible.length > 0 && checkedCount === visible.length;
     all.indeterminate = checkedCount > 0 && checkedCount < visible.length;
@@ -856,7 +856,7 @@ function updateBulkToolbar(entries = null) {
 function getSelectedEntries() {
     return FixPinStorage.getAll()
         .map((point, originalIndex) => ({point, originalIndex}))
-        .filter(({point}) => selectedPointIds.has(String(point.id)));
+        .filter(({originalIndex}) => selectedPointIds.has(originalIndex));
 }
 
 async function shareSelectedPoints() {
@@ -909,10 +909,13 @@ function deleteSelectedPoints() {
     if (!window.confirm(`Delete ${entries.length} selected point(s)? This cannot be undone.`)) return;
     try {
         // Update storage first, then map; avoid mutating storage during a read loop.
-        const ids = new Set(entries.map(({point}) => String(point.id)));
-        const remaining = FixPinStorage.getAll().filter(point => !ids.has(String(point.id)));
+        const positions = new Set(entries.map(({originalIndex}) => originalIndex));
+        const remaining = FixPinStorage.getAll().filter((point, index) => !positions.has(index));
         FixPinStorage.replaceAll(remaining);
-        for (const {point} of entries) FixPinMap.removeSavedMarker(point.id);
+        const remainingIds = new Set(remaining.map(point => String(point.id)));
+        for (const {point} of entries) {
+            if (!remainingIds.has(String(point.id))) FixPinMap.removeSavedMarker(point.id);
+        }
         selectedPointIds.clear();
         renderList();
         showMessage(`${entries.length} point(s) deleted.`);
@@ -1555,6 +1558,7 @@ async function openSelectedFile(event) {
         );
 
         FixPinMap.clearSavedMarkers();
+        selectedPointIds.clear();
 
         renderList();
 
