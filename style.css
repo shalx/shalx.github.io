@@ -1586,3 +1586,18 @@ body.map-fullscreen {
 #data-list .saved-point .point-title-clickable { cursor:pointer; }
 #data-list .saved-point .point-title-clickable:focus-visible { outline:2px solid #4285f4; outline-offset:3px; }
 #data-list .saved-point .point-select-checkbox { flex:0 0 19px; }
+
+/* FIX: place toolbar directly below search in desktop grid */
+@media (min-width: 901px) {
+  .app-container {
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "header header"
+      "search map"
+      "toolbar map"
+      "list map"
+      "list note"
+      "list actions";
+  }
+  #bulkToolbar { grid-area: toolbar; margin: 0; min-width: 0; }
+}
