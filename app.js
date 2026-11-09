@@ -17,6 +17,9 @@ let currentLocation = null;
 
 let searchText = "";
 
+// Selection is kept by stable point ID, not list position.
+const selectedPointIds = new Set();
+
 
 // =====================================
 // ELEMENTS
@@ -84,6 +87,8 @@ function init() {
     FixPinMap.initMap();
 
     bindEvents();
+
+    createBulkToolbar();
 
     renderList();
 
@@ -633,7 +638,14 @@ function renderList() {
             )
         );
 
+    // Drop selections for points that no longer exist.
+    const existingIds = new Set(points.map(point => String(point.id)));
+    for (const id of selectedPointIds) {
+        if (!existingIds.has(id)) selectedPointIds.delete(id);
+    }
+
     elements.dataList.replaceChildren();
+    updateBulkToolbar(filteredEntries);
 
     if (points.length === 0) {
 
@@ -751,113 +763,164 @@ function createListItem(
         );
 
 
-    const actions =
-        document.createElement("div");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "point-select-checkbox";
+    checkbox.checked = selectedPointIds.has(String(point.id));
+    checkbox.setAttribute("aria-label", `Select ${title.textContent}`);
+    checkbox.addEventListener("change", () => {
+        const id = String(point.id);
+        if (checkbox.checked) selectedPointIds.add(id);
+        else selectedPointIds.delete(id);
+        updateBulkToolbar();
+    });
 
-    actions.className =
-        "point-actions";
+    title.classList.add("point-title-clickable");
+    title.title = "Show or hide on map";
+    title.tabIndex = 0;
+    title.setAttribute("role", "button");
+    title.addEventListener("click", () => togglePointOnMap(point, index));
+    title.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            togglePointOnMap(point, index);
+        }
+    });
 
-
-    const pointIsVisible =
-        FixPinMap.hasSavedMarker(
-            point.id
-        );
-
-
-    const mapButton =
-        createIconButton({
-
-            icon:
-                pointIsVisible
-                    ? "ph-map-pin-simple-area"
-                    : "ph-map-pin",
-
-            label:
-                pointIsVisible
-                    ? "Hide from map"
-                    : "Show on map",
-
-            className:
-                pointIsVisible
-                    ? "show-map-btn active"
-                    : "show-map-btn",
-
-            onClick:
-                () => togglePointOnMap(
-                    point,
-                    index
-                )
-
-        });
-
-
-    const shareButton =
-        createIconButton({
-
-            icon:
-                "ph-share-network",
-
-            label:
-                "Share point",
-
-            className:
-                "share-btn",
-
-            onClick:
-                () => sharePoint(
-                    point,
-                    index
-                )
-
-        });
-
-
-    const deleteButton =
-        createIconButton({
-
-            icon:
-                "ph-trash",
-
-            label:
-                "Delete point",
-
-            className:
-                "delete-btn",
-
-            onClick:
-                () => deletePoint(
-                    point,
-                    index
-                )
-
-        });
-
-
-    actions.appendChild(
-        mapButton
-    );
-
-    actions.appendChild(
-        shareButton
-    );
-
-    actions.appendChild(
-        deleteButton
-    );
-
-
-    listItem.appendChild(
-        title
-    );
-
-    listItem.appendChild(
-        actions
-    );
+    listItem.appendChild(title);
+    listItem.appendChild(checkbox);
 
     return listItem;
 
 }
 
+
+// =====================================
+// BULK SELECTION AND ACTIONS
+// =====================================
+function createBulkToolbar() {
+    const toolbar = document.createElement("div");
+    toolbar.id = "bulkToolbar";
+    toolbar.className = "bulk-toolbar";
+
+    const allLabel = document.createElement("label");
+    allLabel.className = "bulk-all-label";
+    const allCheckbox = document.createElement("input");
+    allCheckbox.type = "checkbox";
+    allCheckbox.id = "selectAllPoints";
+    allLabel.append(allCheckbox, document.createTextNode(" ALL"));
+
+    const shareButton = document.createElement("button");
+    shareButton.type = "button";
+    shareButton.id = "shareSelectedPoints";
+    shareButton.textContent = "Share (0)";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.id = "deleteSelectedPoints";
+    deleteButton.textContent = "Delete (0)";
+
+    toolbar.append(allLabel, shareButton, deleteButton);
+    elements.dataList.before(toolbar);
+
+    allCheckbox.addEventListener("change", () => {
+        const entries = getFilteredEntries(FixPinStorage.getAll(), searchText);
+        for (const {point} of entries) {
+            const id = String(point.id);
+            if (allCheckbox.checked) selectedPointIds.add(id);
+            else selectedPointIds.delete(id);
+        }
+        renderList();
+    });
+    shareButton.addEventListener("click", shareSelectedPoints);
+    deleteButton.addEventListener("click", deleteSelectedPoints);
+}
+
+function updateBulkToolbar(entries = null) {
+    const toolbar = document.getElementById("bulkToolbar");
+    if (!toolbar) return;
+    const visible = entries || getFilteredEntries(FixPinStorage.getAll(), searchText);
+    const checkedCount = visible.filter(({point}) => selectedPointIds.has(String(point.id))).length;
+    const all = toolbar.querySelector("#selectAllPoints");
+    all.checked = visible.length > 0 && checkedCount === visible.length;
+    all.indeterminate = checkedCount > 0 && checkedCount < visible.length;
+    all.disabled = visible.length === 0;
+    const total = selectedPointIds.size;
+    const share = toolbar.querySelector("#shareSelectedPoints");
+    const del = toolbar.querySelector("#deleteSelectedPoints");
+    share.textContent = `Share (${total})`;
+    del.textContent = `Delete (${total})`;
+    share.disabled = del.disabled = total === 0;
+}
+
+function getSelectedEntries() {
+    return FixPinStorage.getAll()
+        .map((point, originalIndex) => ({point, originalIndex}))
+        .filter(({point}) => selectedPointIds.has(String(point.id)));
+}
+
+async function shareSelectedPoints() {
+    const entries = getSelectedEntries();
+    if (!entries.length) return;
+    if (entries.some(({point}) => !hasValidCoordinates(point))) {
+        showMessage("One or more selected points have invalid coordinates.");
+        return;
+    }
+    const text = entries.map(({point, originalIndex}) => {
+        const name = getPointTitle(point, originalIndex);
+        const pair = `${Number(point.lat)},${Number(point.lng)}`;
+        return `${name}\nhttps://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pair)}`;
+    }).join("\n\n");
+
+    // One message, with one independent Google Maps link per point.
+    if (navigator.share) {
+        try {
+            await navigator.share({title: "Fix-Pin locations", text});
+            return;
+        } catch (error) {
+            if (error?.name === "AbortError") return;
+            console.error("Fix-Pin: bulk share failed", error);
+        }
+    }
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            showMessage(`${entries.length} location links copied to clipboard.`);
+            return;
+        }
+    } catch (error) {
+        console.error("Fix-Pin: clipboard failed", error);
+    }
+    // Large lists may exceed prompt limits; select text from a temporary window.
+    const popup = window.open("", "_blank");
+    if (popup) {
+        const pre = popup.document.createElement("pre");
+        pre.textContent = text;
+        pre.style.whiteSpace = "pre-wrap";
+        popup.document.body.appendChild(pre);
+    } else {
+        window.prompt("Copy location links:", text);
+    }
+}
+
+function deleteSelectedPoints() {
+    const entries = getSelectedEntries();
+    if (!entries.length) return;
+    if (!window.confirm(`Delete ${entries.length} selected point(s)? This cannot be undone.`)) return;
+    try {
+        // Update storage first, then map; avoid mutating storage during a read loop.
+        const ids = new Set(entries.map(({point}) => String(point.id)));
+        const remaining = FixPinStorage.getAll().filter(point => !ids.has(String(point.id)));
+        FixPinStorage.replaceAll(remaining);
+        for (const {point} of entries) FixPinMap.removeSavedMarker(point.id);
+        selectedPointIds.clear();
+        renderList();
+        showMessage(`${entries.length} point(s) deleted.`);
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message || "Unable to delete selected points.");
+    }
+}
 
 function createIconButton({
 
