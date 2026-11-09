@@ -942,7 +942,7 @@ function deleteSelectedPoints() {
 
 
 // =====================================
-// MANUAL POINT EDITOR (no paid geocoding)
+// POINT EDITOR (Photon address search + manual map selection)
 // =====================================
 function openPointEditor(originalIndex) {
     const editing = originalIndex !== null;
@@ -967,6 +967,18 @@ function openPointEditor(originalIndex) {
     label.appendChild(nameInput);
     form.appendChild(label);
 
+    // Address search is explicit (button click), not a request on every keystroke.
+    const searchButton = document.createElement("button");
+    searchButton.type = "button";
+    searchButton.textContent = "🔎 Find Address";
+    const searchStatus = document.createElement("p");
+    searchStatus.className = "point-editor-help";
+    searchStatus.setAttribute("role", "status");
+    const searchResults = document.createElement("div");
+    searchResults.className = "point-address-results";
+    searchResults.style.cssText = "display:grid;gap:6px;max-height:180px;overflow-y:auto;margin:8px 0";
+    form.append(searchButton, searchStatus, searchResults);
+
     const positionInfo = document.createElement("p");
     positionInfo.className = "point-editor-help";
     positionInfo.textContent = existing
@@ -979,6 +991,77 @@ function openPointEditor(originalIndex) {
     let hint = null;
     let preview = null;
     const map = FixPinMap.getMap();
+    let searchController = null;
+
+    function formatPhotonResult(properties) {
+        const p = properties || {};
+        const street = [p.street, p.housenumber].filter(Boolean).join(" ");
+        const parts = [p.name, street, p.city || p.locality, p.state, p.country]
+            .filter(Boolean);
+        return [...new Set(parts)].join(", ") || "Unnamed location";
+    }
+
+    searchButton.addEventListener("click", async () => {
+        const query = nameInput.value.trim();
+        if (query.length < 3) {
+            searchStatus.textContent = "Enter at least 3 characters.";
+            return;
+        }
+        if (searchController) searchController.abort();
+        const controller = new AbortController();
+        searchController = controller;
+        searchResults.replaceChildren();
+        searchStatus.textContent = "Searching addresses…";
+        searchButton.disabled = true;
+        try {
+            const url = "https://photon.komoot.io/api/?" +
+                new URLSearchParams({q: query, limit: "5"}).toString();
+            const response = await fetch(url, {signal: controller.signal});
+            if (!response.ok) throw new Error("Search service unavailable (" + response.status + ").");
+            const data = await response.json();
+            if (!Array.isArray(data.features)) throw new Error("Unexpected search response.");
+            const matches = data.features.filter(item =>
+                item?.geometry?.type === "Point" &&
+                Array.isArray(item.geometry.coordinates) &&
+                Number.isFinite(Number(item.geometry.coordinates[0])) &&
+                Number.isFinite(Number(item.geometry.coordinates[1])) &&
+                Math.abs(Number(item.geometry.coordinates[0])) <= 180 &&
+                Math.abs(Number(item.geometry.coordinates[1])) <= 90
+            );
+            searchStatus.textContent = matches.length
+                ? "Choose a result, then check its position on the map."
+                : "No addresses found. Try a longer address or Choose on Map.";
+            matches.forEach(item => {
+                const option = document.createElement("button");
+                option.type = "button";
+                option.textContent = formatPhotonResult(item.properties);
+                option.style.cssText = "text-align:left;padding:8px;white-space:normal";
+                option.addEventListener("click", () => {
+                    const [lng, lat] = item.geometry.coordinates.map(Number);
+                    chosen = {lat, lng};
+                    removePreview();
+                    if (map) {
+                        preview = L.marker([lat, lng]).addTo(map);
+                        map.setView([lat, lng], Math.max(map.getZoom(), 17));
+                    }
+                    positionInfo.textContent = "Address found. Check the map; use Choose on Map to correct the location if needed.";
+                    searchStatus.textContent = "Location selected. Save Point to confirm.";
+                    searchResults.replaceChildren();
+                });
+                searchResults.appendChild(option);
+            });
+        } catch (error) {
+            if (error.name !== "AbortError") {
+                console.error("Fix-Pin: Photon search", error);
+                searchStatus.textContent = "Address search failed. Try again or Choose on Map.";
+            }
+        } finally {
+            if (searchController === controller) {
+                searchController = null;
+                searchButton.disabled = false;
+            }
+        }
+    });
 
     const chooseButton = document.createElement("button");
     chooseButton.type = "button";
@@ -1010,6 +1093,7 @@ function openPointEditor(originalIndex) {
         picking = false;
     }
     function closeEditor() {
+        if (searchController) searchController.abort();
         cleanupPicker();
         removePreview();
         if (dialog.open) dialog.close();
