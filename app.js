@@ -947,10 +947,7 @@ function deleteSelectedPoints() {
 function openPointEditor(originalIndex) {
     const editing = originalIndex !== null;
     const existing = editing ? FixPinStorage.getAll()[originalIndex] : null;
-    if (editing && !existing) {
-        showMessage("Point no longer exists. Refresh the list.");
-        return;
-    }
+    if (editing && !existing) { showMessage("Point no longer exists."); return; }
 
     const dialog = document.createElement("dialog");
     dialog.className = "point-editor-dialog";
@@ -961,40 +958,33 @@ function openPointEditor(originalIndex) {
     heading.textContent = editing ? "Edit Point" : "Add Point";
     form.appendChild(heading);
 
-    function field(labelText, value, placeholder) {
-        const label = document.createElement("label");
-        label.textContent = labelText;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = value ?? "";
-        input.placeholder = placeholder || "";
-        input.autocomplete = "off";
-        label.appendChild(input);
-        form.appendChild(label);
-        return input;
-    }
-    const nameInput = field("Name / Note", existing?.note || "", "Point name");
-    const addressInput = field("Address (search in Google Maps)", "", "Street, city, country");
-    const searchButton = document.createElement("button");
-    searchButton.type = "button";
-    searchButton.textContent = "Search in Google Maps ↗";
-    searchButton.addEventListener("click", () => {
-        const query = addressInput.value.trim();
-        if (!query) { showMessage("Enter an address first."); return; }
-        window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query), "_blank", "noopener,noreferrer");
-    });
-    form.appendChild(searchButton);
-    const pairInput = field("Paste coordinates (latitude, longitude)", "", "41.7151, 44.8271");
-    const latitudeInput = field("Latitude", existing?.lat ?? "", "-90 to 90");
-    const longitudeInput = field("Longitude", existing?.lng ?? "", "-180 to 180");
-    pairInput.addEventListener("input", () => {
-        const match = pairInput.value.trim().match(/^\s*([+-]?\d+(?:\.\d+)?)\s*[,;\s]\s*([+-]?\d+(?:\.\d+)?)\s*$/);
-        if (match) { latitudeInput.value = match[1]; longitudeInput.value = match[2]; }
-    });
-    const help = document.createElement("p");
-    help.textContent = "Google Maps opens separately. Copy the verified coordinates back here; address search does not fill them automatically.";
-    help.className = "point-editor-help";
-    form.appendChild(help);
+    const label = document.createElement("label");
+    label.textContent = "Name / Address";
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Enter an address or point name";
+    nameInput.value = existing?.note || "";
+    label.appendChild(nameInput);
+    form.appendChild(label);
+
+    const positionInfo = document.createElement("p");
+    positionInfo.className = "point-editor-help";
+    positionInfo.textContent = existing
+        ? "Current location is saved. Choose a different location on the map if needed."
+        : "Choose the location on the map to save this point.";
+    form.appendChild(positionInfo);
+
+    let chosen = existing ? {lat: Number(existing.lat), lng: Number(existing.lng)} : null;
+    let picking = false;
+    let hint = null;
+    let preview = null;
+    const map = FixPinMap.getMap();
+
+    const chooseButton = document.createElement("button");
+    chooseButton.type = "button";
+    chooseButton.textContent = "📍 Choose on Map";
+    form.appendChild(chooseButton);
+
     const buttons = document.createElement("div");
     buttons.className = "point-editor-actions";
     const cancel = document.createElement("button");
@@ -1004,39 +994,87 @@ function openPointEditor(originalIndex) {
     save.type = "button";
     save.textContent = "Save Point";
     save.className = "point-editor-save";
-    const close = () => { dialog.close(); dialog.remove(); };
-    cancel.addEventListener("click", close);
-    dialog.addEventListener("close", () => dialog.remove());
+    buttons.append(cancel, save);
+    form.appendChild(buttons);
+    dialog.appendChild(form);
+    document.body.appendChild(dialog);
+
+    function removePreview() {
+        if (preview && map) map.removeLayer(preview);
+        preview = null;
+    }
+    function cleanupPicker() {
+        if (map) map.off("click", onMapPick);
+        if (hint) hint.remove();
+        hint = null;
+        picking = false;
+    }
+    function closeEditor() {
+        cleanupPicker();
+        removePreview();
+        if (dialog.open) dialog.close();
+        dialog.remove();
+    }
+    function onMapPick(event) {
+        chosen = {lat: event.latlng.lat, lng: event.latlng.lng};
+        cleanupPicker();
+        removePreview();
+        preview = L.marker([chosen.lat, chosen.lng]).addTo(map);
+        positionInfo.textContent = "Location selected on map. Click Save Point to confirm.";
+        dialog.showModal();
+        nameInput.focus();
+    }
+    chooseButton.addEventListener("click", () => {
+        if (!map) { showMessage("Map is not ready."); return; }
+        dialog.close();
+        picking = true;
+        hint = document.createElement("div");
+        hint.className = "point-map-picker-hint";
+        const message = document.createElement("span");
+        message.textContent = "Move or zoom the map, then click the exact location.";
+        const stop = document.createElement("button");
+        stop.type = "button";
+        stop.textContent = "Cancel selection";
+        stop.addEventListener("click", () => {
+            cleanupPicker();
+            dialog.showModal();
+        });
+        hint.append(message, stop);
+        document.body.appendChild(hint);
+        map.on("click", onMapPick);
+        FixPinMap.refreshMapSize();
+    });
+    cancel.addEventListener("click", closeEditor);
+    dialog.addEventListener("cancel", event => {
+        event.preventDefault();
+        closeEditor();
+    });
     save.addEventListener("click", () => {
-        const latString = latitudeInput.value.trim();
-        const lngString = longitudeInput.value.trim();
-        if (!latString || !lngString) { showMessage("Enter both coordinates."); return; }
-        const lat = Number(latString), lng = Number(lngString);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-            showMessage("Invalid coordinates. Latitude: -90 to 90; longitude: -180 to 180."); return;
-        }
+        if (!chosen) { showMessage("Choose a location on the map first."); return; }
         try {
             if (editing) {
                 const points = FixPinStorage.getAll();
                 if (!points[originalIndex]) throw new Error("Point no longer exists.");
                 const old = points[originalIndex];
-                points[originalIndex] = { ...old, lat, lng, note: nameInput.value.trim() || old.note };
+                points[originalIndex] = {
+                    ...old, lat: chosen.lat, lng: chosen.lng,
+                    note: nameInput.value.trim() || old.note
+                };
                 FixPinStorage.saveAll(points);
                 if (FixPinMap.hasSavedMarker(old.id)) FixPinMap.updateSavedMarker(points[originalIndex]);
             } else {
-                const point = FixPinStorage.createPoint(lat, lng, nameInput.value.trim() || addressInput.value.trim());
+                const point = FixPinStorage.createPoint(chosen.lat, chosen.lng, nameInput.value.trim());
                 FixPinStorage.save(point);
             }
             selectedPointIds.clear();
             renderList();
-            close();
+            closeEditor();
             showToast(editing ? "Point updated" : "Point added");
-        } catch (error) { console.error(error); showMessage(error.message || "Unable to save point."); }
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message || "Unable to save point.");
+        }
     });
-    buttons.append(cancel, save);
-    form.appendChild(buttons);
-    dialog.appendChild(form);
-    document.body.appendChild(dialog);
     dialog.showModal();
     nameInput.focus();
 }
