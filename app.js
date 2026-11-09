@@ -1360,92 +1360,39 @@ function scrollToMap() {
 
 function openVisiblePointsInGoogleMaps() {
 
-    const points =
-        FixPinMap.getSavedMarkerPoints();
+    // Go To uses checked points, independently of map markers.
+    const entries = getSelectedEntries();
+    const points = entries.map(({point}) => point);
 
     if (points.length === 0) {
-
-        showMessage(
-            "Show points on the map first."
-        );
-
+        showMessage("Select at least one point using its checkbox.");
         return;
-
     }
 
     if (points.length > 9) {
-
         showProLimitMessage();
-
         return;
-
     }
 
-    const validPoints =
-        points.filter(
-            hasValidCoordinates
-        );
-
-    if (
-        validPoints.length !==
-        points.length
-    ) {
-
-        showMessage(
-            "One or more points have invalid coordinates."
-        );
-
+    if (!points.every(hasValidCoordinates)) {
+        showMessage("One or more selected points have invalid coordinates.");
         return;
-
     }
 
-    const destinationPoint =
-        validPoints[
-            validPoints.length - 1
-        ];
-
-    const destination =
-        encodeCoordinatePair(
-            destinationPoint
-        );
-
-    let url =
-
-        "https://www.google.com/maps/dir/" +
-
-        "?api=1" +
-
+    // The last selected point in storage order is the destination.
+    // Earlier points become waypoints.
+    const destination = encodeCoordinatePair(points[points.length - 1]);
+    let url = "https://www.google.com/maps/dir/?api=1" +
         `&destination=${destination}`;
 
-    if (validPoints.length > 1) {
-
-        const waypointPoints =
-            validPoints.slice(
-                0,
-                -1
-            );
-
-        const waypoints =
-
-            waypointPoints
-
-                .map(
-                    encodeCoordinatePair
-                )
-
-                .join("%7C");
-
-        url +=
-            `&waypoints=${waypoints}`;
-
+    if (points.length > 1) {
+        const waypoints = points.slice(0, -1)
+            .map(encodeCoordinatePair)
+            .join("%7C");
+        url += `&waypoints=${waypoints}`;
     }
 
-    window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-    );
-
+    window.open(url, "_blank", "noopener,noreferrer");
 }
 
 
