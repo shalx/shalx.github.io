@@ -93,6 +93,8 @@ function init() {
 
     createRefreshMenuItem();
 
+    createHistoryMenuItem();
+
     renderList();
 
     registerServiceWorker();
@@ -955,12 +957,151 @@ async function shareSelectedPoints() {
         return;
     }
 
-    // Send each point name and Google Maps URL in checkbox selection order.
-    const text = entries
-        .map(({point, originalIndex}) => `${getPointTitle(point, originalIndex)}
-${getSharedMapsUrl(point)}`)
-        .join("\n\n");
+    const employeeKey = "fixpin.lastEmployee";
+    const answer = window.prompt("Employee name:", localStorage.getItem(employeeKey) || "");
+    if (answer === null) return;
+    const employee = answer.trim();
+    if (!employee) {
+        showMessage("Enter the employee name.");
+        return;
+    }
+
+    const locations = entries.map(({point, originalIndex}, i) => ({
+        order: i + 1,
+        name: getPointTitle(point, originalIndex),
+        lat: Number(point.lat),
+        lng: Number(point.lng)
+    }));
+    const text = locations.map(p => `${p.name}\n${getSharedMapsUrl(p)}`).join("\n\n");
+
+    // History is recorded when sharing is initiated, not proof of delivery.
+    try {
+        const history = readAssignmentHistory();
+        history.push({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+            createdAt: new Date().toISOString(),
+            employee,
+            locations
+        });
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+        localStorage.setItem(employeeKey, employee);
+    } catch (error) {
+        console.error("Fix-Pin history could not be saved:", error);
+        showMessage("History could not be saved. Sharing was cancelled to avoid losing the record.");
+        return;
+    }
+
     await sendSharedText("Fix-Pin locations", text);
+}
+
+
+// =====================================
+// LOCAL ASSIGNMENT HISTORY (no cloud database)
+// =====================================
+const HISTORY_STORAGE_KEY = "fixpin.assignmentHistory.v1";
+
+function readAssignmentHistory() {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const value = JSON.parse(raw);
+    if (!Array.isArray(value)) throw new Error("Invalid local history data.");
+    return value;
+}
+
+function createHistoryMenuItem() {
+    if (document.getElementById("historyBtn")) return;
+    const button = document.createElement("button");
+    button.id = "historyBtn";
+    button.type = "button";
+    button.className = "menu-item";
+    const icon = document.createElement("i");
+    icon.className = "ph ph-clock-counter-clockwise";
+    icon.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    label.textContent = "HISTORY";
+    button.append(icon, label);
+    elements.appMenu.insertBefore(button, elements.aboutButton);
+    button.addEventListener("click", () => {
+        closeMenu();
+        openHistoryDialog();
+    });
+}
+
+function openHistoryDialog() {
+    let history;
+    try { history = readAssignmentHistory(); }
+    catch (error) {
+        showMessage("Unable to read local history: " + error.message);
+        return;
+    }
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("aria-label", "Assignment history");
+    dialog.style.cssText = "border:0;border-radius:14px;padding:20px;max-width:760px;width:94%;max-height:85vh;box-shadow:0 8px 40px #0003";
+    const heading = document.createElement("h2");
+    heading.textContent = "Assignment History";
+    const explanation = document.createElement("p");
+    explanation.textContent = "Saved on this device only. Entries show sharing started, not confirmed WhatsApp delivery.";
+    const content = document.createElement("div");
+    content.style.cssText = "max-height:55vh;overflow:auto;display:grid;gap:10px";
+    if (!history.length) {
+        content.textContent = "No assignments yet.";
+    } else {
+        [...history].reverse().forEach(item => {
+            const card = document.createElement("div");
+            card.style.cssText = "padding:10px;border:1px solid #ccc;border-radius:8px";
+            const title = document.createElement("strong");
+            const date = new Date(item.createdAt);
+            title.textContent = `${Number.isNaN(date.getTime()) ? item.createdAt : date.toLocaleString()} — ${item.employee}`;
+            const list = document.createElement("ol");
+            (item.locations || []).forEach(p => {
+                const li = document.createElement("li");
+                li.textContent = p.name;
+                list.appendChild(li);
+            });
+            card.append(title, list);
+            content.appendChild(card);
+        });
+    }
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;flex-wrap:wrap;gap:10px;margin-top:16px";
+    const exportButton = document.createElement("button");
+    exportButton.type = "button";
+    exportButton.textContent = "Export CSV";
+    exportButton.disabled = history.length === 0;
+    exportButton.addEventListener("click", () => exportAssignmentHistoryCsv(history));
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.textContent = "Close";
+    closeButton.addEventListener("click", () => dialog.close());
+    actions.append(exportButton, closeButton);
+    dialog.append(heading, explanation, content, actions);
+    dialog.addEventListener("close", () => dialog.remove());
+    document.body.appendChild(dialog);
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+}
+
+function exportAssignmentHistoryCsv(history) {
+    // Leading apostrophe protects Excel/Calc against formula injection.
+    const csvCell = value => {
+        let s = String(value ?? "");
+        if (/^[\s\u0000-\u001f]*[=+@-]/.test(s)) s = "'" + s;
+        return '"' + s.replace(/"/g, '""') + '"';
+    };
+    const rows = [["Date", "Employee", "Assignment ID", "Order", "Address", "Latitude", "Longitude", "Status"]];
+    history.forEach(item => (item.locations || []).forEach((p, i) => {
+        rows.push([item.createdAt, item.employee, item.id, p.order || i + 1,
+            p.name, p.lat, p.lng, "Sharing initiated"]);
+    }));
+    const csv = "\uFEFF" + rows.map(row => row.map(csvCell).join(";")).join("\r\n") + "\r\n";
+    const url = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "FixPin_History.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
 function getSharedMapsUrl(point) {
