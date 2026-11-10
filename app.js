@@ -881,16 +881,31 @@ async function shareSelectedPoints() {
         showMessage("One or more selected points have invalid coordinates.");
         return;
     }
-    const text = entries.map(({point, originalIndex}) => {
+
+    const employeeKey = "fixpin.lastEmployee";
+    const lastEmployee = localStorage.getItem(employeeKey) || "";
+    const answer = window.prompt("Employee name (recipient of this assignment):", lastEmployee);
+    if (answer === null) return;
+    const employee = answer.trim();
+    if (!employee) {
+        showMessage("Enter the employee name before sharing.");
+        return;
+    }
+    localStorage.setItem(employeeKey, employee);
+
+    const date = new Date().toLocaleString();
+    const locations = entries.map(({point, originalIndex}, i) => {
         const name = getPointTitle(point, originalIndex);
         const pair = `${Number(point.lat)},${Number(point.lng)}`;
-        return `${name}\nhttps://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pair)}`;
+        return `${i + 1}. ${name}\nhttps://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pair)}`;
     }).join("\n\n");
+    const text = `Fix-Pin assignment\nEmployee: ${employee}\nPrepared: ${date}\nLocations: ${entries.length}\n\n${locations}`;
 
-    // One message, with one independent Google Maps link per point.
+    // Sharing is controlled by the OS/browser. We cannot know which
+    // WhatsApp contact was chosen or whether the message was delivered.
     if (navigator.share) {
         try {
-            await navigator.share({title: "Fix-Pin locations", text});
+            await navigator.share({title: `Fix-Pin assignment for ${employee}`, text});
             return;
         } catch (error) {
             if (error?.name === "AbortError") return;
@@ -900,13 +915,12 @@ async function shareSelectedPoints() {
     try {
         if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(text);
-            showMessage(`${entries.length} location links copied to clipboard.`);
+            showMessage("Assignment copied. Paste it into WhatsApp or email.");
             return;
         }
     } catch (error) {
         console.error("Fix-Pin: clipboard failed", error);
     }
-    // Large lists may exceed prompt limits; select text from a temporary window.
     const popup = window.open("", "_blank");
     if (popup) {
         const pre = popup.document.createElement("pre");
@@ -914,7 +928,7 @@ async function shareSelectedPoints() {
         pre.style.whiteSpace = "pre-wrap";
         popup.document.body.appendChild(pre);
     } else {
-        window.prompt("Copy location links:", text);
+        window.prompt("Copy assignment:", text);
     }
 }
 
