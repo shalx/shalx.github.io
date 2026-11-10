@@ -940,54 +940,114 @@ async function shareSelectedPoints() {
         return;
     }
 
+    // Both options are kept: ordinary address sharing and employee assignment.
+    const choice = await chooseShareMode();
+    if (!choice) return;
+    const locations = entries.map(({point, originalIndex}) => ({
+        name: getPointTitle(point, originalIndex),
+        lat: Number(point.lat),
+        lng: Number(point.lng)
+    }));
+    if (choice === "addresses") {
+        const text = locations.map(p => `${p.name}\n${getSharedMapsUrl(p)}`).join("\n\n");
+        await sendSharedText("Fix-Pin locations", text);
+        return;
+    }
+
     const employeeKey = "fixpin.lastEmployee";
     const lastEmployee = localStorage.getItem(employeeKey) || "";
-    const answer = window.prompt("Employee name (recipient of this assignment):", lastEmployee);
+    const answer = window.prompt("Employee name:", lastEmployee);
     if (answer === null) return;
     const employee = answer.trim();
-    if (!employee) {
-        showMessage("Enter the employee name before sharing.");
+    if (!employee) { showMessage("Enter the employee name."); return; }
+
+    const payload = {employee, locations};
+    const bytes = new TextEncoder().encode(JSON.stringify(payload));
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    // driver.html limits encoded data to 16,000 characters.
+    if (encoded.length > 16000) {
+        showMessage("Assignment is too large for a link. Select fewer points.");
+        return;
+    }
+    const url = new URL("driver.html", window.location.href);
+    url.search = "";
+    url.hash = "data=" + encoded;
+    const text = `Fix-Pin assignment\nEmployee: ${employee}\nLocations: ${locations.length}\n\nOpen your assignment:\n${url.href}`;
+    if (text.length > 12000) {
+        showMessage("Assignment link is too long for reliable messaging. Select fewer points.");
         return;
     }
     localStorage.setItem(employeeKey, employee);
+    await sendSharedText(`Fix-Pin assignment for ${employee}`, text);
+}
 
-    const date = new Date().toLocaleString();
-    const locations = entries.map(({point, originalIndex}, i) => {
-        const name = getPointTitle(point, originalIndex);
-        const pair = `${Number(point.lat)},${Number(point.lng)}`;
-        return `${i + 1}. ${name}\nhttps://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pair)}`;
-    }).join("\n\n");
-    const text = `Fix-Pin assignment\nEmployee: ${employee}\nPrepared: ${date}\nLocations: ${entries.length}\n\n${locations}`;
+function getSharedMapsUrl(point) {
+    return "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(`${point.lat},${point.lng}`);
+}
 
-    // Sharing is controlled by the OS/browser. We cannot know which
-    // WhatsApp contact was chosen or whether the message was delivered.
+function chooseShareMode() {
+    return new Promise(resolve => {
+        const dialog = document.createElement("dialog");
+        dialog.setAttribute("aria-label", "Choose sharing method");
+        dialog.style.cssText = "border:0;border-radius:14px;padding:22px;max-width:340px;width:90%;box-shadow:0 8px 40px #0003";
+        const title = document.createElement("h2");
+        title.textContent = "Share selected points";
+        title.style.marginTop = "0";
+        const info = document.createElement("p");
+        info.textContent = "Choose how to share:";
+        const actions = document.createElement("div");
+        actions.style.cssText = "display:grid;gap:10px";
+        let done = false;
+        const finish = value => {
+            if (done) return;
+            done = true;
+            if (dialog.open) dialog.close();
+            dialog.remove();
+            resolve(value);
+        };
+        for (const [label, value] of [
+            ["Share Addresses", "addresses"],
+            ["Send Assignment", "assignment"],
+            ["Cancel", null]
+        ]) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = label;
+            button.style.cssText = "padding:12px;border-radius:9px;cursor:pointer";
+            button.addEventListener("click", () => finish(value));
+            actions.append(button);
+        }
+        dialog.addEventListener("cancel", event => { event.preventDefault(); finish(null); });
+        dialog.append(title, info, actions);
+        document.body.append(dialog);
+        if (typeof dialog.showModal === "function") dialog.showModal();
+        else dialog.setAttribute("open", "");
+    });
+}
+
+async function sendSharedText(title, text) {
     if (navigator.share) {
         try {
-            await navigator.share({title: `Fix-Pin assignment for ${employee}`, text});
+            await navigator.share({title, text});
             return;
         } catch (error) {
             if (error?.name === "AbortError") return;
-            console.error("Fix-Pin: bulk share failed", error);
+            console.error("Fix-Pin: share failed", error);
         }
     }
     try {
         if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(text);
-            showMessage("Assignment copied. Paste it into WhatsApp or email.");
+            showMessage("Copied. Paste into WhatsApp or another messenger.");
             return;
         }
     } catch (error) {
         console.error("Fix-Pin: clipboard failed", error);
     }
-    const popup = window.open("", "_blank");
-    if (popup) {
-        const pre = popup.document.createElement("pre");
-        pre.textContent = text;
-        pre.style.whiteSpace = "pre-wrap";
-        popup.document.body.appendChild(pre);
-    } else {
-        window.prompt("Copy assignment:", text);
-    }
+    window.prompt("Copy message:", text);
 }
 
 function deleteSelectedPoints() {
