@@ -95,6 +95,8 @@ function init() {
 
     createHistoryMenuItem();
 
+    createSheetsMenuItem();
+
     renderList();
 
     registerServiceWorker();
@@ -994,6 +996,25 @@ async function shareSelectedPoints() {
     await sendSharedText("Fix-Pin locations", text);
 }
 
+
+function createSheetsMenuItem() {
+    if (document.getElementById("sheetsBtn")) return;
+    const button = document.createElement("button");
+    button.id = "sheetsBtn";
+    button.type = "button";
+    button.className = "menu-item";
+    const icon = document.createElement("i");
+    icon.className = "ph ph-table";
+    icon.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    label.textContent = "Fix-Pin Sheets";
+    button.append(icon, label);
+    elements.appMenu.insertBefore(button, elements.aboutButton);
+    button.addEventListener("click", () => {
+        closeMenu();
+        window.location.href = "./sheets.html";
+    });
+}
 
 // =====================================
 // LOCAL ASSIGNMENT HISTORY (no cloud database)
