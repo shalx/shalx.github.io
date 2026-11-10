@@ -827,11 +827,20 @@ function createListItem(
     checkbox.type = "checkbox";
     checkbox.className = "point-select-checkbox";
     checkbox.checked = selectedPointIds.has(index);
-    checkbox.setAttribute("aria-label", `Select ${title.textContent}`);
+    checkbox.setAttribute("aria-label", `Select ${getPointTitle(point, index)}`);
+    if (checkbox.checked) {
+        const selectionNumber = [...selectedPointIds].indexOf(index) + 1;
+        const orderBadge = document.createElement("span");
+        orderBadge.textContent = `${selectionNumber}. `;
+        orderBadge.title = `Selection order: ${selectionNumber}`;
+        orderBadge.style.cssText = "color:#2563eb;font-weight:bold;margin-right:5px";
+        title.prepend(orderBadge);
+    }
     checkbox.addEventListener("change", () => {
         if (checkbox.checked) selectedPointIds.add(index);
         else selectedPointIds.delete(index);
-        updateBulkToolbar();
+        // Refresh numbering after every selection or deselection.
+        renderList();
     });
 
     title.classList.add("point-title-clickable");
@@ -851,7 +860,7 @@ function createListItem(
     editButton.className = "point-edit-button";
     editButton.textContent = "✎";
     editButton.title = "Edit point";
-    editButton.setAttribute("aria-label", `Edit ${title.textContent}`);
+    editButton.setAttribute("aria-label", `Edit ${getPointTitle(point, index)}`);
     editButton.addEventListener("click", () => openPointEditor(index));
 
     listItem.appendChild(title);
@@ -898,7 +907,11 @@ function createBulkToolbar() {
     elements.dataList.before(toolbar);
 
     allCheckbox.addEventListener("change", () => {
-        const entries = getFilteredEntries(FixPinStorage.getAll(), searchText);
+        const entries = getFilteredEntries(FixPinStorage.getAll(), searchText)
+            .sort((a, b) => getPointTitle(a.point, a.originalIndex).localeCompare(
+                getPointTitle(b.point, b.originalIndex), undefined,
+                {sensitivity: "base", numeric: true}
+            ));
         for (const {originalIndex} of entries) {
             if (allCheckbox.checked) selectedPointIds.add(originalIndex);
             else selectedPointIds.delete(originalIndex);
@@ -927,9 +940,11 @@ function updateBulkToolbar(entries = null) {
 }
 
 function getSelectedEntries() {
-    return FixPinStorage.getAll()
-        .map((point, originalIndex) => ({point, originalIndex}))
-        .filter(({originalIndex}) => selectedPointIds.has(originalIndex));
+    const points = FixPinStorage.getAll();
+    // Set preserves checkbox selection order, regardless of list sorting.
+    return [...selectedPointIds]
+        .filter(index => Number.isInteger(index) && index >= 0 && index < points.length)
+        .map(originalIndex => ({point: points[originalIndex], originalIndex}));
 }
 
 async function shareSelectedPoints() {
@@ -949,7 +964,7 @@ async function shareSelectedPoints() {
         lng: Number(point.lng)
     }));
     if (choice === "addresses") {
-        const text = locations.map(p => `${p.name}\n${getSharedMapsUrl(p)}`).join("\n\n");
+        const text = locations.map((p, i) => `${i + 1}. ${p.name}\n${getSharedMapsUrl(p)}`).join("\n\n");
         await sendSharedText("Fix-Pin locations", text);
         return;
     }
@@ -1511,7 +1526,7 @@ function openVisiblePointsInGoogleMaps() {
         return;
     }
 
-    // The last selected point in storage order is the destination.
+    // The last point selected by checkbox is the destination.
     // Earlier points become waypoints.
     const destination = encodeCoordinatePair(points[points.length - 1]);
     let url = "https://www.google.com/maps/dir/?api=1" +
