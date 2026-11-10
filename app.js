@@ -955,92 +955,16 @@ async function shareSelectedPoints() {
         return;
     }
 
-    // Both options are kept: ordinary address sharing and employee assignment.
-    const choice = await chooseShareMode();
-    if (!choice) return;
-    const locations = entries.map(({point, originalIndex}) => ({
-        name: getPointTitle(point, originalIndex),
-        lat: Number(point.lat),
-        lng: Number(point.lng)
-    }));
-    if (choice === "addresses") {
-        const text = locations.map((p, i) => `${i + 1}. ${p.name}\n${getSharedMapsUrl(p)}`).join("\n\n");
-        await sendSharedText("Fix-Pin locations", text);
-        return;
-    }
-
-    const employeeKey = "fixpin.lastEmployee";
-    const lastEmployee = localStorage.getItem(employeeKey) || "";
-    const answer = window.prompt("Employee name:", lastEmployee);
-    if (answer === null) return;
-    const employee = answer.trim();
-    if (!employee) { showMessage("Enter the employee name."); return; }
-
-    const payload = {employee, locations};
-    const bytes = new TextEncoder().encode(JSON.stringify(payload));
-    let binary = "";
-    for (const byte of bytes) binary += String.fromCharCode(byte);
-    const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-    // driver.html limits encoded data to 16,000 characters.
-    if (encoded.length > 16000) {
-        showMessage("Assignment is too large for a link. Select fewer points.");
-        return;
-    }
-    const url = new URL("driver.html", window.location.href);
-    url.search = "";
-    url.hash = "data=" + encoded;
-    const text = `Fix-Pin assignment\nEmployee: ${employee}\nLocations: ${locations.length}\n\nOpen your assignment:\n${url.href}`;
-    if (text.length > 12000) {
-        showMessage("Assignment link is too long for reliable messaging. Select fewer points.");
-        return;
-    }
-    localStorage.setItem(employeeKey, employee);
-    await sendSharedText(`Fix-Pin assignment for ${employee}`, text);
+    // Send only Google Maps URLs, in the exact order checkboxes were selected.
+    const text = entries
+        .map(({point}) => getSharedMapsUrl(point))
+        .join("\n");
+    await sendSharedText("Fix-Pin locations", text);
 }
 
 function getSharedMapsUrl(point) {
     return "https://www.google.com/maps/search/?api=1&query=" +
         encodeURIComponent(`${point.lat},${point.lng}`);
-}
-
-function chooseShareMode() {
-    return new Promise(resolve => {
-        const dialog = document.createElement("dialog");
-        dialog.setAttribute("aria-label", "Choose sharing method");
-        dialog.style.cssText = "border:0;border-radius:14px;padding:22px;max-width:340px;width:90%;box-shadow:0 8px 40px #0003";
-        const title = document.createElement("h2");
-        title.textContent = "Share selected points";
-        title.style.marginTop = "0";
-        const info = document.createElement("p");
-        info.textContent = "Choose how to share:";
-        const actions = document.createElement("div");
-        actions.style.cssText = "display:grid;gap:10px";
-        let done = false;
-        const finish = value => {
-            if (done) return;
-            done = true;
-            if (dialog.open) dialog.close();
-            dialog.remove();
-            resolve(value);
-        };
-        for (const [label, value] of [
-            ["Share Addresses", "addresses"],
-            ["Send Assignment", "assignment"],
-            ["Cancel", null]
-        ]) {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = label;
-            button.style.cssText = "padding:12px;border-radius:9px;cursor:pointer";
-            button.addEventListener("click", () => finish(value));
-            actions.append(button);
-        }
-        dialog.addEventListener("cancel", event => { event.preventDefault(); finish(null); });
-        dialog.append(title, info, actions);
-        document.body.append(dialog);
-        if (typeof dialog.showModal === "function") dialog.showModal();
-        else dialog.setAttribute("open", "");
-    });
 }
 
 async function sendSharedText(title, text) {
