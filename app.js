@@ -91,6 +91,8 @@ function init() {
 
     createBulkToolbar();
 
+    createRefreshMenuItem();
+
     renderList();
 
     registerServiceWorker();
@@ -404,6 +406,62 @@ function closeMenu() {
         "menu-open"
     );
 
+}
+
+
+// =====================================
+// REFRESH APP (keeps localStorage and saved points)
+// =====================================
+
+function createRefreshMenuItem() {
+    if (document.getElementById("refreshAppBtn")) return;
+
+    const button = document.createElement("button");
+    button.id = "refreshAppBtn";
+    button.type = "button";
+    button.className = "menu-item";
+
+    const icon = document.createElement("i");
+    icon.className = "ph ph-arrows-clockwise";
+    icon.setAttribute("aria-hidden", "true");
+
+    const label = document.createElement("span");
+    label.textContent = "Refresh App";
+    button.append(icon, label);
+
+    // Insert next to other menu actions, before About.
+    elements.appMenu.insertBefore(button, elements.aboutButton);
+    button.addEventListener("click", refreshFixPinApp);
+}
+
+async function refreshFixPinApp() {
+    closeMenu();
+    const button = document.getElementById("refreshAppBtn");
+    if (button) button.disabled = true;
+
+    try {
+        // A newly deployed service worker is checked explicitly.
+        // Unregister for this navigation so an old worker cannot serve
+        // the reload from its outdated offline cache.
+        if ("serviceWorker" in navigator) {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration) {
+                try { await registration.update(); }
+                catch (error) { console.warn("SW update check:", error); }
+                await registration.unregister();
+            }
+        }
+
+        // A unique URL avoids the browser's normal HTML cache.
+        // The app registers its service worker again on the next load.
+        const url = new URL(window.location.href);
+        url.searchParams.set("fixpin_refresh", String(Date.now()));
+        window.location.replace(url.toString());
+    } catch (error) {
+        console.error("Fix-Pin refresh:", error);
+        showMessage("Could not refresh the app. Please try again.");
+        if (button) button.disabled = false;
+    }
 }
 
 
