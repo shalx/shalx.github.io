@@ -955,10 +955,11 @@ async function shareSelectedPoints() {
         return;
     }
 
-    // Send only Google Maps URLs, in the exact order checkboxes were selected.
+    // Send each point name and Google Maps URL in checkbox selection order.
     const text = entries
-        .map(({point}) => getSharedMapsUrl(point))
-        .join("\n");
+        .map(({point, originalIndex}) => `${getPointTitle(point, originalIndex)}
+${getSharedMapsUrl(point)}`)
+        .join("\n\n");
     await sendSharedText("Fix-Pin locations", text);
 }
 
