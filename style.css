@@ -1707,3 +1707,8 @@ button:focus-visible,.icon-btn:focus-visible { outline:2px solid #67e8f9; outlin
 @media (prefers-reduced-motion:reduce) {
   .actions button,.bulk-toolbar button { transition:none; }
 }
+
+/* Appearance menu item */
+.theme-toggle { border: 1px solid var(--outline); margin: 10px 0 6px; }
+.theme-toggle-state { margin-left: auto; color: #67e8f9; font-weight: 700; font-size: 12px; }
+.theme-toggle:focus-visible { outline: 2px solid #67e8f9; outline-offset: 2px; }
