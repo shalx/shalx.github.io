@@ -40,6 +40,9 @@
     <link
         rel="stylesheet"
         href="style.css"
+        id="appThemeStylesheet"
+    >
+    <link rel="stylesheet" href="neon-cyberpunk.css"
     >
 
 </head>
@@ -144,6 +147,12 @@
                 <span>
                     Save to File
                 </span>
+            </button>
+
+            <button id="themeToggleBtn" class="menu-item theme-toggle" type="button" aria-pressed="true" title="Switch between day and night appearance">
+                <i id="themeToggleIcon" class="ph ph-moon" aria-hidden="true"></i>
+                <span id="themeToggleText">Night mode</span>
+                <span id="themeToggleState" class="theme-toggle-state">ON</span>
             </button>
 
             <button
@@ -358,6 +367,7 @@
     <script src="map.js"></script>
     <script src="app.js"></script>
     <script src="fullscreen.js"></script>
+    <script src="theme.js"></script>
 </body>
 
 </html>
