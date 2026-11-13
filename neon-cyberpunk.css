@@ -1,1 +1,1858 @@
+/*
+=========================================
+FIX-PIN
+style.css
+=========================================
+*/
+
+
+/* =====================================
+RESET
+===================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* =====================================
+COLORS
+===================================== */
+
+:root {
+
+    --primary: #4285f4;
+    --primary-hover: #2f6fe0;
+
+    --pin: #4285f4;
+    --pin-hover: #2f6fe0;
+
+    --save: #34a853;
+    --save-hover: #278642;
+
+    --go-to: #f9ab00;
+    --go-to-hover: #dd9300;
+
+    --danger: #d93025;
+    --danger-soft: #fce8e6;
+
+    --surface: #ffffff;
+    --surface-soft: #f5f7fb;
+
+    --background: #eef2f7;
+
+    --text: #202124;
+    --text-secondary: #5f6368;
+
+    --outline: #d0d7e2;
+
+    --overlay:
+        rgba(32, 33, 36, 0.42);
+
+    --shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.05);
+
+    --menu-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.14),
+        0 20px 50px rgba(0, 0, 0, 0.12);
+
+    --radius: 16px;
+
+}
+
+
+/* =====================================
+BODY
+===================================== */
+
+body {
+
+    min-height: 100vh;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+/*
+Запрещает прокрутку страницы,
+когда открыто меню.
+*/
+
+body.menu-open {
+
+    overflow: hidden;
+
+}
+
+
+/* =====================================
+APP
+===================================== */
+
+.app-container {
+
+    width: 100%;
+
+    max-width: 700px;
+
+    margin: 0 auto;
+
+    padding: 12px;
+
+}
+
+
+/* =====================================
+HEADER
+===================================== */
+
+.app-header {
+
+    min-height: 46px;
+
+    margin-bottom: 10px;
+
+    padding: 0 4px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+}
+
+
+.app-title {
+
+    color: var(--text);
+
+    font-size: 21px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+}
+
+
+/* =====================================
+MENU BUTTON
+===================================== */
+
+.menu-button {
+
+    flex: 0 0 42px;
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        transform 0.1s;
+
+}
+
+
+.menu-button:hover {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+.menu-button:active {
+
+    transform: scale(0.96);
+
+}
+
+
+.menu-button i {
+
+    font-size: 24px;
+
+}
+
+
+/* =====================================
+MENU OVERLAY
+===================================== */
+
+.menu-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    background: var(--overlay);
+
+    animation:
+        overlay-fade-in 0.2s ease-out;
+
+}
+
+
+.menu-overlay[hidden] {
+
+    display: none;
+
+}
+
+
+/* =====================================
+APP MENU
+===================================== */
+
+.app-menu {
+
+    position: fixed;
+
+    top: 12px;
+
+    right: 12px;
+
+    z-index: 1001;
+
+    width: min(300px, calc(100vw - 24px));
+
+    padding: 12px;
+
+    border: 1px solid var(--outline);
+
+    border-radius: 18px;
+
+    background: var(--surface);
+
+    box-shadow: var(--menu-shadow);
+
+    animation:
+        menu-slide-in 0.2s ease-out;
+
+}
+
+
+.app-menu[hidden] {
+
+    display: none;
+
+}
+
+
+/* =====================================
+MENU HEADER
+===================================== */
+
+.menu-header {
+
+    min-height: 42px;
+
+    margin-bottom: 6px;
+
+    padding: 0 4px 8px;
+
+    border-bottom: 1px solid var(--outline);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+.menu-header strong {
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+}
+
+
+/* =====================================
+MENU CLOSE BUTTON
+===================================== */
+
+.menu-close-button {
+
+    flex: 0 0 36px;
+
+    width: 36px;
+
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.menu-close-button:hover {
+
+    background: var(--surface-soft);
+
+    color: var(--text);
+
+}
+
+
+.menu-close-button i {
+
+    font-size: 21px;
+
+}
+
+
+/* =====================================
+MENU ITEMS
+===================================== */
+
+.menu-item {
+
+    width: 100%;
+
+    min-height: 48px;
+
+    margin-top: 4px;
+
+    padding: 0 14px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    gap: 12px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    text-align: left;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.menu-item:hover {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+.menu-item:active {
+
+    background: #dce8fc;
+
+}
+
+
+.menu-item i {
+
+    flex-shrink: 0;
+
+    width: 22px;
+
+    font-size: 21px;
+
+    text-align: center;
+
+}
+
+
+/*
+Тонкий разделитель перед About.
+*/
+
+#aboutBtn {
+
+    margin-top: 10px;
+
+    position: relative;
+
+}
+
+
+#aboutBtn::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: -6px;
+
+    left: 8px;
+
+    right: 8px;
+
+    height: 1px;
+
+    background: var(--outline);
+
+}
+
+
+/* =====================================
+MAP
+===================================== */
+
+#map {
+
+    width: 100%;
+
+    height: 31vh;
+
+    min-height: 190px;
+
+    max-height: 270px;
+
+    margin-bottom: 10px;
+
+    overflow: hidden;
+
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow);
+
+}
+
+
+/* =====================================
+INPUTS
+===================================== */
+
+input {
+
+    width: 100%;
+
+    height: 42px;
+
+    margin-bottom: 10px;
+
+    padding: 0 14px;
+
+    border: 1px solid var(--outline);
+
+    border-radius: 12px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+
+}
+
+
+input:focus {
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(66, 133, 244, 0.14);
+
+}
+
+
+input::placeholder {
+
+    color: var(--text-secondary);
+
+}
+
+
+/* =====================================
+MAIN BUTTONS
+===================================== */
+
+.actions {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 7px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.actions button {
+
+    min-width: 0;
+
+    height: 42px;
+
+    padding: 0 10px;
+
+    border: none;
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    transition:
+        background-color 0.2s,
+        transform 0.1s,
+        opacity 0.2s;
+
+}
+
+
+.actions button:hover {
+
+    transform: translateY(-1px);
+
+}
+
+
+.actions button:active {
+
+    transform: translateY(0);
+
+}
+
+
+.actions button:disabled {
+
+    cursor: default;
+
+    opacity: 0.55;
+
+    transform: none;
+
+}
+
+
+.actions button i {
+
+    flex-shrink: 0;
+
+    font-size: 18px;
+
+}
+
+
+/* PIN */
+
+#alertBtn {
+
+    background: var(--pin);
+
+}
+
+
+#alertBtn:hover {
+
+    background: var(--pin-hover);
+
+}
+
+
+/* SAVE */
+
+#myButton {
+
+    background: var(--save);
+
+}
+
+
+#myButton:hover {
+
+    background: var(--save-hover);
+
+}
+
+
+/* GO TO */
+
+#goToSelectedBtn {
+
+    background: var(--go-to);
+
+}
+
+
+#goToSelectedBtn:hover {
+
+    background: var(--go-to-hover);
+
+}
+
+
+/* =====================================
+SEARCH
+===================================== */
+
+#searchInput {
+
+    margin-bottom: 10px;
+
+}
+
+
+/* =====================================
+LIST
+===================================== */
+
+#data-list {
+
+    list-style: none;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+/*
+Каждая точка занимает одну строку:
+
+Point 1                         Show   Delete
+*/
+
+#data-list li {
+
+    min-height: 50px;
+
+    padding: 6px 8px 6px 14px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--outline);
+
+    border-radius: 13px;
+
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.06);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+/*
+Поддержка существующего контейнера .row,
+который создаётся в JavaScript.
+*/
+
+#data-list .row {
+
+    width: 100%;
+
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+/* Название точки */
+
+.note {
+
+    min-width: 0;
+
+    flex: 1;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    color: var(--text);
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    line-height: 1.25;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* Дату и время больше не показываем */
+
+.time {
+
+    display: none;
+
+}
+
+
+/*
+Контейнер кнопок карточки.
+Поддерживаются разные возможные названия класса.
+*/
+
+.point-actions,
+.item-actions,
+.row-actions,
+.list-actions {
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+}
+
+
+/* Кнопки внутри карточки */
+
+.icon-btn {
+
+    flex: 0 0 36px;
+
+    width: 36px;
+
+    height: 36px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.icon-btn:hover {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+.icon-btn i {
+
+    font-size: 20px;
+
+}
+
+
+/* Активная точка, уже показанная на карте */
+
+.icon-btn.active,
+.icon-btn.is-visible,
+.show-map-btn.active {
+
+    background: #e8f0fe;
+
+    color: var(--primary);
+
+}
+
+
+/* Кнопка удаления */
+
+.delete-btn {
+
+    color: var(--danger);
+
+}
+
+
+.delete-btn:hover {
+
+    background: var(--danger-soft);
+
+    color: var(--danger);
+
+}
+
+
+/* =====================================
+ABOUT DIALOG
+===================================== */
+
+.about-dialog {
+
+    width: min(440px, calc(100vw - 24px));
+
+    max-height: calc(100vh - 24px);
+
+    margin: auto;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid var(--outline);
+
+    border-radius: 18px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    box-shadow: var(--menu-shadow);
+
+}
+
+
+.about-dialog[open] {
+
+    animation:
+        dialog-show 0.2s ease-out;
+
+}
+
+
+.about-dialog::backdrop {
+
+    background: var(--overlay);
+
+    animation:
+        overlay-fade-in 0.2s ease-out;
+
+}
+
+
+/* =====================================
+ABOUT CONTENT
+===================================== */
+
+.about-content {
+
+    padding: 18px;
+
+}
+
+
+.about-header {
+
+    margin-bottom: 16px;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid var(--outline);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+}
+
+
+.about-header h2 {
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+
+}
+
+
+/* =====================================
+ABOUT CLOSE BUTTON
+===================================== */
+
+.about-close-button {
+
+    flex: 0 0 38px;
+
+    width: 38px;
+
+    height: 38px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+
+}
+
+
+.about-close-button:hover {
+
+    background: var(--surface-soft);
+
+    color: var(--text);
+
+}
+
+
+.about-close-button i {
+
+    font-size: 21px;
+
+}
+
+
+/* =====================================
+ABOUT TEXT
+===================================== */
+
+.about-content p {
+
+    margin-bottom: 12px;
+
+    color: var(--text-secondary);
+
+    font-size: 15px;
+
+    line-height: 1.55;
+
+}
+
+
+.about-content p:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.about-version {
+
+    padding-top: 4px;
+
+    color: var(--primary) !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700;
+
+}
+
+
+/* =====================================
+LEAFLET POPUP
+===================================== */
+
+.leaflet-popup-content {
+
+    margin: 10px 14px;
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+
+/* =====================================
+ANIMATIONS
+===================================== */
+
+@keyframes overlay-fade-in {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+}
+
+
+@keyframes menu-slide-in {
+
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+
+@keyframes dialog-show {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+
+/* =====================================
+PHONE
+===================================== */
+
+@media (max-width: 600px) {
+
+    .app-container {
+
+        padding: 8px;
+
+    }
+
+
+    .app-header {
+
+        min-height: 42px;
+
+        margin-bottom: 8px;
+
+        padding: 0 2px;
+
+    }
+
+
+    .app-title {
+
+        font-size: 20px;
+
+    }
+
+
+    .menu-button {
+
+        flex-basis: 40px;
+
+        width: 40px;
+
+        height: 40px;
+
+        border-radius: 11px;
+
+    }
+
+
+    .menu-button i {
+
+        font-size: 23px;
+
+    }
+
+
+    .app-menu {
+
+        top: 8px;
+
+        right: 8px;
+
+        width: min(290px, calc(100vw - 16px));
+
+    }
+
+
+    #map {
+
+        height: 29vh;
+
+        min-height: 175px;
+
+        margin-bottom: 8px;
+
+        border-radius: 14px;
+
+    }
+
+
+    input {
+
+        height: 40px;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .actions {
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 6px;
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .actions button {
+
+        height: 40px;
+
+        padding: 0 7px;
+
+        border-radius: 9px;
+
+        font-size: 12px;
+
+        gap: 4px;
+
+    }
+
+
+    .actions button i {
+
+        font-size: 17px;
+
+    }
+
+
+    #data-list {
+
+        gap: 6px;
+
+    }
+
+
+    #data-list li {
+
+        min-height: 48px;
+
+        padding:
+            5px
+            6px
+            5px
+            12px;
+
+    }
+
+
+    .note {
+
+        font-size: 14px;
+
+    }
+
+
+    .icon-btn {
+
+        flex-basis: 34px;
+
+        width: 34px;
+
+        height: 34px;
+
+    }
+
+
+    .icon-btn i {
+
+        font-size: 19px;
+
+    }
+
+
+    .about-content {
+
+        padding: 16px;
+
+    }
+
+}
+
+
+/* =====================================
+VERY SMALL PHONE
+===================================== */
+
+@media (max-width: 360px) {
+
+    .actions button span {
+
+        display: none;
+
+    }
+
+
+    .actions button {
+
+        padding: 0;
+
+    }
+
+
+    .actions button i {
+
+        font-size: 20px;
+
+    }
+
+
+    .app-title {
+
+        font-size: 19px;
+
+    }
+
+}
+/* =====================================
+TOAST
+===================================== */
+
+.toast {
+
+    position: fixed;
+
+    left: 50%;
+    bottom: 30px;
+
+    transform:
+        translateX(-50%)
+        translateY(20px);
+
+    padding:
+        12px 22px;
+
+    background: #34a853;
+
+    color: #ffffff;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        opacity .25s,
+        transform .25s,
+        visibility .25s;
+
+    z-index: 9999;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0,0,0,.25);
+
+}
+
+.toast.show {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+
+}
+
+/* =====================================
+REDUCED MOTION
+===================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior: auto !important;
+
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+
+    }
+
+}
+
+/* FULLSCREEN MAP — added without changing normal layout */
+#map.map-expanded {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    z-index: 2000;
+}
+body.map-fullscreen { overflow: hidden; }
+/* Above Leaflet controls; remains accessible in either mode */
+#map .map-expand-control {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 800;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(0,0,0,.15);
+    border-radius: 5px;
+    background: #fff;
+    color: #202124;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 1px 5px rgba(0,0,0,.25);
+}
+#map .map-expand-control:hover { background: #f1f5fb; }
+#map .map-expand-control:focus-visible { outline: 3px solid #4285f4; }
+
+/* FIX-PIN FULLSCREEN MAP FIX */
+
+body.map-fullscreen {
+    overflow: hidden;
+}
+
+#map.map-expanded {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    border-radius: 0 !important;
+    z-index: 2000 !important;
+}
+
+#map .map-expand-control {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+
+    width: 36px;
+    height: 36px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    color: #222;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#map.map-expanded .map-expand-control {
+    z-index: 2001;
+}
+
+
+/* =====================================
+   FIX-PIN DESKTOP LAYOUT
+   Desktop only; original mobile layout remains intact.
+   ===================================== */
+@media (min-width: 901px) {
+    .app-container {
+        max-width: none;
+        width: 100%;
+        height: 100dvh;
+        min-height: 500px;
+        margin: 0;
+        padding: 14px 18px;
+        display: grid;
+        grid-template-columns: minmax(300px, 36%) minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "header header"
+            "search map"
+            "list map"
+            "list note"
+            "list actions";
+        column-gap: 16px;
+        row-gap: 10px;
+    }
+
+    .app-header { grid-area: header; margin-bottom: 0; }
+    #searchInput { grid-area: search; margin-bottom: 0; }
+    #data-list {
+        grid-area: list;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 2px 4px 6px 0;
+        align-content: start;
+    }
+    #map {
+        grid-area: map;
+        height: 100%;
+        min-height: 0;
+        max-height: none;
+        margin-bottom: 0;
+    }
+    #myInput { grid-area: note; margin-bottom: 0; }
+    .actions { grid-area: actions; margin-bottom: 0; }
+    .actions button { height: 44px; }
+    #fileInput { display: none; }
+
+    /* Keep the existing fullscreen-map behavior unchanged. */
+    #map.map-expanded {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        z-index: 2000 !important;
+    }
+}
+
+/* FIX-PIN: BULK POINT SELECTION */
+.bulk-toolbar { display:flex; align-items:center; gap:9px; margin:0 0 10px; flex-wrap:wrap; }
+.bulk-all-label { display:flex; align-items:center; gap:6px; font-weight:700; margin-right:auto; cursor:pointer; }
+.bulk-all-label input, .point-select-checkbox { width:19px; height:19px; min-width:19px; margin:0; padding:0; accent-color:#4285f4; cursor:pointer; }
+.bulk-toolbar button { padding:9px 13px; border:0; border-radius:9px; color:white; background:#4285f4; cursor:pointer; font-weight:600; }
+.bulk-toolbar #deleteSelectedPoints { background:#d93025; }
+.bulk-toolbar button:disabled { opacity:.45; cursor:default; }
+#data-list .saved-point { gap:10px; }
+#data-list .saved-point .point-title-clickable { cursor:pointer; }
+#data-list .saved-point .point-title-clickable:focus-visible { outline:2px solid #4285f4; outline-offset:3px; }
+#data-list .saved-point .point-select-checkbox { flex:0 0 19px; }
+
+/* FIX: place toolbar directly below search in desktop grid */
+@media (min-width: 901px) {
+  .app-container {
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "header header"
+      "search map"
+      "toolbar map"
+      "list map"
+      "list note"
+      "list actions";
+  }
+  #bulkToolbar { grid-area: toolbar; margin: 0; min-width: 0; }
+}
+
+/* Fix-Pin point editor */
+#bulkToolbar #addManualPoint { background:#24834b; }
+#data-list .saved-point .point-edit-button { border:0; background:transparent; color:#3469ac; font-size:22px; cursor:pointer; padding:4px 7px; flex-shrink:0; }
+.point-editor-dialog { border:0; border-radius:15px; padding:0; width:min(94vw,520px); max-height:90vh; box-shadow:0 18px 55px #0005; }
+.point-editor-dialog::backdrop { background:#0008; }
+.point-editor-form { display:flex; flex-direction:column; gap:12px; padding:24px; overflow-y:auto; max-height:90vh; }
+.point-editor-form h2 { margin:0 0 5px; font-size:21px; }
+.point-editor-form label { display:flex; flex-direction:column; gap:5px; font-weight:600; font-size:14px; }
+.point-editor-form input { width:100%; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font:inherit; }
+.point-editor-form button { border:0; border-radius:8px; padding:10px 12px; cursor:pointer; background:#e5eaf0; color:#17212d; font-weight:600; }
+.point-editor-form .point-editor-save { background:#24834b; color:white; }
+.point-editor-help { font-size:12px; color:#526070; margin:0; }
+.point-editor-actions { display:flex; justify-content:flex-end; gap:9px; }
+@media(max-width:900px){ #bulkToolbar { flex-wrap:wrap; } }
+
+/* Map selection mode */
+.point-map-picker-hint { position:fixed; top:90px; left:50%; transform:translateX(-50%); z-index:1900; background:#fff; border:2px solid #4285f4; border-radius:12px; box-shadow:0 5px 24px #0004; padding:12px 16px; display:flex; align-items:center; gap:12px; max-width:90vw; font-size:14px; }
+.point-map-picker-hint button { background:#e8eef8; color:#123; border:0; padding:9px 12px; border-radius:8px; cursor:pointer; }
+@media(max-width:600px){ .point-map-picker-hint { top:65px; width:88vw; flex-direction:column; } }
+
+/* =====================================================
+   FIX-PIN NIGHT NEON — visual theme only, 2026-11-11
+   Layout, map tiles and JavaScript are unchanged.
+   ===================================================== */
+:root {
+  --primary:#22d3ee; --primary-hover:#67e8f9;
+  --pin:#0891b2; --pin-hover:#06b6d4;
+  --save:#15803d; --save-hover:#22c55e;
+  --go-to:#a16207; --go-to-hover:#eab308;
+  --danger:#fb5273; --danger-soft:#421c30;
+  --surface:#141c2e; --surface-soft:#1c2942;
+  --background:#0b1020;
+  --text:#e9f2ff; --text-secondary:#a6b8d1;
+  --outline:#344462; --overlay:rgba(2,6,23,.75);
+  --shadow:0 2px 12px rgba(0,0,0,.32);
+  --menu-shadow:0 15px 50px rgba(0,0,0,.6),0 0 24px rgba(34,211,238,.12);
+}
+body { background:#0b1020; color:var(--text); color-scheme:dark; }
+.app-title { color:#b6efff; text-shadow:0 0 7px #22d3ee99,0 0 18px #22d3ee44; }
+.app-header { border-bottom:1px solid #1c4d64; }
+#map { border:1px solid #29465a; box-shadow:0 0 15px #06b6d41c; }
+/* Keep OpenStreetMap tiles, Leaflet zoom controls and popup legible. */
+#map .leaflet-container, #map .leaflet-control-zoom a,
+#map .leaflet-popup-content-wrapper, #map .leaflet-popup-tip { color:#202124; color-scheme:light; }
+#map .leaflet-control-zoom a { background:#fff; }
+#map .leaflet-popup-content { color:#202124; }
+input:not([type="checkbox"]):not([type="radio"]), textarea, select {
+  background:#111a2b; color:#edf6ff; border-color:#257a9b;
+  box-shadow:0 0 7px #06b6d421;
+}
+input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus, select:focus {
+  border-color:#22d3ee; box-shadow:0 0 0 2px #22d3ee25,0 0 13px #22d3ee70;
+}
+input::placeholder,textarea::placeholder { color:#91a9c7; }
+input[type="checkbox"] { accent-color:#22d3ee; }
+#data-list li { background:#141c2e; border-color:#33435e; box-shadow:0 2px 8px #0004; }
+#data-list li:hover { border-color:#397f9d; }
+.note { color:#eaf4ff; }
+.icon-btn { color:#70baff; }
+.icon-btn:hover,.icon-btn.active,.icon-btn.is-visible,.show-map-btn.active { background:#163751; color:#67e8f9; }
+.delete-btn { color:#fb7185; }
+.delete-btn:hover { background:#431b2d; color:#fda4af; }
+.menu-button,.menu-close-button,.about-close-button {
+  background:#090f1c; color:#b7f5ff; border:1px solid #22d3ee;
+  box-shadow:0 0 8px #22d3ee66,inset 0 0 8px #22d3ee1c;
+}
+.menu-button:hover,.menu-close-button:hover,.about-close-button:hover { background:#102b3d; color:#fff; box-shadow:0 0 16px #22d3ee99; }
+.app-menu,.about-dialog,.point-editor-dialog { background:#111a2c; color:#edf6ff; border:1px solid #345477; }
+.menu-item { color:#e7f2ff; }
+.menu-item:hover,.menu-item:active { background:#1b2e4d; color:#67e8f9; }
+.about-content p { color:#b8c8df; }
+.point-editor-form { background:#111a2c; color:#edf6ff; }
+.point-editor-form input { background:#0c1424; border-color:#356079; color:#edf6ff; }
+.point-editor-form button { background:#223450; color:#edf6ff; border:1px solid #46617d; }
+.point-editor-form .point-editor-save { background:#0b1a12; color:#86efac; border:1px solid #22c55e; box-shadow:0 0 10px #22c55e66; }
+.point-editor-help { color:#b8c8df; }
+.point-map-picker-hint { background:#111a2c; color:#edf6ff; border-color:#22d3ee; }
+.point-map-picker-hint button { background:#223450; color:#edf6ff; }
+/* Black buttons with colored neon borders. */
+.actions button,.bulk-toolbar button {
+  background:#090f1c; border:1px solid currentColor;
+  transition:box-shadow .2s,transform .15s,background .2s,opacity .2s;
+}
+.actions button:hover,.bulk-toolbar button:not(:disabled):hover { transform:translateY(-1px); }
+#alertBtn { background:#090f1c; color:#67e8f9; border-color:#22d3ee; box-shadow:0 0 10px #22d3ee75; }
+#alertBtn:hover { background:#102b3d; box-shadow:0 0 18px #22d3eebb; }
+#myButton { background:#090f1c; color:#86efac; border-color:#22c55e; box-shadow:0 0 10px #22c55e75; }
+#myButton:hover { background:#102b1c; box-shadow:0 0 18px #22c55ebb; }
+#goToSelectedBtn { background:#090f1c; color:#fde68a; border-color:#eab308; box-shadow:0 0 10px #eab30875; }
+#goToSelectedBtn:hover { background:#30240d; box-shadow:0 0 18px #eab308bb; }
+.bulk-toolbar button { color:#e9d5ff; border-color:#a855f7; box-shadow:0 0 9px #a855f766; }
+.bulk-toolbar button:hover:not(:disabled) { background:#281439; box-shadow:0 0 16px #a855f7aa; }
+.bulk-toolbar #deleteSelectedPoints { background:#090f1c; color:#fda4af; border-color:#fb5273; box-shadow:0 0 9px #fb527377; }
+.bulk-toolbar #deleteSelectedPoints:hover:not(:disabled) { background:#351423; box-shadow:0 0 16px #fb5273aa; }
+#bulkToolbar #addManualPoint { background:#090f1c; color:#86efac; border-color:#22c55e; box-shadow:0 0 9px #22c55e77; }
+#bulkToolbar #addManualPoint:hover:not(:disabled) { background:#102b1c; box-shadow:0 0 16px #22c55eaa; }
+.bulk-all-label { color:#eaf4ff; }
+#data-list .saved-point .point-edit-button { color:#70baff; }
+#data-list .saved-point .point-edit-button:hover { color:#b6f1ff; text-shadow:0 0 9px #22d3ee; }
+.toast { background:#102b1c; color:#86efac; border:1px solid #22c55e; box-shadow:0 0 16px #22c55e88; }
+/* Accessibility: visible keyboard focus without changing layout. */
+button:focus-visible,.icon-btn:focus-visible { outline:2px solid #67e8f9; outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) {
+  .actions button,.bulk-toolbar button { transition:none; }
+}
+
+/* Appearance menu item */
+.theme-toggle { border: 1px solid var(--outline); margin: 10px 0 6px; }
+.theme-toggle-state { margin-left: auto; color: #67e8f9; font-weight: 700; font-size: 12px; }
+.theme-toggle:focus-visible { outline: 2px solid #67e8f9; outline-offset: 2px; }
+
+/* =====================================================
+   FIX-PIN MOBILE LAYOUT — 2026-11-13
+   Desktop (>= 901px) is unchanged.
+   ===================================================== */
+@media (max-width: 900px) {
+  body { min-height: 100dvh; }
+
+  .app-container {
+    width: 100%;
+    max-width: 700px;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-header { order: 1; }
+  #searchInput { order: 2; }
+  #bulkToolbar { order: 3; }
+  #data-list { order: 4; }
+  #map { order: 5; }
+  #myInput { order: 6; }
+  .actions { order: 7; }
+  #fileInput { order: 8; }
+
+  #bulkToolbar {
+    width: 100%;
+    margin: 0 0 8px;
+    display: grid;
+    grid-template-columns: auto repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    align-items: center;
+  }
+
+  #bulkToolbar .bulk-all-label {
+    margin: 0;
+    min-height: 42px;
+    white-space: nowrap;
+  }
+
+  #bulkToolbar button {
+    min-width: 0;
+    min-height: 42px;
+    padding: 7px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  #data-list {
+    width: 100%;
+    max-height: 31dvh;
+    margin: 0 0 8px;
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #data-list li { min-height: 50px; }
+
+  #map {
+    width: 100%;
+    height: 38dvh;
+    min-height: 250px;
+    max-height: 420px;
+    margin: 0 0 8px;
+  }
+
+  #myInput { margin-bottom: 8px; }
+  .actions { margin-bottom: 0; }
+
+  .actions button,
+  .menu-button,
+  .icon-btn {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-container { max-width: none; padding: 7px; }
+  .app-header { margin-bottom: 7px; }
+  #searchInput { margin-bottom: 7px; }
+
+  #bulkToolbar {
+    margin-bottom: 7px;
+    grid-template-columns: auto repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  #bulkToolbar .bulk-all-label {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  #bulkToolbar button {
+    min-height: 40px;
+    padding: 6px 5px;
+    font-size: 11px;
+  }
+
+  #data-list {
+    max-height: 27dvh;
+    margin-bottom: 7px;
+  }
+
+  #map {
+    height: 40dvh;
+    min-height: 245px;
+    max-height: 390px;
+    margin-bottom: 7px;
+    border-radius: 13px;
+  }
+
+  #myInput { height: 42px; margin-bottom: 7px; }
+  .actions { gap: 6px; }
+  .actions button { min-height: 44px; height: 44px; }
+}
+
+@media (max-width: 420px) {
+  #bulkToolbar {
+    grid-template-columns: auto 1fr 1fr;
+  }
+
+  #bulkToolbar #addManualPoint {
+    grid-column: 2 / 4;
+  }
+
+  #bulkToolbar .bulk-all-label { grid-row: 1 / 3; align-self: stretch; }
+
+  #map { min-height: 230px; }
+}
+
+@media (max-width: 360px) {
+  #bulkToolbar button { font-size: 10px; }
+  #map { min-height: 215px; }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  #data-list { max-height: 34dvh; }
+  #map { height: 62dvh; min-height: 260px; max-height: none; }
+}
 
