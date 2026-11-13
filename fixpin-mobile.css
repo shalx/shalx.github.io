@@ -28,4 +28,3 @@
 @media (max-width: 900px) and (orientation: landscape) {
   #map:not(.map-expanded) { height: 62dvh; min-height: 220px; max-height: none; }
 }
-
