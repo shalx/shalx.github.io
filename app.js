@@ -943,15 +943,6 @@ async function shareSelectedPoints() {
         return;
     }
 
-    const employeeKey = "fixpin.lastEmployee";
-    const answer = window.prompt("Employee name:", localStorage.getItem(employeeKey) || "");
-    if (answer === null) return;
-    const employee = answer.trim();
-    if (!employee) {
-        showMessage("Enter the employee name.");
-        return;
-    }
-
     const locations = entries.map(({point, originalIndex}, i) => ({
         order: i + 1,
         name: getPointTitle(point, originalIndex),
@@ -960,23 +951,7 @@ async function shareSelectedPoints() {
     }));
     const text = locations.map(p => `${p.name}\n${getSharedMapsUrl(p)}`).join("\n\n");
 
-    // History is recorded when sharing is initiated, not proof of delivery.
-    try {
-        const history = readAssignmentHistory();
-        history.push({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-            createdAt: new Date().toISOString(),
-            employee,
-            locations
-        });
-        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
-        localStorage.setItem(employeeKey, employee);
-    } catch (error) {
-        console.error("Fix-Pin history could not be saved:", error);
-        showMessage("History could not be saved. Sharing was cancelled to avoid losing the record.");
-        return;
-    }
-
+    // Share selected locations directly; no employee prompt or assignment history.
     await sendSharedText("Fix-Pin locations", text);
 }
 
