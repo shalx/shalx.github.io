@@ -417,26 +417,7 @@ function closeMenu() {
 // REFRESH APP (keeps localStorage and saved points)
 // =====================================
 
-function createRefreshMenuItem() {
-    if (document.getElementById("refreshAppBtn")) return;
 
-    const button = document.createElement("button");
-    button.id = "refreshAppBtn";
-    button.type = "button";
-    button.className = "menu-item";
-
-    const icon = document.createElement("i");
-    icon.className = "ph ph-arrows-clockwise";
-    icon.setAttribute("aria-hidden", "true");
-
-    const label = document.createElement("span");
-    label.textContent = "Refresh App";
-    button.append(icon, label);
-
-    // Insert next to other menu actions, before About.
-    elements.appMenu.insertBefore(button, elements.aboutButton);
-    button.addEventListener("click", refreshFixPinApp);
-}
 
 function createRefreshMenuItem() {
     if (document.getElementById("refreshAppBtn")) return;
