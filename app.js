@@ -629,6 +629,8 @@ function saveCurrentPoint() {
 
         showMessage("✓ Pin saved");
 
+        FixPinVoice.speak("Pin saved");
+
         elements.noteInput.focus();
 
     } catch (error) {
@@ -1127,6 +1129,7 @@ function deleteSelectedPoints() {
         selectedPointIds.clear();
         renderList();
         showMessage(`${entries.length} point(s) deleted.`);
+        FixPinVoice.speak(entries.length === 1 ? "Point deleted" : "Points deleted");
     } catch (error) {
         console.error(error);
         showMessage(error.message || "Unable to delete selected points.");
@@ -1347,6 +1350,7 @@ function openPointEditor(originalIndex) {
             renderList();
             closeEditor();
             showToast(editing ? "Point updated" : "Point added");
+            FixPinVoice.speak(editing ? "Point updated" : "Point added");
         } catch (error) {
             console.error(error);
             showMessage(error.message || "Unable to save point.");
@@ -1821,6 +1825,8 @@ async function savePointsToFile() {
             "File saved successfully."
         );
 
+        FixPinVoice.speak("File saved");
+
     } catch (error) {
 
         console.error(error);
@@ -1944,6 +1950,8 @@ async function openSelectedFile(event) {
             `Added: ${addedCount}. ` +
             `Duplicates skipped: ${duplicateCount}.`
         );
+
+        FixPinVoice.speak("File opened");
 
     } catch (error) {
 
